@@ -3,6 +3,9 @@ ros2_ws/build/
 ros2_ws/install/
 ros2_ws/log/
 
+# Separate upstream repo (github.com/ros/ros_tutorials), not part of this repo's history
+ros2_ws/src/ros_tutorials/
+
 # Python generated files
 __pycache__/
 *.pyc

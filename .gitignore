@@ -1,0 +1,22 @@
+# ROS 2 generated folders
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Python generated files
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE and editor files
+.vscode/
+.idea/
+
+# Temporary files
+*.swp
+*~
+.DS_Store
+
+# Large ROS bag recordings
+*.db3
+*.mcap

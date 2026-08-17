@@ -1,6 +1,6 @@
 # 41068 Robotics Studio 1
 
-Personal repository for ROS 2 laboratory work, assignments and notes.
+Team repository for our 41068 Robotics Studio 1 project — ROS 2 packages, lab work, and notes, shared by the whole group.
 
 ## Structure
 
@@ -19,7 +19,7 @@ Personal repository for ROS 2 laboratory work, assignments and notes.
 
 This project actually involves **two independent git repositories**:
 
-1. **This repo** (`41068_robotics_studio_1`) — personal assignments, lab notes, and any packages authored for the subject. This is the one hosted at `github.com/Elmacco/41068_Robotics_Studio_1`.
+1. **This repo** (`41068_robotics_studio_1`) — shared assignments, lab notes, and any packages authored for the subject. This is the one hosted at `github.com/Elmacco/41068_Robotics_Studio_1`.
 2. **`ros2_ws/src/ros_tutorials/`** — a plain `git clone` of the upstream [`ros/ros_tutorials`](https://github.com/ros/ros_tutorials) repo (branch `humble`), used to read/run the official ROS 2 tutorial packages (`turtlesim`, `roscpp_tutorials`, `rospy_tutorials`, etc.).
 
 They are **not** linked as a git submodule — `ros_tutorials` is just a second, self-contained repo that happens to live inside this repo's working tree, and it's excluded via `.gitignore` so this repo's git never tries to track its contents. Because of that:
@@ -54,7 +54,9 @@ ros_ws() {
 }
 ```
 
-Then pull this repo and build the workspace:
+You'll need to be added as a collaborator on `github.com/Elmacco/41068_Robotics_Studio_1` (or have your SSH key added) before you can clone/push. Ask whoever owns the repo to add your GitHub account.
+
+Then clone this repo and build the workspace:
 
 ```bash
 git clone git@github.com:Elmacco/41068_Robotics_Studio_1.git ~/subjects/41068_robotics_studio_1
@@ -96,4 +98,6 @@ Notes:
 
 - `colcon build`/`install`/`log` output is gitignored, so it's safe to build before committing.
 - `ros2_ws/src/ros_tutorials/` is also gitignored (see [Two repositories in this workspace](#two-repositories-in-this-workspace)) — commits here never include anything from that nested repo.
-- For small personal notes/assignment commits, committing straight to `main` without a branch/PR is fine; use a branch when a change is large enough to want to review before merging.
+- Since this is now a shared repo, prefer a branch + PR for anything that touches shared code (packages, launch files, worlds) so teammates get a chance to see the change before it lands on `main`. Small personal notes are fine to commit straight to `main`.
+- Pull `main` before starting new work and again before opening a PR, so conflicts get resolved early and locally rather than on GitHub.
+- Where practical, avoid two people editing the same file on `main` at once — coordinate in your team chat if you're both touching the same package.

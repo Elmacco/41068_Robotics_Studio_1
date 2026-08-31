@@ -26,7 +26,7 @@
     enable_interactive_mode: true
     use_scan_matching: true
     use_scan_barycenter: true
-    minimum_travel_distance: 0.0
+    minimum_travel_distance: 0.2
     minimum_travel_heading: 0.5
     scan_buffer_size: 10
     scan_buffer_maximum_scan_distance: 10.0
@@ -38,7 +38,7 @@
     loop_match_maximum_variance_coarse: 3.0
     loop_match_minimum_response_coarse: 0.35
     loop_match_minimum_response_fine: 0.45
-    correlation_search_space_dimension: 0.5
+    correlation_search_space_dimension: 1.0
     correlation_search_space_resolution: 0.01
     correlation_search_space_smear_deviation: 0.1
     loop_search_space_dimension: 8.0

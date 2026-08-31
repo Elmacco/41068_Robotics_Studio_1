@@ -121,7 +121,7 @@ controller_server:
     general_goal_checker:
       stateful: true
       plugin: nav2_controller::SimpleGoalChecker
-      xy_goal_tolerance: 1.0
+      xy_goal_tolerance: 0.4
       yaw_goal_tolerance: 1.57
     FollowPath:
       plugin: dwb_core::DWBLocalPlanner
@@ -147,7 +147,7 @@ controller_server:
       linear_granularity: 0.2
       angular_granularity: 0.2
       transform_tolerance: 0.2
-      xy_goal_tolerance: 1.0
+      xy_goal_tolerance: 0.4
       yaw_goal_tolerance: 1.57
       trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: true
@@ -168,7 +168,7 @@ controller_server:
       PathDist.scale: 32.0
       GoalDist.scale: 24.0
       RotateToGoal.scale: 32.0
-      RotateToGoal.xy_goal_tolerance: 2.0
+      RotateToGoal.xy_goal_tolerance: 0.5
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
 local_costmap:
@@ -190,7 +190,7 @@ local_costmap:
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
-        inflation_radius: 2.0
+        inflation_radius: 0.6
       obstacle_layer:
         plugin: nav2_costmap_2d::ObstacleLayer
         enabled: true
@@ -219,6 +219,9 @@ global_costmap:
       use_sim_time: true
       footprint: '[ [0.5, 0.5], [0.5, -0.5], [-0.5, -0.5], [-0.5, 0.5] ]'
       resolution: 0.1
+      rolling_window: true
+      width: 20
+      height: 20
       track_unknown_space: true
       plugins:
       - static_layer
@@ -244,7 +247,7 @@ global_costmap:
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
-        inflation_radius: 2.0
+        inflation_radius: 0.6
       always_send_full_costmap: true
 map_server:
   ros__parameters:

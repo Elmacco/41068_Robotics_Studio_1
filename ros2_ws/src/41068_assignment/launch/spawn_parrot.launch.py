@@ -1,6 +1,7 @@
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
+    GroupAction,
     IncludeLaunchDescription,
     SetEnvironmentVariable,
     TimerAction,
@@ -46,6 +47,18 @@ def generate_launch_description():
         'rviz',
         default_value='False',
         description='Flag to launch RViz',
+    ))
+
+    ld.add_action(DeclareLaunchArgument(
+        'slam',
+        default_value='False',
+        description='Flag to launch SLAM Toolbox',
+    ))
+
+    ld.add_action(DeclareLaunchArgument(
+        'nav2',
+        default_value='False',
+        description='Flag to launch Nav2. Nav2 also starts SLAM.',
     ))
 
     # Reuse the common Gazebo server systems (physics, sensors, etc.) curated
@@ -149,7 +162,7 @@ def generate_launch_description():
             '-topic', '/' + namespace + '/robot_description',
             '-name', gz_model_name,
             '-x', '0.0',
-            '-y', '0.0',
+            '-y', '-4.0',
             '-z', '0.8',
         ],
     )
@@ -166,6 +179,28 @@ def generate_launch_description():
             'config_file': PathJoinSubstitution([bringup_config_path, 'gazebo_bridge_parrot1.yaml']),
             'use_sim_time': use_sim_time,
         }],
+    ))
+
+    # SLAM/Nav2, reusing the same navigation launch file, namespace, and
+    # slam_params_parrot1.yaml / nav2_params_parrot1.yaml configs as the main
+    # bringup package.
+    ld.add_action(TimerAction(
+        period=7.0,
+        actions=[GroupAction(
+            scoped=True,
+            actions=[IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    PathJoinSubstitution([bringup_path, 'launch', '41068_navigation.launch.py'])
+                ),
+                launch_arguments={
+                    'use_sim_time': use_sim_time,
+                    'namespace': namespace,
+                    'config_filename_suffix': '_' + namespace,
+                    'slam': LaunchConfiguration('slam'),
+                    'nav2': LaunchConfiguration('nav2'),
+                }.items(),
+            )],
+        )],
     ))
 
     # RViz, reusing the pre-built Parrot display config from

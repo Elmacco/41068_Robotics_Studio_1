@@ -107,10 +107,14 @@ def generate_launch_description():
     frame_prefix = 'parrot1_'
     gz_model_name = 'parrot1'
 
+    # Use our own parrot_thermal.urdf.xacro (adds a thermal camera on top of
+    # the stock Parrot from 41068_ignition_bringup) instead of bringup's
+    # plain parrot.urdf.xacro. See that file for why it's not just added to
+    # the shared bringup xacro directly.
     robot_description_content = ParameterValue(
         Command([
             'xacro ',
-            PathJoinSubstitution([bringup_path, 'urdf_parrot', 'parrot.urdf.xacro']),
+            PathJoinSubstitution([assignment_path, 'urdf_parrot', 'parrot_thermal.urdf.xacro']),
             ' ',
             'prefix:=', frame_prefix,
             ' ',
@@ -177,6 +181,24 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'config_file': PathJoinSubstitution([bringup_config_path, 'gazebo_bridge_parrot1.yaml']),
+            'use_sim_time': use_sim_time,
+        }],
+    ))
+
+    # Second, separate bridge node just for the thermal camera topic added
+    # in parrot_thermal.urdf.xacro. Kept out of the bridge node above (which
+    # uses bringup's unmodified gazebo_bridge_parrot1.yaml) so that config
+    # stays a faithful copy of the course-provided one.
+    ld.add_action(Node(
+        package='ros_ign_bridge',
+        executable='parameter_bridge',
+        namespace=namespace,
+        name='gazebo_bridge_thermal',
+        output='screen',
+        parameters=[{
+            'config_file': PathJoinSubstitution(
+                [assignment_path, 'config', 'gazebo_bridge_parrot1_thermal.yaml']
+            ),
             'use_sim_time': use_sim_time,
         }],
     ))

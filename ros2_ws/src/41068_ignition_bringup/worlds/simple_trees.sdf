@@ -38,12 +38,13 @@
       <surface_model>EARTH_WGS84</surface_model>
     </spherical_coordinates>
 
-    <!-- Small ground plane with grass texture -->
+
+    <!-- Small ground plane with trail texture -->
     <include>
       <uri>
-        model://grass_plane
+        model://trail_plane
       </uri>
-      <name>grass_plane</name>
+      <name>trail_plane</name>
       <pose>0 0 0 0 0 0</pose>
     </include>
 
@@ -55,15 +56,72 @@
       <name>oak1</name>
       <pose>0 3.0 0 0 0 0</pose>
     </include>
-    
-    <!-- Pine tree -->
+
+     <!-- Oak tree -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+      </uri>
+      <name>oak2</name>
+      <pose>-4.5 3.0 0 0 0 0</pose>
+    </include>
+
+     <!-- Oak tree -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+      </uri>
+      <name>oak3</name>
+      <pose>4.0 -4.0 0 0 0 0</pose>
+    </include>
+
+     <!-- Oak tree -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+      </uri>
+      <name>oak4</name>
+      <pose>-4.0 -6.0 0 0 0 0</pose>
+    </include>
+
+        <!-- Pine tree 
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
       </uri>
       <name>pine1</name>
-      <pose>5.0 0.0 0 0 0 0</pose>
+      <pose>6.0 0.0 0 0 0 0</pose>
+    </include>
+    -->
+
+        <!-- rock -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock</name>
+      <scale>10 10 10</scale>
+      <pose>3.3 2.3 0 0 0 0</pose>
     </include>
 
+        <!-- Some dude -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person</name>
+      <pose>4.0 3.0 0 0 0 0</pose>
+    </include>
+
+        <!-- Platypus -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/platypus
+      </uri>
+      <name>platypus</name>
+      <pose>-5.0 -3.0 0 0 0 0</pose>
+    </include>
+    
   </world>
 </sdf>
+

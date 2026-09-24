@@ -61,6 +61,12 @@ def generate_launch_description():
         description='Flag to launch Nav2. Nav2 also starts SLAM.',
     ))
 
+    ld.add_action(DeclareLaunchArgument(
+        'web_dashboard',
+        default_value='False',
+        description='Flag to launch the local HTTP dashboard bridge for the webpage.',
+    ))
+
     # Reuse the common Gazebo server systems (physics, sensors, etc.) curated
     # in 41068_ignition_bringup so this world doesn't need to redeclare them.
     server_config_file = PathJoinSubstitution([bringup_config_path, 'ignition_server.config'])
@@ -223,6 +229,18 @@ def generate_launch_description():
                 }.items(),
             )],
         )],
+    ))
+
+    ld.add_action(TimerAction(
+        period=4.0,
+        actions=[Node(
+            package='41068_assignment',
+            executable='web_dashboard_bridge.py',
+            namespace=namespace,
+            name='web_dashboard_bridge',
+            output='screen',
+        )],
+        condition=_if_true('web_dashboard'),
     ))
 
     # RViz, reusing the pre-built Parrot display config from

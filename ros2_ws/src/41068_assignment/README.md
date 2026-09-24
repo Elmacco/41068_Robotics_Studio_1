@@ -7,6 +7,8 @@ waypoints while streaming sensor data (camera, lidar, IMU).
 ## Layout
 
 ```
+GUI/
+  index.html, app.js, style.css   Static browser dashboard for the drone UI
 launch/
   spawn_parrot.launch.py   Spawns the drone + SLAM/Nav2/RViz in assignment_world
 worlds/
@@ -39,12 +41,23 @@ source install/setup.bash
 1. Launch the sim with SLAM + Nav2:
 
    ```bash
-   ros2 launch 41068_assignment spawn_parrot.launch.py rviz:=True nav2:=True
+  ros2 launch 41068_assignment spawn_parrot.launch.py rviz:=True nav2:=True web_dashboard:=True
    ```
 
    (`nav2:=True` starts SLAM Toolbox automatically as well.)
 
-2. (Optional) Preview the planned route in RViz before flying it — this only
+  The `web_dashboard:=True` flag starts the local HTTP bridge that feeds the browser page live telemetry and camera streams.
+
+2. Serve the webpage:
+
+  ```bash
+  cd /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/GUI
+  python3 -m http.server 8000
+  ```
+
+  Then open `http://localhost:8000` in your browser.
+
+3. (Optional) Preview the planned route in RViz before flying it — this only
    publishes markers, it never sends the drone anywhere:
 
    ```bash
@@ -55,7 +68,7 @@ source install/setup.bash
    topic to see the route: numbered spheres at each waypoint, colour-coded
    grey (visited) / green (current target) / orange (upcoming).
 
-3. Fly the route:
+4. Fly the route:
 
    ```bash
    ros2 run 41068_assignment waypoint_follower.py --ros-args -r __ns:=/parrot1

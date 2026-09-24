@@ -16,7 +16,13 @@ install(
 )
 
 install(
+  DIRECTORY GUI
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(
   PROGRAMS scripts/waypoint_follower.py scripts/publish_waypoints.py
+            scripts/web_dashboard_bridge.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

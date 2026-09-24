@@ -38,7 +38,7 @@ def generate_launch_description():
         'world',
         default_value='simple_trees',
         description='Which world to load',
-        choices=['simple_trees', 'large_demo'],
+        choices=['simple_trees', 'large_demo', 'hiking_trail_1'],
     ))
 
     ld.add_action(IncludeLaunchDescription(

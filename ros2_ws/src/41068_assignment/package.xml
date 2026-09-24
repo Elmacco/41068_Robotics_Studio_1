@@ -11,6 +11,9 @@
 
   <depend>rclcpp</depend>
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
 
   <!-- Sim / robot bringup -->
   <exec_depend>41068_ignition_bringup</exec_depend>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Ground Control Station</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="status-bar">
+            <div>
+                <p class="eyebrow">Drone Ground Control Station</p>
+                <h1>Mission Layout Preview</h1>
+            </div>
+            <div class="system-status">
+                <span class="status-pill status-pill-online">System Ready</span>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <section class="panel map-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Navigation</p>
+                        <h2>Top Down Map</h2>
+                    </div>
+                    <span class="panel-tag">Live position overlay</span>
+                </div>
+                <div class="map-frame" id="map">
+                    <div class="placeholder-copy">
+                        <span class="placeholder-title">Map Space</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel feeds-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Video</p>
+                        <h2>Camera Feeds</h2>
+                    </div>
+                </div>
+                <div class="camera-grid">
+                    <article class="feed-card">
+                        <div class="feed-label-row">
+                            <h3>RGB Camera</h3>
+                            <span class="feed-badge feed-badge-rgb" id="rgb-feed-status">Waiting</span>
+                        </div>
+                        <div class="feed-frame">
+                            <img id="rgb-feed" class="live-feed-image" alt="RGB camera feed" />
+                            <div class="placeholder-copy" id="rgb-placeholder">
+                                <span class="placeholder-title">RGB Feed</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="feed-card">
+                        <div class="feed-label-row">
+                            <h3>Thermal Camera</h3>
+                            <span class="feed-badge feed-badge-thermal" id="thermal-feed-status">Optional</span>
+                        </div>
+                        <div class="feed-frame feed-frame-thermal">
+                            <img id="thermal-feed" class="live-feed-image" alt="Thermal camera feed" />
+                            <div class="placeholder-copy" id="thermal-placeholder">
+                                <span class="placeholder-title">Thermal Feed</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <aside class="panel telemetry-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Flight Data</p>
+                        <h2>Telemetry</h2>
+                    </div>
+                    <span class="panel-tag">Refreshes live</span>
+                </div>
+                <div class="telemetry-stack">
+                    <div class="metric-card">
+                        <span class="label">Battery</span>
+                        <span class="value mono" id="stat-battery">98%</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">Coordinates</span>
+                        <span class="value mono" id="val-coords">-33.8688, 151.2093</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">Altitude</span>
+                        <span class="value mono" id="val-altitude">0.0 m</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">Heading</span>
+                        <span class="value mono" id="val-heading">0°</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">Ground Speed</span>
+                        <span class="value mono" id="val-speed">0.0 m/s</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">Flight Mode</span>
+                        <span class="value" id="val-mode">STANDBY</span>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="panel controls-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Command</p>
+                        <h2>Control Options</h2>
+                    </div>
+                    <span class="panel-tag">Manual actions</span>
+                </div>
+                <div class="manual-block">
+                    <div class="control-grid">
+                        <button class="btn btn-primary" id="btn-takeoff">Take Off</button>
+                        <button class="btn btn-secondary" id="btn-takeover">Take Over</button>
+                    </div>
+
+                    <div class="slider-stack">
+                        <div class="slider-row">
+                            <div class="slider-label-row">
+                                <span class="label">Forward / Back</span>
+                                <span class="slider-value mono" id="forward-value">0.0 m/s</span>
+                            </div>
+                            <input id="forward-slider" class="speed-slider" type="range" min="-3" max="3" step="0.1" value="0">
+                        </div>
+
+                        <div class="slider-row">
+                            <div class="slider-label-row">
+                                <span class="label">Left / Right</span>
+                                <span class="slider-value mono" id="lateral-value">0.0 m/s</span>
+                            </div>
+                            <input id="lateral-slider" class="speed-slider" type="range" min="-3" max="3" step="0.1" value="0">
+                        </div>
+
+                        <button class="btn btn-ghost" id="btn-rtl">Return Home</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

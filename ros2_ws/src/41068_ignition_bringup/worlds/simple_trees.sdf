@@ -54,7 +54,7 @@
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
       </uri>
       <name>oak1</name>
-      <pose>0 3.0 0 0 0 0</pose>
+      <pose>-0.3 3.5 0 0 0 0</pose>
     </include>
 
      <!-- Oak tree -->
@@ -63,7 +63,7 @@
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
       </uri>
       <name>oak2</name>
-      <pose>-4.5 3.0 0 0 0 0</pose>
+      <pose>-4.8 2.6 0 0 0 0</pose>
     </include>
 
      <!-- Oak tree -->
@@ -72,7 +72,7 @@
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
       </uri>
       <name>oak3</name>
-      <pose>4.0 -4.0 0 0 0 0</pose>
+      <pose>5.0 -4.0 0 0 0 0</pose>
     </include>
 
      <!-- Oak tree -->
@@ -81,7 +81,7 @@
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
       </uri>
       <name>oak4</name>
-      <pose>-4.0 -6.0 0 0 0 0</pose>
+      <pose>-6.0 -5.4 0 0 0 0</pose>
     </include>
 
         <!-- Pine tree 
@@ -119,7 +119,7 @@
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/platypus
       </uri>
       <name>platypus</name>
-      <pose>-5.0 -3.0 0 0 0 0</pose>
+      <pose>0.0 -3.0 0 0 0 0</pose>
     </include>
     
   </world>

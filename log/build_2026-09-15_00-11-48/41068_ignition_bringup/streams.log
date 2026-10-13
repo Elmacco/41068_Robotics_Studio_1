@@ -1,0 +1,144 @@
+[0.020s] Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup -DCMAKE_INSTALL_PREFIX=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup
+[0.902s] -- The C compiler identification is GNU 11.4.0
+[1.478s] -- The CXX compiler identification is GNU 11.4.0
+[1.517s] -- Detecting C compiler ABI info
+[1.669s] -- Detecting C compiler ABI info - done
+[1.677s] -- Check for working C compiler: /usr/bin/cc - skipped
+[1.678s] -- Detecting C compile features
+[1.683s] -- Detecting C compile features - done
+[1.688s] -- Detecting CXX compiler ABI info
+[1.802s] -- Detecting CXX compiler ABI info - done
+[1.810s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[1.810s] -- Detecting CXX compile features
+[1.811s] -- Detecting CXX compile features - done
+[1.828s] -- Found ament_cmake: 1.3.14 (/opt/ros/humble/share/ament_cmake/cmake)
+[2.081s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[2.272s] -- Found ros_ign_interfaces: 0.244.26 (/opt/ros/humble/share/ros_ign_interfaces/cmake)
+[2.381s] -- Found rosidl_generator_c: 3.1.9 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[2.393s] -- Found rosidl_adapter: 3.1.9 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[2.420s] -- Found rosidl_generator_cpp: 3.1.9 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[2.454s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[2.488s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[2.703s] -- Found ament_lint_auto: 0.12.15 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[2.762s] WARNING: Package name "41068_ignition_bringup" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits, underscores, and dashes.
+[2.827s] -- Added test 'copyright' to check source files copyright and LICENSE
+[2.838s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[2.838s] -- Configured cppcheck include dirs: 
+[2.838s] -- Configured cppcheck exclude dirs and/or files: 
+[2.849s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[2.850s] -- Configured cpplint exclude dirs and/or files: 
+[2.851s] -- Added test 'flake8' to check Python code syntax and style conventions
+[2.855s] -- Added test 'lint_cmake' to check CMake code style
+[2.858s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[2.868s] -- Added test 'uncrustify' to check C / C++ code style
+[2.868s] -- Configured uncrustify additional arguments: 
+[2.871s] -- Added test 'xmllint' to check XML markup files
+[2.873s] -- Configuring done
+[2.878s] -- Generating done
+[2.880s] -- Build files have been written to: /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup
+[2.889s] Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup -DCMAKE_INSTALL_PREFIX=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup
+[2.891s] Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup -- -j8 -l8
+[2.938s] Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup -- -j8 -l8
+[2.951s] Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup
+[2.959s] -- Install configuration: ""
+[2.959s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config
+[2.960s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/gazebo_bridge_husky1.yaml
+[2.963s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/41068_husky1.rviz
+[2.963s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/ignition_server.config
+[2.964s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/gazebo_bridge_parrot.yaml
+[2.964s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/gazebo_bridge_parrot1.yaml
+[2.964s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/gazebo_bridge_clock.yaml
+[2.968s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/robot_localization_husky1.yaml
+[2.971s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/gazebo_bridge_husky.yaml
+[2.971s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/slam_params.yaml
+[2.971s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/nav2_params.yaml
+[2.972s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/nav2_params_husky1.yaml
+[2.972s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/robot_localization.yaml
+[2.972s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/nav2_params_parrot1.yaml
+[2.973s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/slam_params_husky1.yaml
+[2.973s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/41068.rviz
+[2.973s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/robot_localization_parrot1.yaml
+[2.974s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/41068_parrot1.rviz
+[2.974s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/config/slam_params_parrot1.yaml
+[2.974s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/launch
+[2.975s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/launch/41068_navigation.launch.py
+[2.975s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/launch/41068_ignition_husky.launch.py
+[2.975s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/launch/41068_ignition.launch.py
+[2.975s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/launch/41068_dynamic_world_demo.launch.py
+[2.976s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/launch/41068_ignition_parrot.launch.py
+[2.976s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/launch/41068_autonomy_demo.launch.py
+[2.976s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models
+[2.976s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/grass_plane
+[2.977s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/grass_plane/model.config
+[2.981s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/grass_plane/model.sdf
+[2.981s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/grass_plane/materials
+[2.981s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/grass_plane/materials/textures
+[2.981s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/grass_plane/materials/textures/empty_grass.png
+[3.037s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane
+[3.037s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/model.config
+[3.037s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/model.sdf
+[3.037s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/materials
+[3.038s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/materials/textures
+[3.038s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/materials/textures/forest_overhead.png
+[3.106s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/materials/textures/forest_overhead_plain.png
+[3.149s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/materials/textures/empty_grass.png
+[3.199s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_plane/materials/textures/leaf_litter.png
+[3.238s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall
+[3.238s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall/model.config
+[3.238s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall/model.sdf
+[3.239s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall/materials
+[3.239s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall/materials/textures
+[3.239s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall/materials/textures/forest_wall_transparent.png
+[3.285s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall/materials/textures/forest_wall_transparent_small.png
+[3.294s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/models/forest_wall/materials/textures/forest_wall.png
+[3.333s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky
+[3.333s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/common_properties.urdf.xacro
+[3.333s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/meshes
+[3.333s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/meshes/top_plate.dae
+[3.337s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/meshes/bumper.dae
+[3.346s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/meshes/base_link.dae
+[3.354s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/meshes/jpl04_arch_nosensor.stl
+[3.361s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/meshes/top_chassis.dae
+[3.386s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/meshes/wheel.dae
+[3.419s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/wheel.urdf.xacro
+[3.420s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/husky.urdf.xacro
+[3.423s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_husky/husky.gazebo.xacro
+[3.424s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/worlds
+[3.424s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/worlds/simple_trees.sdf
+[3.428s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/worlds/large_demo.sdf
+[3.432s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot
+[3.432s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/model.config
+[3.432s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/model.sdf
+[3.432s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/common_properties.urdf.xacro
+[3.433s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/thumbnails
+[3.433s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/thumbnails/4.png
+[3.433s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/thumbnails/2.png
+[3.438s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/thumbnails/5.png
+[3.438s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/thumbnails/1.png
+[3.442s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/thumbnails/3.png
+[3.443s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/meshes
+[3.443s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/meshes/propeller_fr.dae
+[3.456s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/meshes/propeller_fl.dae
+[3.462s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/meshes/propeller_rl.dae
+[3.466s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/meshes/hull.dae
+[3.515s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/meshes/propeller_rr.dae
+[3.523s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/parrot.gazebo.xacro
+[3.523s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/urdf_parrot/parrot.urdf.xacro
+[3.524s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib/41068_ignition_bringup/dynamic_world_demo.py
+[3.524s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib/41068_ignition_bringup/basic_autonomy_demo.py
+[3.525s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/ament_index/resource_index/package_run_dependencies/41068_ignition_bringup
+[3.525s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/ament_index/resource_index/parent_prefix_path/41068_ignition_bringup
+[3.525s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/environment/ament_prefix_path.sh
+[3.526s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/environment/ament_prefix_path.dsv
+[3.526s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/environment/path.sh
+[3.526s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/environment/path.dsv
+[3.526s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/local_setup.bash
+[3.526s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/local_setup.sh
+[3.527s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/local_setup.zsh
+[3.527s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/local_setup.dsv
+[3.527s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.dsv
+[3.527s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/ament_index/resource_index/packages/41068_ignition_bringup
+[3.527s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/cmake/41068_ignition_bringupConfig.cmake
+[3.527s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/cmake/41068_ignition_bringupConfig-version.cmake
+[3.527s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.xml
+[3.530s] Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup

@@ -1,0 +1,260 @@
+[0.113s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.113s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x70e778e5e5f0>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x70e778e5e080>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x70e778e5e080>>, mixin_verb=('build',))
+[0.292s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.293s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/student/subjects/41068_robotics_studio_1'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.305s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extensions ['ignore', 'ignore_ament_install']
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'ignore'
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'ignore_ament_install'
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extensions ['colcon_pkg']
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'colcon_pkg'
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extensions ['colcon_meta']
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'colcon_meta'
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extensions ['ros']
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'ros'
+[0.306s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extensions ['cmake', 'python']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'cmake'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'python'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extensions ['python_setup_py']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes) by extension 'python_setup_py'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extensions ['ignore', 'ignore_ament_install']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'ignore'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'ignore_ament_install'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extensions ['colcon_pkg']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'colcon_pkg'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extensions ['colcon_meta']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'colcon_meta'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extensions ['ros']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'ros'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extensions ['cmake', 'python']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'cmake'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'python'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extensions ['python_setup_py']
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(notes/Labs) by extension 'python_setup_py'
+[0.307s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extensions ['ignore', 'ignore_ament_install']
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'ignore'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'ignore_ament_install'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extensions ['colcon_pkg']
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'colcon_pkg'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extensions ['colcon_meta']
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'colcon_meta'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extensions ['ros']
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'ros'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extensions ['cmake', 'python']
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'cmake'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'python'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extensions ['python_setup_py']
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws) by extension 'python_setup_py'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/build) by extensions ['ignore', 'ignore_ament_install']
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/build) by extension 'ignore'
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/build) ignored
+[0.308s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/install) by extensions ['ignore', 'ignore_ament_install']
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/install) by extension 'ignore'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/install) ignored
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/log) by extensions ['ignore', 'ignore_ament_install']
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/log) by extension 'ignore'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/log) ignored
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extensions ['ignore', 'ignore_ament_install']
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'ignore'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'ignore_ament_install'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extensions ['colcon_pkg']
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'colcon_pkg'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extensions ['colcon_meta']
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'colcon_meta'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extensions ['ros']
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'ros'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extensions ['cmake', 'python']
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'cmake'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'python'
+[0.309s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extensions ['python_setup_py']
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src) by extension 'python_setup_py'
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extensions ['ignore', 'ignore_ament_install']
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extension 'ignore'
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extension 'ignore_ament_install'
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extensions ['colcon_pkg']
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extension 'colcon_pkg'
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extensions ['colcon_meta']
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extension 'colcon_meta'
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extensions ['ros']
+[0.310s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_assignment) by extension 'ros'
+[0.318s] DEBUG:colcon.colcon_core.package_identification:Package 'ros2_ws/src/41068_assignment' with type 'ros.ament_cmake' and name '41068_assignment'
+[0.318s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extensions ['ignore', 'ignore_ament_install']
+[0.319s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extension 'ignore'
+[0.319s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extension 'ignore_ament_install'
+[0.319s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extensions ['colcon_pkg']
+[0.319s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extension 'colcon_pkg'
+[0.319s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extensions ['colcon_meta']
+[0.320s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extension 'colcon_meta'
+[0.320s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extensions ['ros']
+[0.320s] Level 1:colcon.colcon_core.package_identification:_identify(ros2_ws/src/41068_ignition_bringup) by extension 'ros'
+[0.325s] DEBUG:colcon.colcon_core.package_identification:Package 'ros2_ws/src/41068_ignition_bringup' with type 'ros.ament_cmake' and name '41068_ignition_bringup'
+[0.325s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.325s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.325s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.325s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.325s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.359s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.359s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.360s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 0 installed packages in /home/student/ros2_ws/install
+[0.362s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 341 installed packages in /opt/ros/humble
+[0.364s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'cmake_args' from command line to 'None'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'cmake_target' from command line to 'None'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'cmake_clean_cache' from command line to 'False'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'cmake_clean_first' from command line to 'False'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'cmake_force_configure' from command line to 'False'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'ament_cmake_args' from command line to 'None'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'catkin_cmake_args' from command line to 'None'
+[0.408s] Level 5:colcon.colcon_core.verb:set package '41068_ignition_bringup' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.408s] DEBUG:colcon.colcon_core.verb:Building package '41068_ignition_bringup' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup', 'merge_install': False, 'path': '/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup', 'symlink_install': False, 'test_result_base': None}
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'cmake_args' from command line to 'None'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'cmake_target' from command line to 'None'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'cmake_clean_cache' from command line to 'False'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'cmake_clean_first' from command line to 'False'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'cmake_force_configure' from command line to 'False'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'ament_cmake_args' from command line to 'None'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'catkin_cmake_args' from command line to 'None'
+[0.409s] Level 5:colcon.colcon_core.verb:set package '41068_assignment' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.409s] DEBUG:colcon.colcon_core.verb:Building package '41068_assignment' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment', 'merge_install': False, 'path': '/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment', 'symlink_install': False, 'test_result_base': None}
+[0.409s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.410s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.411s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup' with build type 'ament_cmake'
+[0.411s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup'
+[0.413s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.413s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.413s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.431s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup -DCMAKE_INSTALL_PREFIX=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup
+[3.300s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup -DCMAKE_INSTALL_PREFIX=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup
+[3.302s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup -- -j8 -l8
+[3.349s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup -- -j8 -l8
+[3.362s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup
+[3.940s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(41068_ignition_bringup)
+[3.941s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_ignition_bringup
+[4.000s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup' for CMake module files
+[4.000s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup' for CMake config files
+[4.001s] Level 1:colcon.colcon_core.shell:create_environment_hook('41068_ignition_bringup', 'cmake_prefix_path')
+[4.001s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/hook/cmake_prefix_path.ps1'
+[4.002s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/hook/cmake_prefix_path.dsv'
+[4.003s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/hook/cmake_prefix_path.sh'
+[4.005s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib'
+[4.005s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/bin'
+[4.005s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib/pkgconfig/41068_ignition_bringup.pc'
+[4.005s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib/python3.10/site-packages'
+[4.006s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/bin'
+[4.006s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.ps1'
+[4.007s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.dsv'
+[4.008s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.sh'
+[4.009s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.bash'
+[4.011s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.zsh'
+[4.011s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/colcon-core/packages/41068_ignition_bringup)
+[4.012s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(41068_ignition_bringup)
+[4.012s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup' for CMake module files
+[4.013s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup' for CMake config files
+[4.013s] Level 1:colcon.colcon_core.shell:create_environment_hook('41068_ignition_bringup', 'cmake_prefix_path')
+[4.013s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/hook/cmake_prefix_path.ps1'
+[4.014s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/hook/cmake_prefix_path.dsv'
+[4.014s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/hook/cmake_prefix_path.sh'
+[4.015s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib'
+[4.015s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/bin'
+[4.015s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib/pkgconfig/41068_ignition_bringup.pc'
+[4.015s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/lib/python3.10/site-packages'
+[4.016s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/bin'
+[4.016s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.ps1'
+[4.017s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.dsv'
+[4.017s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.sh'
+[4.018s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.bash'
+[4.018s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/41068_ignition_bringup/package.zsh'
+[4.019s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup/share/colcon-core/packages/41068_ignition_bringup)
+[4.019s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment' with build type 'ament_cmake'
+[4.020s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment'
+[4.020s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[4.020s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[4.029s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment': AMENT_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment -DCMAKE_INSTALL_PREFIX=/home/student/subjects/41068_robotics_studio_1/install/41068_assignment
+[5.759s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment' returned '0': AMENT_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment -DCMAKE_INSTALL_PREFIX=/home/student/subjects/41068_robotics_studio_1/install/41068_assignment
+[5.761s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment': AMENT_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_assignment -- -j8 -l8
+[5.807s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment' returned '0': AMENT_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_assignment -- -j8 -l8
+[5.809s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment': AMENT_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_assignment
+[5.828s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(41068_assignment)
+[5.829s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment' for CMake module files
+[5.829s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment' returned '0': AMENT_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_assignment
+[5.830s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment' for CMake config files
+[5.830s] Level 1:colcon.colcon_core.shell:create_environment_hook('41068_assignment', 'cmake_prefix_path')
+[5.830s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/hook/cmake_prefix_path.ps1'
+[5.831s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/hook/cmake_prefix_path.dsv'
+[5.831s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/hook/cmake_prefix_path.sh'
+[5.832s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib'
+[5.832s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/bin'
+[5.832s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib/pkgconfig/41068_assignment.pc'
+[5.832s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib/python3.10/site-packages'
+[5.833s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/bin'
+[5.833s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.ps1'
+[5.834s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.dsv'
+[5.834s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.sh'
+[5.834s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.bash'
+[5.835s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.zsh'
+[5.835s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/colcon-core/packages/41068_assignment)
+[5.836s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(41068_assignment)
+[5.836s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment' for CMake module files
+[5.837s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment' for CMake config files
+[5.837s] Level 1:colcon.colcon_core.shell:create_environment_hook('41068_assignment', 'cmake_prefix_path')
+[5.837s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/hook/cmake_prefix_path.ps1'
+[5.837s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/hook/cmake_prefix_path.dsv'
+[5.838s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/hook/cmake_prefix_path.sh'
+[5.838s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib'
+[5.839s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/bin'
+[5.839s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib/pkgconfig/41068_assignment.pc'
+[5.839s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib/python3.10/site-packages'
+[5.839s] Level 1:colcon.colcon_core.environment:checking '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/bin'
+[5.840s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.ps1'
+[5.840s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.dsv'
+[5.841s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.sh'
+[5.841s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.bash'
+[5.842s] INFO:colcon.colcon_core.shell:Creating package script '/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.zsh'
+[5.842s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/colcon-core/packages/41068_assignment)
+[5.842s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[5.843s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[5.843s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[5.843s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[5.849s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[5.849s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[5.849s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[5.867s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[5.867s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/student/subjects/41068_robotics_studio_1/install/local_setup.ps1'
+[5.869s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/student/subjects/41068_robotics_studio_1/install/_local_setup_util_ps1.py'
+[5.870s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/student/subjects/41068_robotics_studio_1/install/setup.ps1'
+[5.871s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/student/subjects/41068_robotics_studio_1/install/local_setup.sh'
+[5.872s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/student/subjects/41068_robotics_studio_1/install/_local_setup_util_sh.py'
+[5.872s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/student/subjects/41068_robotics_studio_1/install/setup.sh'
+[5.873s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/student/subjects/41068_robotics_studio_1/install/local_setup.bash'
+[5.874s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/student/subjects/41068_robotics_studio_1/install/setup.bash'
+[5.875s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/student/subjects/41068_robotics_studio_1/install/local_setup.zsh'
+[5.876s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/student/subjects/41068_robotics_studio_1/install/setup.zsh'

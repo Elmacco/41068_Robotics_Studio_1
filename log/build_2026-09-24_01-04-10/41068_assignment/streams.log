@@ -1,0 +1,32 @@
+[0.012s] Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment': CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/home/student/subjects/41068_robotics_studio_1/install/41068_assignment:/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_assignment -- -j8 -l8
+[0.062s] Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment' returned '0': CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/home/student/subjects/41068_robotics_studio_1/install/41068_assignment:/opt/ros/humble /usr/bin/cmake --build /home/student/subjects/41068_robotics_studio_1/build/41068_assignment -- -j8 -l8
+[0.064s] Invoking command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment': CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/home/student/subjects/41068_robotics_studio_1/install/41068_assignment:/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_assignment
+[0.074s] -- Install configuration: ""
+[0.074s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/launch
+[0.074s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/launch/.gitkeep
+[0.074s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/launch/spawn_parrot.launch.py
+[0.075s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/worlds
+[0.075s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/worlds/assignment_world.sdf
+[0.075s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/config
+[0.075s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/config/gazebo_bridge_parrot1_thermal.yaml
+[0.075s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/urdf_parrot
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/urdf_parrot/parrot_thermal.urdf.xacro
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib/41068_assignment/waypoint_follower.py
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib/41068_assignment/publish_waypoints.py
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/lib/41068_assignment/mission_waypoints.py
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/ament_index/resource_index/package_run_dependencies/41068_assignment
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/ament_index/resource_index/parent_prefix_path/41068_assignment
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/environment/ament_prefix_path.sh
+[0.076s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/environment/ament_prefix_path.dsv
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/environment/path.sh
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/environment/path.dsv
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/local_setup.bash
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/local_setup.sh
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/local_setup.zsh
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/local_setup.dsv
+[0.077s] -- Installing: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.dsv
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/ament_index/resource_index/packages/41068_assignment
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/cmake/41068_assignmentConfig.cmake
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/cmake/41068_assignmentConfig-version.cmake
+[0.077s] -- Up-to-date: /home/student/subjects/41068_robotics_studio_1/install/41068_assignment/share/41068_assignment/package.xml
+[0.079s] Invoked command in '/home/student/subjects/41068_robotics_studio_1/build/41068_assignment' returned '0': CMAKE_PREFIX_PATH=/home/student/subjects/41068_robotics_studio_1/install/41068_ignition_bringup:/home/student/subjects/41068_robotics_studio_1/install/41068_assignment:/opt/ros/humble /usr/bin/cmake --install /home/student/subjects/41068_robotics_studio_1/build/41068_assignment

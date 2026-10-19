@@ -23,8 +23,9 @@ The assignment work lives in `ros2_ws/src/41068_assignment/` (its own [README](r
 
 - **Sim**: custom world (`worlds/assignment_world.sdf`) with the Parrot drone spawned into it via `launch/spawn_parrot.launch.py`, reusing the Parrot's URDF, sensor bridges, and localization config from `41068_ignition_bringup` rather than duplicating them.
 - **Sensors**: camera (RGB + depth), lidar, IMU, and a thermal camera (`urdf_parrot/parrot_thermal.urdf.xacro` + `config/gazebo_bridge_parrot1_thermal.yaml`) — all bridged to ROS and confirmed publishing live data. World objects with an actual heat signature (for the thermal camera to pick up) aren't in yet.
-- **Navigation**: SLAM Toolbox + Nav2 wired up (`slam:=`/`nav2:=` launch args), flying a fixed waypoint route via `scripts/waypoint_follower.py` (with `scripts/publish_waypoints.py` to preview the route in RViz first).
-- **Not started**: anything that reacts to the thermal camera (detection/localization of a heat source), any dynamic/obstacle-avoidance behaviour beyond the fixed route.
+- **Navigation**: SLAM Toolbox + Nav2 wired up (`slam:=`/`nav2:=` launch args), flying a fixed waypoint route via `scripts/waypoint_follower.py` (with `scripts/publish_waypoints.py` to preview the route in RViz first). The map frame now equals the world frame, and `flight_controller.py` holds the drone's altitude.
+- **Mission modes** (`mission_manager.py`, commands on `/parrot1/mission_command`): **Mapping** explores the world on its own and builds a terrain map from the depth camera (ground height, obstacles, trails); **Passive** flies a detected trail at 8 m; **Active** drops to 3 m for a closer look (first step only). The terrain map also gives **ranger routes**, the least-effort walking path to any point (`/parrot1/plan_ranger_route`). See the package README.
+- **Not started**: anything that reacts to the thermal camera (detection/localization of a heat source), Active mode beyond hovering lower, flying over hills.
 
 This package is under active, ongoing development by multiple people — see the workflow rules below before pushing changes to it.
 

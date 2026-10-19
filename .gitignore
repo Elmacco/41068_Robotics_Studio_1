@@ -10,6 +10,7 @@ ros2_ws/src/ros_tutorials/
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
 
 # IDE and editor files
 .vscode/

@@ -91,6 +91,22 @@ def generate_launch_description():
         description='Flag to launch the local HTTP dashboard bridge for the webpage.',
     ))
 
+    ld.add_action(DeclareLaunchArgument(
+        'mission',
+        default_value='True',
+        description='Flag to launch the terrain mapper and mission manager '
+                    '(mapping / passive / active modes). Mapping mode also '
+                    'needs nav2:=True.',
+    ))
+
+    ld.add_action(DeclareLaunchArgument(
+        'terrain_map',
+        default_value='',
+        description='terrain.npz saved by an earlier run (terrain/save service) '
+                    'to start from, e.g. ~/41068_maps/hiking_trail_1_<time>/terrain.npz. '
+                    'Empty starts with a blank map.',
+    ))
+
     # Reuse the common Gazebo server systems (physics, sensors, etc.) curated
     # in 41068_ignition_bringup so this world doesn't need to redeclare them.
     server_config_file = PathJoinSubstitution([bringup_config_path, 'ignition_server.config'])
@@ -259,6 +275,42 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
             'target_altitude': ParameterValue(spawn_z, value_type=float),
         }],
+    ))
+
+    # Terrain map from the depth camera (always running, so every flight adds
+    # to it), trail detection and the ranger route service. Mapping bounds and
+    # the ranger station come from config/worlds/<world>.yaml.
+    ld.add_action(Node(
+        package='41068_assignment',
+        executable='terrain_mapper.py',
+        namespace=namespace,
+        name='terrain_mapper',
+        output='screen',
+        parameters=[
+            PathJoinSubstitution([assignment_path, 'config', 'worlds', [world, '.yaml']]),
+            {'use_sim_time': use_sim_time, 'world_name': world,
+             'map_load_file': LaunchConfiguration('terrain_map')},
+        ],
+        remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
+        condition=_if_true('mission'),
+    ))
+
+    # Mission modes, driven by mission_command (from the dashboard or the
+    # command line, see the README). Home is the spawn pose.
+    ld.add_action(Node(
+        package='41068_assignment',
+        executable='mission_manager.py',
+        namespace=namespace,
+        name='mission_manager',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'home_x': ParameterValue(spawn_x, value_type=float),
+            'home_y': ParameterValue(spawn_y, value_type=float),
+            'home_z': ParameterValue(spawn_z, value_type=float),
+        }],
+        remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
+        condition=_if_true('mission'),
     ))
 
     # Second, separate bridge node just for the thermal camera topic added

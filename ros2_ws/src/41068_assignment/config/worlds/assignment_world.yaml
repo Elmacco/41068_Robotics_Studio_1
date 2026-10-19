@@ -1,0 +1,15 @@
+# Per-world settings for terrain_mapper (loaded by spawn_parrot.launch.py from
+# config/worlds/<world>.yaml). The map frame equals the world frame, so these
+# are plain world-file coordinates in metres.
+/**:
+  ros__parameters:
+    # Mapping area: the ground plane. assignment_world uses grass_plane,
+    # 15 x 15 m centred on the origin.
+    terrain:
+      x_min: -7.5
+      x_max: 7.5
+      y_min: -7.5
+      y_max: 7.5
+    # Where ranger routes start when no start is given: the drone's launch
+    # point, which doubles as the ranger station.
+    ranger_station: [0.0, -4.0]

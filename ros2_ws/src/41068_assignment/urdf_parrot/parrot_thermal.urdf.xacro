@@ -6,7 +6,8 @@
   We deliberately don't edit that file: it's the shared, course-provided
   package used by the whole team, so changes there affect every launch
   file that uses it and get clobbered if the unit pushes an update. Instead
-  we xacro:include the original file and add the extra sensor on top.
+  we xacro:include our own copy of it (parrot_base.urdf.xacro, which only
+  adds tunable camera FOV/tilt) and add the extra sensor on top.
   This works because xacro:include only splices in the *children* of the
   included file's root element, not the root <robot> tag itself - bringup's
   own parrot.urdf.xacro already relies on this same trick to pull in
@@ -22,13 +23,45 @@
   <xacro:arg name="gz_model_name" default="parrot"/>
   <xacro:property name="gz_model_name" value="$(arg gz_model_name)"/>
 
-  <xacro:include filename="$(find 41068_ignition_bringup)/urdf_parrot/parrot.urdf.xacro"/>
+  <!-- Camera tuning, shared by the RGB-D and thermal cameras so both keep
+       looking at the same patch of ground.
 
-  <!-- Mount point for the thermal camera: same position/tilt as the RGB-D
-       camera (front of the drone, angled 45 deg down) so both cameras are
-       roughly looking at the same thing. -->
+       camera_hfov: horizontal FOV in radians, default 140 deg (stock RGB-D
+       is 120 deg). At the default 45 deg tilt both cameras already see from
+       directly below the drone out to the horizon, so a wider FOV only buys
+       sideways coverage - and costs pixels per degree. Pinhole cameras
+       distort badly much past ~150 deg.
+
+       camera_pitch: downward tilt in radians, default 45 deg (stock). -->
+  <xacro:arg name="camera_hfov" default="2.44346"/>
+  <xacro:property name="camera_hfov" value="$(arg camera_hfov)"/>
+  <xacro:arg name="camera_pitch" default="0.785398"/>
+  <xacro:property name="camera_pitch" value="$(arg camera_pitch)"/>
+
+  <!-- Thermal image resolution. 640x480 (up from 320x240) so a person
+       ~10 m away is ~13 px wide at 140 deg FOV instead of ~8 px at 120 deg -
+       otherwise the thermal feed is the weak link for hiker detection.
+       Real drone thermal cameras commonly come in 640x512. -->
+  <xacro:arg name="thermal_width" default="640"/>
+  <xacro:arg name="thermal_height" default="480"/>
+
+  <!-- Our copy of bringup's parrot.urdf.xacro, with the RGB-D camera's FOV
+       and tilt parameterised (see that file for why it's a copy). -->
+  <xacro:include filename="$(find 41068_assignment)/urdf_parrot/parrot_base.urdf.xacro"/>
+
+  <!-- Mount point for the thermal camera: beside the RGB-D camera, at the same
+       height and tilt (front of the drone, angled camera_pitch down) so both
+       cameras are looking at the same thing.
+
+       It used to sit directly below the RGB-D camera at z = 0.20, which is
+       exactly the height of the lidar (base_scan). The lidar then hit the
+       camera's box on every beam within about 4 deg of straight ahead,
+       reading 0.21-0.25 m: the drone was blind straight ahead, and SLAM drew
+       a line of fake obstacles along every path it flew. At z = 0.25 the box
+       spans 0.23-0.27 m, clear of the lidar plane, and y = -0.07 keeps it
+       clear of the RGB-D camera's box (y = +-0.04). -->
   <joint name="${prefix}thermal_camera_joint" type="fixed">
-    <origin xyz="0.25 0.0 0.20" rpy="0 0.785398 0"/>
+    <origin xyz="0.25 -0.07 0.25" rpy="0 ${camera_pitch} 0"/>
     <parent link="${prefix}base_link"/>
     <child link="${prefix}thermal_camera_link"/>
   </joint>
@@ -56,10 +89,12 @@
     -->
     <sensor name="thermal_camera" type="thermal_camera">
       <camera>
-        <horizontal_fov>1.5</horizontal_fov>
+        <!-- Same FOV as the RGB-D camera, so anything visible to one is
+             visible to the other. -->
+        <horizontal_fov>${camera_hfov}</horizontal_fov>
         <image>
-          <width>320</width>
-          <height>240</height>
+          <width>$(arg thermal_width)</width>
+          <height>$(arg thermal_height)</height>
           <!-- thermal_camera requires a 16-bit format: each pixel is a
                temperature reading, and 8 bits isn't enough precision to
                distinguish meaningfully different temperatures. -->

@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""Run the drone's mission modes, switched by commands from the dashboard.
+
+Commands arrive as std_msgs/String on mission_command (the web dashboard
+already publishes there):
+
+  mapping          explore the world until the camera has seen all of it,
+                   save the terrain map, then return home
+  passive <trail>  fly along a detected trail at cruise altitude, e.g.
+                   'passive T3' (trail names are on the trails topic)
+  active           drop to active_altitude over the current spot and hover
+  return_home      climb to cruise altitude, fly home, descend
+  stop, take_over  stop all autonomy and hover; the dashboard's manual
+                   control keeps working (it publishes cmd_vel directly)
+  takeoff          hover at mapping altitude (the drone spawns airborne)
+  save_map         save the terrain map now
+
+The current mode and what it is doing are published once a second as
+std_msgs/String on mission_state, e.g. "MAPPING: 42% observed, flying to F7".
+
+Altitude is set through the flight controller's target_altitude topic;
+horizontal motion comes from Nav2 (Mapping mode) or is published here on
+cmd_vel (path following). Pose comes from TF (2D: x, y, heading) and
+altitude from the Gazebo odometry, as everywhere else in this stack.
+"""
+
+import json
+import math
+
+import rclpy
+from geometry_msgs.msg import Pose2D, Twist
+from nav2_msgs.action import NavigateToPose
+from nav_msgs.msg import OccupancyGrid, Odometry
+from rclpy.action import ActionClient
+from rclpy.executors import ExternalShutdownException
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, QoSProfile
+from rclpy.time import Time
+from std_msgs.msg import Float64, String
+from std_srvs.srv import Trigger
+from tf2_ros import Buffer, TransformException, TransformListener
+from visualization_msgs.msg import MarkerArray
+
+from coverage_explorer import CoverageExplorer
+from mapping_mode import MappingMode
+from mission_modes import FlyPathMode, FollowConfig, HoverMode
+from node_params import declare_config
+from trail_detector import nearest_end_first
+
+
+class MissionManager(Node):
+
+    def __init__(self):
+        super().__init__('mission_manager')
+
+        self.declare_parameter('frame_id', 'parrot1_map')
+        self.declare_parameter('base_frame', 'parrot1_base_link')
+        # Home is where the drone spawned; the launch file passes the spawn pose.
+        self.declare_parameter('home_x', 0.0)
+        self.declare_parameter('home_y', -4.0)
+        self.declare_parameter('home_z', 0.8)
+        # Mapping altitude: the lidar (0.2 m above the drone) then scans at
+        # about chest height, seeing trunks and the obstacles a walking
+        # person meets, and the camera sees the ground under the canopy.
+        self.declare_parameter('mapping_altitude', 0.8)
+        # Cruise altitude for Passive mode and Return Home: clear of the
+        # tallest tree (oak, 6.5 m) with a 1.5 m margin.
+        self.declare_parameter('cruise_altitude', 8.0)
+        # Active mode drops to this height for a closer look (m).
+        self.declare_parameter('active_altitude', 3.0)
+        # The drone counts as at a target altitude within this (m).
+        self.declare_parameter('altitude_tolerance', 0.15)
+        # Mapping mode: give up on a Nav2 goal after this long (s), and finish
+        # after this many consecutive selections find no frontier.
+        self.declare_parameter('goal_timeout', 40.0)
+        self.declare_parameter('no_goal_limit', 5)
+        self.declare_parameter('rate', 5.0)
+
+        self.frame_id = self.get_parameter('frame_id').value
+        self.base_frame = self.get_parameter('base_frame').value
+        self.home = tuple(self.get_parameter(name).value for name in ('home_x', 'home_y', 'home_z'))
+        self.cruise_altitude = self.get_parameter('cruise_altitude').value
+        self.altitude_tolerance = self.get_parameter('altitude_tolerance').value
+        self.mapping_params = {
+            'mapping_altitude': self.get_parameter('mapping_altitude').value,
+            'goal_timeout': self.get_parameter('goal_timeout').value,
+            'no_goal_limit': self.get_parameter('no_goal_limit').value,
+        }
+        self.follow_config = declare_config(self, FollowConfig(), 'follow.')
+        self.explorer = CoverageExplorer(frame_id=self.frame_id)
+
+        self.altitude = None
+        self.terrain_grid = None
+        self.trails = {}
+
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+
+        latched = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.create_subscription(String, 'mission_command', self.command_callback, 10)
+        self.create_subscription(Odometry, 'odometry', self.odom_callback, 10)
+        self.create_subscription(OccupancyGrid, 'terrain/occupancy', self.grid_callback, latched)
+        self.create_subscription(String, 'trails', self.trails_callback, latched)
+
+        self.state_pub = self.create_publisher(String, 'mission_state', latched)
+        self.altitude_pub = self.create_publisher(Float64, 'target_altitude', 10)
+        self.cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.marker_pub = self.create_publisher(MarkerArray, 'exploration_markers', 1)
+
+        self.nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+        self.save_client = self.create_client(Trigger, 'terrain/save')
+
+        self.mode = HoverMode(self, 'IDLE')
+        self.status = 'waiting for a command'
+        self.create_timer(1.0 / self.get_parameter('rate').value, self.step)
+        self.create_timer(1.0, self.publish_state)
+
+    # ------------------------------------------------------------- commands
+
+    def command_callback(self, msg: String):
+        words = msg.data.strip().split()
+        if not words:
+            return
+        command, args = words[0].lower(), words[1:]
+        home_x, home_y, home_z = self.home
+
+        if command == 'mapping':
+            self.switch_to(MappingMode(self, self.explorer))
+        elif command == 'passive':
+            if not args or args[0].upper() not in self.trails:
+                known = ', '.join(sorted(self.trails, key=lambda n: int(n[1:]))) or 'none yet'
+                self.get_logger().warn(f'passive needs a trail name; detected trails: {known}')
+                return
+            pose = self.get_pose()
+            if pose is None:
+                self.get_logger().warn('No drone pose yet')
+                return
+            trail = self.trails[args[0].upper()]
+            path = nearest_end_first(trail['points'], pose.x, pose.y)
+            self.switch_to(FlyPathMode(self, f'PASSIVE {trail["name"]}', path,
+                                       self.cruise_altitude))
+        elif command == 'active':
+            self.switch_to(HoverMode(self, 'ACTIVE', self.get_parameter('active_altitude').value))
+        elif command == 'return_home':
+            self.switch_to(FlyPathMode(self, 'RETURN HOME', [(home_x, home_y)],
+                                       self.cruise_altitude, final_altitude=home_z))
+        elif command in ('stop', 'take_over'):
+            self.switch_to(HoverMode(self, 'IDLE'))
+        elif command == 'takeoff':
+            self.switch_to(HoverMode(self, 'IDLE', self.mapping_params['mapping_altitude']))
+        elif command == 'save_map':
+            self.save_map()
+        else:
+            self.get_logger().warn(f'Unknown command "{msg.data}"')
+
+    def switch_to(self, mode):
+        self.mode.stop()
+        self.mode = mode
+        self.mode.start()
+        self.get_logger().info(f'Mode: {mode.name}')
+
+    # ------------------------------------------------------------ main loop
+
+    def step(self):
+        self.status = self.mode.step()
+        if not self.mode.finished:
+            return
+        self.get_logger().info(f'{self.mode.name} finished: {self.status}')
+        if isinstance(self.mode, MappingMode):
+            self.save_map()
+            home_x, home_y, home_z = self.home
+            self.switch_to(FlyPathMode(self, 'RETURN HOME', [(home_x, home_y)],
+                                       self.cruise_altitude, final_altitude=home_z))
+        else:
+            self.switch_to(HoverMode(self, 'IDLE'))
+
+    def publish_state(self):
+        self.state_pub.publish(String(data=f'{self.mode.name}: {self.status}'))
+
+    # --------------------------------------------------- helpers for modes
+
+    def get_pose(self):
+        """Drone x, y, heading in the map frame, or None if TF is not ready."""
+        try:
+            t = self.tf_buffer.lookup_transform(self.frame_id, self.base_frame, Time())
+        except TransformException:
+            return None
+        q = t.transform.rotation
+        pose = Pose2D()
+        pose.x = t.transform.translation.x
+        pose.y = t.transform.translation.y
+        pose.theta = math.atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+        return pose
+
+    def set_altitude(self, altitude: float):
+        self.altitude_pub.publish(Float64(data=float(altitude)))
+
+    def at_altitude(self, altitude: float) -> bool:
+        # Re-send the target while waiting, in case the flight controller
+        # started after the first message.
+        self.altitude_pub.publish(Float64(data=float(altitude)))
+        return self.altitude is not None and abs(self.altitude - altitude) < self.altitude_tolerance
+
+    def publish_cmd(self, cmd: Twist):
+        self.cmd_pub.publish(cmd)
+
+    def publish_exploration_markers(self, markers: MarkerArray):
+        self.marker_pub.publish(markers)
+
+    def save_map(self):
+        if not self.save_client.service_is_ready():
+            self.get_logger().warn('terrain/save is not available, map not saved')
+            return
+        future = self.save_client.call_async(Trigger.Request())
+        future.add_done_callback(
+            lambda f: self.get_logger().info(f'Terrain map saved to {f.result().message}'))
+
+    # ------------------------------------------------------------ callbacks
+
+    def odom_callback(self, msg: Odometry):
+        self.altitude = msg.pose.pose.position.z
+
+    def grid_callback(self, msg: OccupancyGrid):
+        self.terrain_grid = msg
+
+    def trails_callback(self, msg: String):
+        data = json.loads(msg.data)
+        self.trails = {trail['name']: trail for trail in data['trails']}
+
+
+def main():
+    rclpy.init()
+    node = MissionManager()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

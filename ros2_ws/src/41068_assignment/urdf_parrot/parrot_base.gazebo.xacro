@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
 <!--
   Copy of 41068_ignition_bringup/urdf_parrot/parrot.gazebo.xacro (included by
-  our parrot_base.urdf.xacro). The only change from the original is the
-  RGB-D camera's horizontal_fov, which is ${camera_hfov} instead of a fixed
-  2.0944 - see parrot_thermal.urdf.xacro for where it's set.
+  our parrot_base.urdf.xacro). The changes from the original are:
+    - the RGB-D camera's horizontal_fov is ${camera_hfov} instead of a fixed
+      2.0944 - see parrot_thermal.urdf.xacro for where it's set
+    - the odometry publisher reports 3D poses (<dimensions>3</dimensions>),
+      so the drone's altitude reaches ROS - see the comment on that plugin
 -->
 <robot name="parrot" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:arg name="laser_visual"  default="false" />
@@ -101,6 +103,12 @@
       filename="ignition-gazebo-odometry-publisher-system"
       name="ignition::gazebo::systems::OdometryPublisher">
       <topic>model/${gz_model_name}/odometry</topic>
+      <!-- The plugin defaults to 2D, which reports z = 0 at every height, so
+           nothing in ROS knew the drone's altitude (the web dashboard showed
+           0). 3D is needed to hold an altitude and to place camera points at
+           the right height in the terrain map. The EKF still only uses x, y
+           and yaw from it, so TF stays 2D (see spawn_parrot.launch.py). -->
+      <dimensions>3</dimensions>
       <odom_publish_frequency>20</odom_publish_frequency>
       <odom_frame>${prefix}odom</odom_frame>
       <robot_base_frame>${prefix}base_link</robot_base_frame>

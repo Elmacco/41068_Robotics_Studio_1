@@ -39,8 +39,32 @@ def generate_launch_description():
     ld.add_action(DeclareLaunchArgument(
         'world',
         default_value='assignment_world',
-        description='World file (without .sdf) to load from 41068_assignment/worlds',
+        description='World file (without .sdf) to load from <world_package>/worlds',
     ))
+
+    world_package = LaunchConfiguration('world_package')
+    ld.add_action(DeclareLaunchArgument(
+        'world_package',
+        default_value='41068_assignment',
+        description='Package whose worlds/ folder holds the world, e.g. '
+                    '41068_ignition_bringup for hiking_trail_1 or simple_trees',
+    ))
+
+    ld.add_action(DeclareLaunchArgument(
+        'gui',
+        default_value='True',
+        description='Flag to open the Gazebo window. False runs the simulator '
+                    'server only (sensors still render), which is lighter and '
+                    'avoids the WSL2 rendering crash noted in the README.',
+    ))
+
+    # Spawn pose. This is also the drone's home: return_home flies back here.
+    spawn_x = LaunchConfiguration('x')
+    spawn_y = LaunchConfiguration('y')
+    spawn_z = LaunchConfiguration('z')
+    ld.add_action(DeclareLaunchArgument('x', default_value='0.0', description='Spawn x (m)'))
+    ld.add_action(DeclareLaunchArgument('y', default_value='-4.0', description='Spawn y (m)'))
+    ld.add_action(DeclareLaunchArgument('z', default_value='0.8', description='Spawn height (m)'))
 
     rviz = LaunchConfiguration('rviz')
     ld.add_action(DeclareLaunchArgument(
@@ -89,8 +113,10 @@ def generate_launch_description():
         ),
         launch_arguments={
             'ign_args': [
-                PathJoinSubstitution([assignment_path, 'worlds', [world, '.sdf']]),
+                PathJoinSubstitution([FindPackageShare(world_package), 'worlds', [world, '.sdf']]),
                 ' -r',
+                PythonExpression(["'' if '", LaunchConfiguration('gui'),
+                                  "'.lower() in ['true', '1', 'yes', 'on'] else ' -s'"]),
             ]
         }.items(),
     ))
@@ -153,7 +179,35 @@ def generate_launch_description():
         output='screen',
         parameters=[
             PathJoinSubstitution([bringup_config_path, 'robot_localization_parrot1.yaml']),
-            {'use_sim_time': use_sim_time},
+            {
+                'use_sim_time': use_sim_time,
+                # Override bringup's odom0_config (velocities only) to also
+                # fuse the absolute x, y and yaw that Gazebo's odometry
+                # reports, standing in for GPS + compass.
+                #
+                # With velocities only, the EKF integrated two bogus readings
+                # Gazebo sends right after spawning (about -400 and -67 m/s,
+                # as if the drone jumped from the world origin to its spawn
+                # point), so parrot1_odom - and SLAM's parrot1_map, which
+                # starts aligned with it - ended up 11.3 m away from the
+                # world. Fusing the pose keeps parrot1_map aligned with the
+                # world, so world-file coordinates (bounds, trees, trails)
+                # can be used directly as map coordinates.
+                #
+                # z is deliberately left out, so TF stays 2D like the rest of
+                # the course stack. SLAM Toolbox is 2D and sets map -> odom so
+                # that base_link sits at z = 0 in the map; with z fused, map
+                # -> odom carried -altitude, refreshed only once per processed
+                # scan, and Nav2 ignored lidar hits above 2 m in odom (its
+                # max_obstacle_height). Nodes that need the altitude read it
+                # from the 3D Gazebo odometry topic instead.
+                #
+                # Order: x y z, roll pitch yaw, vx vy vz, vroll vpitch vyaw,
+                # ax ay az.
+                'odom0_config': [True, True, False, False, False, True,
+                                 True, True, False, False, False, True,
+                                 False, False, False],
+            },
         ],
         remappings=[
             ('/tf', 'tf'),
@@ -171,9 +225,9 @@ def generate_launch_description():
         arguments=[
             '-topic', '/' + namespace + '/robot_description',
             '-name', gz_model_name,
-            '-x', '0.0',
-            '-y', '-4.0',
-            '-z', '0.8',
+            '-x', spawn_x,
+            '-y', spawn_y,
+            '-z', spawn_z,
         ],
     )
     # Give Gazebo a moment to come up before spawning the entity.
@@ -188,6 +242,22 @@ def generate_launch_description():
         parameters=[{
             'config_file': PathJoinSubstitution([bringup_config_path, 'gazebo_bridge_parrot1.yaml']),
             'use_sim_time': use_sim_time,
+        }],
+        # Only the flight controller talks to Gazebo; everything else
+        # (Nav2, the dashboard, mission modes) publishes on cmd_vel, which
+        # the flight controller passes on with altitude hold added.
+        remappings=[('cmd_vel', 'cmd_vel_gz')],
+    ))
+
+    ld.add_action(Node(
+        package='41068_assignment',
+        executable='flight_controller.py',
+        namespace=namespace,
+        name='flight_controller',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'target_altitude': ParameterValue(spawn_z, value_type=float),
         }],
     ))
 

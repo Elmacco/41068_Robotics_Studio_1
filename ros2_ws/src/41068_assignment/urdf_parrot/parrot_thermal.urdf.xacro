@@ -49,11 +49,19 @@
        and tilt parameterised (see that file for why it's a copy). -->
   <xacro:include filename="$(find 41068_assignment)/urdf_parrot/parrot_base.urdf.xacro"/>
 
-  <!-- Mount point for the thermal camera: same position/tilt as the RGB-D
-       camera (front of the drone, angled camera_pitch down) so both cameras
-       are roughly looking at the same thing. -->
+  <!-- Mount point for the thermal camera: beside the RGB-D camera, at the same
+       height and tilt (front of the drone, angled camera_pitch down) so both
+       cameras are looking at the same thing.
+
+       It used to sit directly below the RGB-D camera at z = 0.20, which is
+       exactly the height of the lidar (base_scan). The lidar then hit the
+       camera's box on every beam within about 4 deg of straight ahead,
+       reading 0.21-0.25 m: the drone was blind straight ahead, and SLAM drew
+       a line of fake obstacles along every path it flew. At z = 0.25 the box
+       spans 0.23-0.27 m, clear of the lidar plane, and y = -0.07 keeps it
+       clear of the RGB-D camera's box (y = +-0.04). -->
   <joint name="${prefix}thermal_camera_joint" type="fixed">
-    <origin xyz="0.25 0.0 0.20" rpy="0 ${camera_pitch} 0"/>
+    <origin xyz="0.25 -0.07 0.25" rpy="0 ${camera_pitch} 0"/>
     <parent link="${prefix}base_link"/>
     <child link="${prefix}thermal_camera_link"/>
   </joint>

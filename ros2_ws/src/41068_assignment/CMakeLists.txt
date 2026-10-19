@@ -22,7 +22,7 @@ install(
 
 install(
   PROGRAMS scripts/waypoint_follower.py scripts/publish_waypoints.py
-            scripts/web_dashboard_bridge.py
+            scripts/web_dashboard_bridge.py scripts/flight_controller.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

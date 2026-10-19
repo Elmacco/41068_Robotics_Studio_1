@@ -63,9 +63,15 @@ Build:
 
 ```bash
 cd ros2_ws
-colcon build --packages-select 41068_assignment
+colcon build --packages-select 41068_ignition_bringup 41068_assignment
 source install/setup.bash
 ```
+
+Build both packages after pulling: worlds and models such as
+`hiking_trail_1` / `trail_plane` live in `41068_ignition_bringup`, and if its
+install is out of date Gazebo exits straight away (`ign gazebo ... process
+has died ... exit code 255` near the top of the launch output), the drone is
+never spawned, and Nav2 then waits for `parrot1_odom` for ever.
 
 ## Running it
 

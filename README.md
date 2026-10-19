@@ -129,3 +129,31 @@ git push -u origin thermal-camera
 **5. `colcon build`/`install`/`log` output and `ros2_ws/src/ros_tutorials/` are gitignored** — safe to build before committing, and commits here never pick up anything from that nested repo (see [Two repositories in this workspace](#two-repositories-in-this-workspace)).
 
 **6. If you land in a merge conflict, don't guess.** Conflicts in `spawn_parrot.launch.py` or the world file are usually two people's genuinely different additions, not one person being wrong — read both sides and combine them rather than picking one and discarding the other.
+
+
+## Need to do
+  #everything
+    # GPS Localisation
+    # Follow known paths
+    # Add mapping mode for nav2
+    # set waypoints
+    # When identify person broadcast hiker detected and give UI option to get a path to the person
+    # Thermal camera
+    # Maybe makde fov for camera bigger
+    #active mode can be 
+    #have a preloaded map made from SLAM
+
+  #Alec
+    #GPS
+    #Mapping mode
+    #Change Camera fov
+
+  #Connor
+    # Thermal
+    # UI
+
+  #Will
+    #Active mode
+
+  #Ethan
+    #Find out ifd the person  needs help (Different coloured shirts)

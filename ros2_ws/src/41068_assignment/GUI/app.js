@@ -185,6 +185,7 @@ function connectBridge() {
 	telemetryTimer = setInterval(refreshTelemetry, 1000);
 	cameraTimer = setInterval(() => {
 		configureCameraFeed('rgb', cameraFeedsUrl.rgb);
+		configureCameraFeed('thermal', cameraFeedsUrl.thermal);
 	}, 400);
 	renderManualValues();
 }

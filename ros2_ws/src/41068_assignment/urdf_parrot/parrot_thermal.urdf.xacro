@@ -106,7 +106,7 @@
         </clip>
       </camera>
       <always_on>true</always_on>
-      <update_rate>3</update_rate>
+      <update_rate>15</update_rate>
       <topic>model/${gz_model_name}/thermal_camera</topic>
       <gz_frame_id>${prefix}thermal_camera_link</gz_frame_id>
 
@@ -130,10 +130,10 @@
              ambient temperature through a genuine heat source (body heat,
              fire, engine) without wasting the 16-bit range on
              temperatures nothing in the world will ever reach. -->
-        <min_temp>253.15</min_temp>
-        <max_temp>673.15</max_temp>
+        <min_temp>273.15</min_temp>
+        <max_temp>340.0</max_temp>
         <!-- Kelvin represented per step of sensor noise/quantisation. -->
-        <resolution>3.0</resolution>
+        <resolution>0.01</resolution>
       </plugin>
     </sensor>
   </gazebo>

@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Drone Ground Control Station</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261020a">
 </head>
 
 <body>
@@ -83,11 +86,11 @@
                 <div class="telemetry-stack">
                     <div class="metric-card">
                         <span class="label">Battery</span>
-                        <span class="value mono" id="stat-battery">98%</span>
+                        <span class="value mono" id="stat-battery">NA</span>
                     </div>
                     <div class="metric-card">
                         <span class="label">Coordinates</span>
-                        <span class="value mono" id="val-coords">-33.8688, 151.2093</span>
+                        <span class="value mono" id="val-coords">N/A</span>
                     </div>
                     <div class="metric-card">
                         <span class="label">Altitude</span>
@@ -114,39 +117,50 @@
                         <p class="panel-kicker">Command</p>
                         <h2>Control Options</h2>
                     </div>
-                    <span class="panel-tag">Manual actions</span>
+                    <span class="panel-tag">Mission control</span>
                 </div>
+
                 <div class="manual-block">
-                    <div class="control-grid">
-                        <button class="btn btn-primary" id="btn-takeoff">Take Off</button>
-                        <button class="btn btn-secondary" id="btn-takeover">Take Over</button>
+                    <div class="control-grid autonomy-grid">
+                        <button class="btn btn-primary" id="btn-takeoff" data-command="takeoff">Take Off</button>
+                        <button class="btn btn-secondary" id="btn-takeover" data-command="take_over">Take Over</button>
+                        <button class="btn btn-accent" id="btn-mapping" data-command="mapping">Mapping</button>
+                        <button class="btn btn-accent-soft" id="btn-passive" data-command="passive_t3">Passive T3</button>
+                        <button class="btn btn-ghost" id="btn-active" data-command="active">Active</button>
+                        <button class="btn btn-ghost" id="btn-save-map" data-command="save_map">Save Map</button>
+                        <button class="btn btn-ghost" id="btn-rtl" data-command="return_home">Return Home</button>
+                        <button class="btn btn-warning" id="btn-stop" data-command="stop">Stop</button>
                     </div>
 
-                    <div class="slider-stack">
-                        <div class="slider-row">
+                    <div class="manual-controls-layout">
+                        <div class="slider-row altitude-row">
                             <div class="slider-label-row">
-                                <span class="label">Forward / Back</span>
-                                <span class="slider-value mono" id="forward-value">0.0 m/s</span>
+                                <span class="label">Altitude</span>
+                                <span class="slider-value mono" id="altitude-value">0.0 m</span>
                             </div>
-                            <input id="forward-slider" class="speed-slider" type="range" min="-3" max="3" step="0.1" value="0">
+                            <input id="altitude-slider" class="altitude-slider" type="range" min="0" max="16" step="0.1" value="0">
                         </div>
 
-                        <div class="slider-row">
-                            <div class="slider-label-row">
-                                <span class="label">Left / Right</span>
-                                <span class="slider-value mono" id="lateral-value">0.0 m/s</span>
+                        <div class="manual-pad">
+                            <div class="pad-grid">
+                                <button class="btn btn-ghost pad-btn pad-forward" id="btn-forward" data-direction="forward">Forward</button>
+                                <button class="btn btn-ghost pad-btn pad-left" id="btn-left" data-direction="left">Left</button>
+                                <button class="btn btn-ghost pad-btn pad-back" id="btn-back" data-direction="backward">Back</button>
+                                <button class="btn btn-ghost pad-btn pad-right" id="btn-right" data-direction="right">Right</button>
                             </div>
-                            <input id="lateral-slider" class="speed-slider" type="range" min="-3" max="3" step="0.1" value="0">
-                        </div>
 
-                        <button class="btn btn-ghost" id="btn-rtl">Return Home</button>
+                            <div class="yaw-stack">
+                                <button class="btn btn-ghost" id="btn-yaw-left" data-direction="yaw_left">Yaw Left</button>
+                                <button class="btn btn-ghost" id="btn-yaw-right" data-direction="yaw_right">Yaw Right</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=20261020a"></script>
 </body>
 
 </html>

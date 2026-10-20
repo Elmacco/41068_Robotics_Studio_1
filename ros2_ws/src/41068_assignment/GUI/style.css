@@ -92,10 +92,11 @@ body {
 .dashboard-grid {
 	flex: 1;
 	display: grid;
-	grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+	grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+	grid-template-rows: minmax(0, 1fr) minmax(0, auto);
 	grid-template-areas:
 		"map feeds"
-		"telemetry controls";
+		"controls telemetry";
 	gap: 16px;
 	align-items: stretch;
 }
@@ -139,6 +140,7 @@ body {
 
 .telemetry-panel {
 	grid-area: telemetry;
+	align-self: start;
 }
 
 .controls-panel {
@@ -148,7 +150,6 @@ body {
 .map-frame,
 .feed-frame {
 	position: relative;
-	min-height: 280px;
 	overflow: hidden;
 	border-radius: 18px;
 	border: 1px solid rgba(67, 96, 72, 0.12);
@@ -158,10 +159,16 @@ body {
 }
 
 .map-frame {
-	min-height: clamp(520px, 58vh, 760px);
-	flex: none;
+	aspect-ratio: 16 / 9;
+	min-height: clamp(420px, 48vh, 640px);
 	width: 100%;
 	align-self: stretch;
+}
+
+.feed-frame {
+	aspect-ratio: 16 / 9;
+	min-height: 180px;
+	width: 100%;
 }
 
 .map-frame::before,
@@ -256,11 +263,6 @@ body {
 	font-size: 0.95rem;
 }
 
-.feed-frame {
-	min-height: 180px;
-	flex: 1;
-}
-
 .feed-frame-thermal {
 	background:
 		linear-gradient(135deg, rgba(255, 120, 92, 0.18), rgba(255, 221, 105, 0.08)),
@@ -277,15 +279,15 @@ body {
 
 .telemetry-stack {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12px;
+	grid-template-columns: 1fr;
+	gap: 10px;
 }
 
 .metric-card {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
-	padding: 14px 15px;
+	gap: 4px;
+	padding: 10px 12px;
 	border-radius: 16px;
 	background: rgba(255, 255, 255, 0.58);
 	border: 1px solid rgba(72, 102, 75, 0.10);
@@ -299,7 +301,7 @@ body {
 }
 
 .metric-card .value {
-	font-size: 1.1rem;
+	font-size: 1rem;
 	color: var(--text);
 	font-weight: 700;
 }
@@ -314,6 +316,10 @@ body {
 	gap: 12px;
 }
 
+.autonomy-grid {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .manual-block {
 	display: flex;
 	flex-direction: column;
@@ -325,6 +331,13 @@ body {
 	flex-direction: column;
 	gap: 14px;
 	padding-top: 2px;
+}
+
+.manual-controls-layout {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 14px;
+	align-items: stretch;
 }
 
 .slider-row {
@@ -357,6 +370,21 @@ body {
 	cursor: pointer;
 }
 
+.altitude-row {
+	width: 90px;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.altitude-slider {
+	-webkit-appearance: slider-vertical;
+	appearance: slider-vertical;
+	width: 20px;
+	height: 210px;
+	accent-color: var(--accent-2);
+	cursor: pointer;
+}
+
 .btn {
 	appearance: none;
 	border: none;
@@ -385,14 +413,106 @@ body {
 	font-weight: 700;
 }
 
+.btn-accent {
+	background: linear-gradient(135deg, #8aa8d8, #5c81bf);
+	color: #f6f9ff;
+	font-weight: 700;
+}
+
+.btn-accent-soft {
+	background: linear-gradient(135deg, #d8d3a4, #b9b16d);
+	color: #312d18;
+	font-weight: 700;
+}
+
 .btn-ghost {
 	background: rgba(255, 255, 255, 0.40);
 	border: 1px solid rgba(72, 102, 75, 0.12);
 	color: var(--text);
 }
 
-.control-note {
-	font-size: 0.9rem;
+.btn-warning {
+	background: linear-gradient(135deg, #d86a5a, #b74c42);
+	color: #fff4f2;
+	font-weight: 700;
+}
+
+.motion-pad {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	padding: 12px;
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.52);
+	border: 1px solid rgba(72, 102, 75, 0.10);
+}
+
+.pad-btn {
+	appearance: none;
+	background: rgba(102, 139, 91, 0.08);
+	border: 1px solid rgba(72, 102, 75, 0.12);
+	border-radius: 12px;
+	padding: 12px 10px;
+	font: inherit;
+	font-weight: 700;
+	color: var(--text);
+	cursor: pointer;
+	transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.pad-btn:hover {
+	transform: translateY(-1px);
+	background: rgba(102, 139, 91, 0.12);
+}
+
+.pad-btn-center {
+	background: rgba(61, 125, 79, 0.10);
+}
+
+.manual-pad {
+	display: flex;
+	gap: 12px;
+	align-items: stretch;
+}
+
+.pad-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(64px, 1fr));
+	grid-template-rows: repeat(3, minmax(52px, auto));
+	gap: 8px;
+	flex: 1;
+	padding: 10px;
+	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.5);
+	border: 1px solid rgba(72, 102, 75, 0.1);
+}
+
+.pad-forward {
+	grid-column: 2;
+	grid-row: 1;
+}
+
+.pad-left {
+	grid-column: 1;
+	grid-row: 2;
+}
+
+.pad-back {
+	grid-column: 2;
+	grid-row: 3;
+}
+
+.pad-right {
+	grid-column: 3;
+	grid-row: 2;
+}
+
+.yaw-stack {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 8px;
+	min-width: 120px;
 }
 
 @media (max-width: 850px) {
@@ -401,8 +521,8 @@ body {
 		grid-template-areas:
 			"map"
 			"feeds"
-			"telemetry"
-			"controls";
+			"controls"
+			"telemetry";
 	}
 
 	.camera-grid {
@@ -412,6 +532,34 @@ body {
 	.telemetry-panel,
 	.controls-panel {
 		min-height: auto;
+	}
+
+	.autonomy-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.manual-controls-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.altitude-row {
+		width: 100%;
+	}
+
+	.altitude-slider {
+		width: 100%;
+		height: 8px;
+		-webkit-appearance: none;
+		appearance: auto;
+	}
+
+	.manual-pad {
+		flex-direction: column;
+	}
+
+	.yaw-stack {
+		min-width: 0;
+		flex-direction: row;
 	}
 }
 

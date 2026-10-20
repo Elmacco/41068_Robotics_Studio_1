@@ -16,7 +16,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from std_msgs.msg import String
+from std_msgs.msg import Float64, String
 
 
 class DashboardState:
@@ -76,6 +76,7 @@ class BridgeNode(Node):
         self.state = state
         self.command_pub = self.create_publisher(String, '/parrot1/mission_command', 10)
         self.manual_pub = self.create_publisher(Twist, '/parrot1/cmd_vel', 10)
+        self.target_altitude_pub = self.create_publisher(Float64, '/parrot1/target_altitude', 10)
         self.create_subscription(Odometry, '/parrot1/odometry', self.odom_callback, 10)
         self.create_subscription(Image, '/parrot1/camera/image', self.rgb_callback, 10)
         self.create_subscription(Image, '/parrot1/thermal_camera/image', self.thermal_callback, 10)
@@ -115,12 +116,19 @@ class BridgeNode(Node):
         else:
             self.state.set_mode('TAKE OVER')
 
-    def publish_manual(self, forward: float, lateral: float):
+    def publish_manual(self, forward: float, lateral: float, yaw: float = 0.0, altitude: Optional[float] = None):
         message = Twist()
         message.linear.x = forward
         message.linear.y = lateral
         message.linear.z = 0.0
+        message.angular.z = yaw
         self.manual_pub.publish(message)
+
+        if altitude is not None and math.isfinite(altitude):
+            target_msg = Float64()
+            target_msg.data = max(0.0, altitude)
+            self.target_altitude_pub.publish(target_msg)
+
         self.state.set_mode('MANUAL')
 
     @staticmethod
@@ -232,14 +240,23 @@ class DashboardRequestHandler(BaseHTTPRequestHandler):
             try:
                 forward = float(payload.get('forward', 0.0))
                 lateral = float(payload.get('lateral', 0.0))
+                yaw = float(payload.get('yaw', 0.0))
+                altitude_raw = payload.get('altitude', None)
+                altitude = float(altitude_raw) if altitude_raw is not None else None
             except (TypeError, ValueError):
                 self.send_response(HTTPStatus.BAD_REQUEST)
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 return
 
-            self.server.node.publish_manual(forward, lateral)
-            body = json.dumps({'ok': True, 'forward': forward, 'lateral': lateral}).encode('utf-8')
+            self.server.node.publish_manual(forward, lateral, yaw, altitude)
+            body = json.dumps({
+                'ok': True,
+                'forward': forward,
+                'lateral': lateral,
+                'yaw': yaw,
+                'altitude': altitude,
+            }).encode('utf-8')
             self._set_common_headers('application/json')
             self.send_header('Content-Length', str(len(body)))
             self.end_headers()

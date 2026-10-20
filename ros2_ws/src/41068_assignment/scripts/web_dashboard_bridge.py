@@ -138,9 +138,22 @@ class BridgeNode(Node):
             array = np.frombuffer(msg.data, dtype=np.uint8).reshape((msg.height, msg.width))
             array = cv2.cvtColor(array, cv2.COLOR_GRAY2BGR)
         elif encoding in ('16uc1', 'mono16'):
-            array = np.frombuffer(msg.data, dtype=np.uint16).reshape((msg.height, msg.width))
-            array = cv2.convertScaleAbs(array, alpha=255.0 / 65535.0)
-            array = cv2.applyColorMap(array, cv2.COLORMAP_INFERNO if thermal else cv2.COLORMAP_JET)
+            array16 = np.frombuffer(msg.data, dtype=np.uint16).reshape((msg.height, msg.width))
+            if thermal:
+                # Use a fixed thermal display window so hotter objects remain
+                # visually brighter across frames instead of being flattened by
+                # per-frame auto-normalization.
+                resolution_kelvin = 0.01
+                display_min_kelvin = 285.0
+                display_max_kelvin = 325.0
+
+                kelvin = array16.astype(np.float32) * resolution_kelvin
+                scale = 255.0 / max(display_max_kelvin - display_min_kelvin, 1e-6)
+                array8 = np.clip((kelvin - display_min_kelvin) * scale, 0.0, 255.0).astype(np.uint8)
+                array = cv2.applyColorMap(array8, cv2.COLORMAP_INFERNO)
+            else:
+                array8 = cv2.convertScaleAbs(array16, alpha=255.0 / 65535.0)
+                array = cv2.applyColorMap(array8, cv2.COLORMAP_JET)
         else:
             # Fall back to a grayscale interpretation for uncommon encodings.
             array = np.frombuffer(msg.data, dtype=np.uint8)

@@ -17,7 +17,13 @@
     </light>
     <gravity>0 0 -9.81</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
-    <atmosphere type="adiabatic"/>
+
+    <!-- Explicit thermal baseline for objects without assigned heat. -->
+    <atmosphere type="adiabatic">
+      <temperature>300.0</temperature>
+      <temperature_gradient>0.1</temperature_gradient>
+    </atmosphere>
+
     <physics name="default_physics" type="ignored">
       <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
@@ -38,7 +44,6 @@
       <surface_model>EARTH_WGS84</surface_model>
     </spherical_coordinates>
 
-
     <!-- Small ground plane with trail texture -->
     <include>
       <uri>
@@ -57,7 +62,7 @@
       <pose>-0.3 3.5 0 0 0 0</pose>
     </include>
 
-     <!-- Oak tree -->
+    <!-- Oak tree -->
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
@@ -66,7 +71,7 @@
       <pose>-4.8 2.6 0 0 0 0</pose>
     </include>
 
-     <!-- Oak tree -->
+    <!-- Oak tree -->
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
@@ -75,7 +80,7 @@
       <pose>5.0 -4.0 0 0 0 0</pose>
     </include>
 
-     <!-- Oak tree -->
+    <!-- Oak tree -->
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
@@ -84,17 +89,7 @@
       <pose>-6.0 -5.4 0 0 0 0</pose>
     </include>
 
-        <!-- Pine tree 
-    <include>
-      <uri>
-        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
-      </uri>
-      <name>pine1</name>
-      <pose>6.0 0.0 0 0 0 0</pose>
-    </include>
-    -->
-
-        <!-- rock -->
+    <!-- rock -->
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
@@ -104,16 +99,16 @@
       <pose>3.3 2.3 0 0 0 0</pose>
     </include>
 
-        <!-- Some dude -->
+    <!-- Some dude -->
     <include>
       <uri>
-        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+        model://standing_person_hot
       </uri>
       <name>standing_person</name>
       <pose>4.0 3.0 0 0 0 0</pose>
     </include>
 
-        <!-- Platypus -->
+    <!-- Platypus -->
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/platypus
@@ -121,7 +116,6 @@
       <name>platypus</name>
       <pose>0.0 -3.0 0 0 0 0</pose>
     </include>
-    
+
   </world>
 </sdf>
-

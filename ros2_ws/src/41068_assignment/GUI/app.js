@@ -24,16 +24,26 @@ const cameraFeeds = {
 const commandButtons = {
 	takeoff: document.getElementById('btn-takeoff'),
 	rtl: document.getElementById('btn-rtl'),
-	takeover: document.getElementById('btn-takeover')
+	takeover: document.getElementById('btn-takeover'),
+	mapping: document.getElementById('btn-mapping'),
+	passive: document.getElementById('btn-passive'),
+	active: document.getElementById('btn-active'),
+	saveMap: document.getElementById('btn-save-map'),
+	stop: document.getElementById('btn-stop')
 };
 
 const manualControls = {
-	forward: document.getElementById('forward-slider'),
-	lateral: document.getElementById('lateral-slider'),
-	forwardValue: document.getElementById('forward-value'),
-	lateralValue: document.getElementById('lateral-value')
+	altitude: document.getElementById('altitude-slider'),
+	altitudeValue: document.getElementById('altitude-value'),
+	forward: document.getElementById('btn-forward'),
+	back: document.getElementById('btn-back'),
+	left: document.getElementById('btn-left'),
+	right: document.getElementById('btn-right'),
+	yawLeft: document.getElementById('btn-yaw-left'),
+	yawRight: document.getElementById('btn-yaw-right')
 };
 
+const directionButtons = document.querySelectorAll('[data-direction]');
 const statusIndicator = document.querySelector('.status-pill-online');
 const bridgeBaseUrl = 'http://localhost:8081';
 const telemetryUrl = `${bridgeBaseUrl}/api/telemetry`;
@@ -45,25 +55,39 @@ const cameraFeedsUrl = {
 };
 
 const localState = {
-	heading: 84,
-	altitude: 18.4,
-	speed: 4.8,
-	battery: 98,
-	latitude: -33.8688,
-	longitude: 151.2093,
+	heading: 0,
+	altitude: 0,
+	speed: 0,
+	battery: 0,
+	latitude: 0,
+	longitude: 0,
 	mode: 'STANDBY'
 };
 
-let ros = null;
 let fallbackTimer = null;
 let telemetryTimer = null;
 let cameraTimer = null;
 let manualTimer = null;
+let isAltitudeSliderActive = false;
 
 const manualState = {
 	forward: 0,
-	lateral: 0
+	lateral: 0,
+	yaw: 0,
+	altitude: 0
 };
+
+function toNumber(value, fallback = 0) {
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatMetric(value, decimals = 1, suffix = '') {
+	if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+		return 'N/A';
+	}
+	return `${Number(value).toFixed(decimals)}${suffix}`;
+}
 
 function setFeedActive(feedKey, active) {
 	const feed = cameraFeeds[feedKey];
@@ -93,12 +117,16 @@ function configureCameraFeed(feedKey, streamUrl) {
 }
 
 function renderTelemetry(state) {
-	telemetryValues.coords.textContent = `${state.latitude.toFixed(4)}, ${state.longitude.toFixed(4)}`;
-	telemetryValues.altitude.textContent = `${state.altitude.toFixed(1)} m`;
-	telemetryValues.heading.textContent = `${Math.round(state.heading) % 360}°`;
-	telemetryValues.speed.textContent = `${state.speed.toFixed(1)} m/s`;
-	telemetryValues.mode.textContent = state.mode;
-	telemetryValues.battery.textContent = `${Math.round(state.battery)}%`;
+	const latitude = toNumber(state.latitude, 0);
+	const longitude = toNumber(state.longitude, 0);
+	telemetryValues.coords.textContent = Number.isFinite(latitude) && Number.isFinite(longitude)
+		? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+		: 'N/A';
+	telemetryValues.altitude.textContent = formatMetric(state.altitude, 1, ' m');
+	telemetryValues.heading.textContent = `${Math.round(toNumber(state.heading, 0)) % 360}°`;
+	telemetryValues.speed.textContent = formatMetric(state.speed, 1, ' m/s');
+	telemetryValues.mode.textContent = state.mode || 'STANDBY';
+	telemetryValues.battery.textContent = Number.isFinite(Number(state.battery)) ? `${Math.round(toNumber(state.battery, 0))}%` : 'NA';
 	if (telemetryValues.gps) {
 		telemetryValues.gps.textContent = '3D FIX';
 	}
@@ -118,17 +146,18 @@ function applyTelemetry(payload) {
 	localState.speed = payload.speed ?? localState.speed;
 	localState.battery = payload.battery ?? localState.battery;
 	localState.mode = payload.mode ?? localState.mode;
+	syncAltitudeFromTelemetry(localState.altitude);
 	renderTelemetry(localState);
 }
 
 function tickFallbackTelemetry() {
-	localState.heading = (localState.heading + 3) % 360;
-	localState.altitude = 18.4 + Math.sin(Date.now() / 2600) * 0.8;
-	localState.speed = 4.2 + Math.cos(Date.now() / 2100) * 0.5;
-	localState.latitude += 0.00002;
-	localState.longitude += 0.00003;
-	localState.battery = Math.max(82, localState.battery - 0.01);
-	localState.mode = 'HOVER';
+	localState.heading = 0;
+	localState.altitude = 0;
+	localState.speed = 0;
+	localState.latitude = 0;
+	localState.longitude = 0;
+	localState.battery = 0;
+	localState.mode = 'STANDBY';
 	renderTelemetry(localState);
 }
 
@@ -136,23 +165,46 @@ function startFallbackMode() {
 	if (fallbackTimer) {
 		return;
 	}
-	updateStatus('Local Mock Active');
+	updateStatus('Bridge Offline');
 	fallbackTimer = setInterval(tickFallbackTelemetry, 1000);
 }
 
 function renderManualValues() {
-	if (manualControls.forwardValue) {
-		manualControls.forwardValue.textContent = `${Number(manualState.forward).toFixed(1)} m/s`;
-	}
-	if (manualControls.lateralValue) {
-		manualControls.lateralValue.textContent = `${Number(manualState.lateral).toFixed(1)} m/s`;
+	if (manualControls.altitudeValue) {
+		manualControls.altitudeValue.textContent = `${Number(manualState.altitude).toFixed(1)} m`;
 	}
 }
 
 function updateManualState() {
-	manualState.forward = Number(manualControls.forward?.value ?? 0);
-	manualState.lateral = Number(manualControls.lateral?.value ?? 0);
+	manualState.altitude = Number(manualControls.altitude?.value ?? 0);
 	renderManualValues();
+}
+
+function syncAltitudeFromTelemetry(altitude) {
+	if (!manualControls.altitude || isAltitudeSliderActive) {
+		return;
+	}
+
+	const parsedAltitude = Number(altitude);
+	if (!Number.isFinite(parsedAltitude)) {
+		return;
+	}
+
+	const clampedAltitude = Math.min(16, Math.max(0, parsedAltitude));
+	manualState.altitude = clampedAltitude;
+	manualControls.altitude.value = clampedAltitude.toFixed(1);
+	renderManualValues();
+}
+
+function setManualVector(forward, lateral, yaw = 0) {
+	manualState.forward = forward;
+	manualState.lateral = lateral;
+	manualState.yaw = yaw;
+	publishManualControl();
+}
+
+function resetManualVector() {
+	setManualVector(0, 0, 0);
 }
 
 async function refreshTelemetry() {
@@ -172,7 +224,7 @@ async function refreshTelemetry() {
 			localState.mode = payload.mode;
 		}
 	} catch (error) {
-		console.warn('Telemetry bridge unavailable, using local fallback.', error);
+		console.warn('Telemetry bridge unavailable, using placeholder data.', error);
 		updateStatus('Bridge Offline');
 		startFallbackMode();
 	}
@@ -187,11 +239,21 @@ function connectBridge() {
 		configureCameraFeed('rgb', cameraFeedsUrl.rgb);
 		configureCameraFeed('thermal', cameraFeedsUrl.thermal);
 	}, 400);
-	renderManualValues();
+	updateManualState();
 }
 
 async function publishCommand(command) {
-	localState.mode = command === 'return_home' ? 'RETURN HOME' : 'TAKE OVER';
+	const labels = {
+		takeoff: 'TAKE OFF',
+		take_over: 'TAKE OVER',
+		return_home: 'RETURN HOME',
+		stop: 'STOP',
+		save_map: 'SAVE MAP',
+		mapping: 'MAPPING',
+		passive_t3: 'PASSIVE T3',
+		active: 'ACTIVE'
+	};
+	localState.mode = labels[command] || command.toUpperCase();
 	renderTelemetry(localState);
 
 	try {
@@ -208,7 +270,6 @@ async function publishCommand(command) {
 }
 
 async function publishManualControl() {
-	updateManualState();
 	try {
 		await fetch(manualUrl, {
 			method: 'POST',
@@ -228,31 +289,100 @@ function sendTakeoff() {
 	publishCommand('takeoff');
 }
 
+function bindCommandButtons() {
+	Object.entries(commandButtons).forEach(([key, button]) => {
+		if (!button) {
+			return;
+		}
+		button.addEventListener('click', () => {
+			if (key === 'takeoff') {
+				sendTakeoff();
+				return;
+			}
+			if (key === 'takeover') {
+				publishCommand('take_over');
+				return;
+			}
+			if (key === 'rtl') {
+				publishCommand('return_home');
+				return;
+			}
+			const commandName = button.dataset.command || key;
+			publishCommand(commandName);
+		});
+	});
+}
+
+function bindMomentaryManualButton(button, vector) {
+	if (!button) {
+		return;
+	}
+
+	let engaged = false;
+
+	const activate = (event) => {
+		if (event) {
+			event.preventDefault();
+		}
+		engaged = true;
+		setManualVector(vector.forward, vector.lateral, vector.yaw);
+	};
+
+	const release = () => {
+		if (!engaged) {
+			return;
+		}
+		engaged = false;
+		resetManualVector();
+	};
+
+	button.addEventListener('pointerdown', activate);
+	button.addEventListener('pointerup', release);
+	button.addEventListener('pointerleave', release);
+	button.addEventListener('pointercancel', release);
+	button.addEventListener('mousedown', activate);
+	button.addEventListener('mouseup', release);
+	button.addEventListener('mouseleave', release);
+	button.addEventListener('touchstart', activate, { passive: false });
+	button.addEventListener('touchend', release);
+	button.addEventListener('touchcancel', release);
+}
+
 renderTelemetry(localState);
 connectBridge();
+bindCommandButtons();
 
-commandButtons.takeoff.addEventListener('click', () => {
-	sendTakeoff();
+manualControls.altitude.addEventListener('pointerdown', () => {
+	isAltitudeSliderActive = true;
 });
 
-commandButtons.rtl.addEventListener('click', () => {
-	publishCommand('return_home');
+manualControls.altitude.addEventListener('pointerup', () => {
+	isAltitudeSliderActive = false;
 });
 
-commandButtons.takeover.addEventListener('click', () => {
-	publishCommand('take_over');
+manualControls.altitude.addEventListener('blur', () => {
+	isAltitudeSliderActive = false;
 });
 
-manualControls.forward.addEventListener('input', () => {
+manualControls.altitude.addEventListener('input', () => {
+	isAltitudeSliderActive = true;
+	updateManualState();
 	publishManualControl();
 });
 
-manualControls.lateral.addEventListener('input', () => {
-	publishManualControl();
+manualControls.altitude.addEventListener('change', () => {
+	isAltitudeSliderActive = false;
 });
+
+bindMomentaryManualButton(manualControls.forward, { forward: 1, lateral: 0, yaw: 0 });
+bindMomentaryManualButton(manualControls.back, { forward: -1, lateral: 0, yaw: 0 });
+bindMomentaryManualButton(manualControls.left, { forward: 0, lateral: 1, yaw: 0 });
+bindMomentaryManualButton(manualControls.right, { forward: 0, lateral: -1, yaw: 0 });
+bindMomentaryManualButton(manualControls.yawLeft, { forward: 0, lateral: 0, yaw: 1 });
+bindMomentaryManualButton(manualControls.yawRight, { forward: 0, lateral: 0, yaw: -1 });
 
 manualTimer = setInterval(() => {
-	if (Math.abs(manualState.forward) > 0.001 || Math.abs(manualState.lateral) > 0.001) {
+	if (Math.abs(manualState.forward) > 0.001 || Math.abs(manualState.lateral) > 0.001 || Math.abs(manualState.yaw) > 0.001) {
 		publishManualControl();
 	}
 }, 300);

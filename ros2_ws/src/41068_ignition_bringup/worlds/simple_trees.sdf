@@ -218,7 +218,7 @@
       <pose>21.0 -18.0 0 0 0 1.8</pose>
     </include>
 
-    <!-- rock -->
+        <!-- rock -->
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
@@ -308,10 +308,10 @@
       <pose>-4.0 -23.0 0.02 0 0 0</pose>
     </include>
 
-    <!-- Trail 1, dude 1 -->
+        <!-- Trail 1, dude 1 -->
     <include>
       <uri>
-        model://standing_person_hot
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
       </uri>
       <name>standing_person</name>
       <pose>-15.0 15.0 0 0 0 0</pose>
@@ -336,7 +336,7 @@
     </include>
 
 
-    <!-- Platypus -->
+        <!-- Platypus -
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/platypus

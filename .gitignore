@@ -24,3 +24,8 @@ __pycache__/
 # Large ROS bag recordings
 *.db3
 *.mcap
+
+# Generated files inside the bringup model directory
+ros2_ws/src/41068_ignition_bringup/models/build/
+ros2_ws/src/41068_ignition_bringup/models/install/
+ros2_ws/src/41068_ignition_bringup/models/log/

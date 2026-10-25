@@ -4,26 +4,30 @@
     <link name="link">
         <collision name="collision">
             <geometry>
-                <heightmap>
-                    <uri>model://trail_plane/materials/textures/rolling_hills_heightmap.png</uri>
+            <heightmap>
+                    <uri>file:///home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_ignition_bringup/models/trail_plane/materials/textures/rolling_hills_heightmap_8bit.png</uri>
                     <pos>0 0 0</pos>
-                    <size>25 25 2</size>
+                    <size>50 50 5</size>
                 </heightmap>
             </geometry>
         </collision>
         <visual name="visual">
-            <cast_shadows>false</cast_shadows>
+            <pose>0 0 0.01 0 0 0</pose>
             <geometry>
-                <heightmap>
-                    <uri>model://trail_plane/materials/textures/rolling_hills_heightmap.png</uri>
-                    <pos>0 0 0</pos>
-                    <size>25 25 2</size>
-                    <texture>
-                        <diffuse>model://trail_plane/materials/textures/empty_grass.png</diffuse>
-                        <size>5</size>
-                    </texture>
-                </heightmap>
+                <plane>
+                    <normal>0 0 1</normal>
+                    <size>50 50</size>
+                </plane>
             </geometry>
+            <material>
+                <ambient>0.45 0.22 0.08 1</ambient>
+                <diffuse>0.45 0.22 0.08 1</diffuse>
+                <pbr>
+                    <metal>
+                        <albedo_map>model://trail_plane/materials/textures/empty_grass.png</albedo_map>
+                    </metal>
+                </pbr>
+            </material>
         </visual>
     </link>
 </model>

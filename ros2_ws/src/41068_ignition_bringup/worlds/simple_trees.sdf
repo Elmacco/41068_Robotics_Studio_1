@@ -3,17 +3,17 @@
   <world name="simple_trees">
     <!-- Basic world setup  -->
     <light name="sun" type="directional">
-      <cast_shadows>1</cast_shadows>
-      <pose>0 0 10 0 -0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0.2 0.2 0.2 1</specular>
+     <cast_shadows>0</cast_shadows>
+      <pose>0 0 50 0 -0 0</pose>
+      <diffuse>0.7 0.7 0.7 1</diffuse>
+      <specular>0 0 0 1</specular>
       <attenuation>
         <range>1000</range>
         <constant>0.9</constant>
         <linear>0.01</linear>
         <quadratic>0.001</quadratic>
       </attenuation>
-      <direction>-0.5 0.1 -0.9</direction>
+      <direction>0 0 -1</direction>
     </light>
     <gravity>0 0 -9.81</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
@@ -30,7 +30,7 @@
       <real_time_update_rate>100</real_time_update_rate>
     </physics>
     <scene>
-      <ambient>1.0 1.0 1.0</ambient>
+      <ambient>0.5 0.5 0.5</ambient>
       <background>0.8 0.8 0.8</background>
       <shadows>1</shadows>
     </scene>
@@ -44,8 +44,7 @@
       <surface_model>EARTH_WGS84</surface_model>
     </spherical_coordinates>
 
-    <!-- Small ground plane with trail texture -->
-    <include>
+  <include>
       <uri>
         model://trail_plane
       </uri>
@@ -89,7 +88,137 @@
       <pose>-6.0 -5.4 0 0 0 0</pose>
     </include>
 
-    <!-- rock -->
+    <!-- Additional trees placed on the grassy areas beside the trail -->
+    <include>
+      <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak5</name>
+       <pose>-8.0 21.0 0 0 0 0.3</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak6</name>
+       <pose>-3.8 21.5 0 0 0 1.1</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak7</name>
+       <pose>21.0 14.5 0 0 0 2.0</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak8</name>
+       <pose>-21.0 10.0 0 0 0 0.7</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak9</name>
+       <pose>-9.0 8.0 0 0 0 2.8</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak10</name>
+       <pose>19.0 6.5 0 0 0 1.6</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak11</name>
+       <pose>-20.0 -12.0 0 0 0 2.4</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak12</name>
+       <pose>-7.0 -16.0 0 0 0 0.9</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak13</name>
+       <pose>12.0 -17.0 0 0 0 2.1</pose>
+    </include>
+
+    <include>
+       <uri>
+         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+       </uri>
+       <name>oak14</name>
+       <pose>22.0 -22.0 0 0 0 0.4</pose>
+    </include>
+
+    <!-- Pine trees placed between the oak trees -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine1</name>
+      <pose>-5.8 21.0 0 0 0 0.8</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine2</name>
+      <pose>20.5 10.5 0 0 0 2.2</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine3</name>
+      <pose>-20.5 5.5 0 0 0 1.4</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine4</name>
+      <pose>-8.0 -13.5 0 0 0 2.7</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine5</name>
+      <pose>5.0 -17.5 0 0 0 0.5</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine6</name>
+      <pose>21.0 -18.0 0 0 0 1.8</pose>
+    </include>
+
+        <!-- rock -->
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
@@ -99,23 +228,122 @@
       <pose>3.3 2.3 0 0 0 0</pose>
     </include>
 
-    <!-- Some dude -->
+    <!-- Additional rocks spread through the grassy areas -->
     <include>
       <uri>
-        model://standing_person_hot
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
       </uri>
-      <name>standing_person</name>
-      <pose>4.0 3.0 0 0 0 0</pose>
+      <name>rock2</name>
+      <scale>5 5 5</scale>
+      <pose>-11.0 19.0 0 0 0 0.4</pose>
     </include>
 
-    <!-- Platypus -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock3</name>
+      <scale>7 7 7</scale>
+      <pose>16.0 17.0 0 0 0 1.2</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock4</name>
+      <scale>3 3 3</scale>
+      <pose>-19.0 3.0 0 0 0 2.0</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock5</name>
+      <scale>8 8 8</scale>
+      <pose>10.0 8.0 0 0 0 0.7</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock6</name>
+      <scale>4 4 4</scale>
+      <pose>-16.0 -7.0 0 0 0 2.6</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock7</name>
+      <scale>6 6 6</scale>
+      <pose>15.0 -11.0 0 0 0 1.5</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock8</name>
+      <scale>2.5 2.5 2.5</scale>
+      <pose>-12.0 -19.0 0 0 0 0.9</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock9</name>
+      <scale>9 9 9</scale>
+      <pose>19.0 -20.0 0 0 0 2.3</pose>
+    </include>
+
+    <!-- Launch pad for the parrot on simple_trees -->
+    <include>
+      <uri>model://launch_pad</uri>
+      <name>launch_pad</name>
+      <pose>-4.0 -23.0 0.02 0 0 0</pose>
+    </include>
+
+        <!-- Trail 1, dude 1 -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person</name>
+      <pose>-15.0 15.0 0 0 0 0</pose>
+    </include>
+
+   <!-- Trail 1, dude 2 -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person2</name>
+      <pose>-15.0 -15.0 0 0 0 0</pose>
+    </include>
+
+    <!-- Trail 3, dude 3 -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person3</name>
+      <pose>20.0 -15.0 5 0 0 0</pose>
+    </include>
+
+
+        <!-- Platypus -
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/platypus
       </uri>
       <name>platypus</name>
-      <pose>0.0 -3.0 0 0 0 0</pose>
+      <pose>-2.0 -22.0 0 0 0 0</pose>
     </include>
-
+    -->
   </world>
 </sdf>

@@ -276,6 +276,7 @@ def generate_launch_description():
         choices=['simple_trees', 'large_demo', 'hiking_trail_1'],
     )
     ld.add_action(world_launch_arg)
+    world = LaunchConfiguration('world')
 
     # Load common Gazebo server systems from a shared config file. This keeps
     # required systems such as Sensors out of individual robot and world files,
@@ -291,6 +292,14 @@ def generate_launch_description():
     ld.add_action(SetEnvironmentVariable(
         name='GZ_SIM_SERVER_CONFIG_PATH',
         value=server_config_file,
+    ))
+    ld.add_action(SetEnvironmentVariable(
+        name='GZ_SIM_RESOURCE_PATH',
+        value=PathJoinSubstitution([pkg_path, 'models']),
+    ))
+    ld.add_action(SetEnvironmentVariable(
+        name='IGN_GAZEBO_RESOURCE_PATH',
+        value=PathJoinSubstitution([pkg_path, 'models']),
     ))
 
     # Start Gazebo once.
@@ -356,8 +365,8 @@ def generate_launch_description():
         xacro_parts=['urdf_parrot', 'parrot.urdf.xacro'],
         bridge_config='gazebo_bridge_parrot1.yaml',
         localization_config='robot_localization_parrot1.yaml',
-        x='2.0',
-        y='0.0',
+        x=PythonExpression(["'-4.0' if '", world, "' == 'simple_trees' else '2.0'"]),
+        y=PythonExpression(["'-23.0' if '", world, "' == 'simple_trees' else '0.0'"]),
         z='0.8',
         spawn_delay=6.0,
     )

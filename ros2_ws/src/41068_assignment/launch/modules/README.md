@@ -7,9 +7,9 @@ so you can merge your part whenever it's ready.
 
 | Flag | File | Owner |
 |---|---|---|
-| `dashboard` | `dashboard.launch.py` | Connor |
+| `dashboard` | `dashboard.launch.py` ✅ | Connor |
 | `thermal` | `thermal.launch.py` | Connor |
-| `detection` | `detection.launch.py` | Ethan |
+| `detection` | `detection.launch.py` ✅ | Ethan |
 | `active_mode` | `active_mode.launch.py` | Will |
 | `behaviour_tree` | `behaviour_tree.launch.py` | Alec |
 

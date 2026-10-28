@@ -1,0 +1,8 @@
+# Not resolvable via rosdep/apt - install separately:
+#   pip install -r requirements.txt --break-system-packages
+#
+# Pulls in PyTorch as a dependency. Weights (yolo26n.pt) auto-download from
+# Ultralytics' release assets on first use, so run once with internet access
+# before an offline demo:
+#   python3 -c "from ultralytics import YOLO; YOLO('yolo26n.pt')"
+ultralytics

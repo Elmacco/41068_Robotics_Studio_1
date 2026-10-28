@@ -39,6 +39,14 @@
   <exec_depend>python3-opencv</exec_depend>
   <test_depend>python3-pytest</test_depend>
 
+  <!-- Person detection / projection (Ethan: target_detector.py,
+       target_projector.py). target_detector.py also needs the "ultralytics"
+       pip package, which rosdep/apt can't install: see requirements.txt. -->
+  <exec_depend>vision_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>message_filters</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

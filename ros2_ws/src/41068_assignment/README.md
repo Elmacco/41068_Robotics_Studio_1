@@ -33,7 +33,10 @@ worlds/
   assignment_world.sdf     Ground plane + a few trees
   simple_trees.sdf         Will's demo world (launch pad, trail, hills)
   hiking_trail_1.sdf       Trail world for trail detection (25 x 25 m)
-models/                    grass_plane, trail_plane, elevated_trail, launch_pad
+models/                    grass_plane, trail_plane, elevated_trail, launch_pad,
+                           rescue_randy_base/_red/_green (Ethan's)
+weights/yolo26n.pt         YOLO weights for target_detector.py (offline use)
+requirements.txt           pip-only dependencies (ultralytics)
 urdf_parrot/               Parrot + thermal camera (copies of bringup's xacros
                            and meshes, with tunable camera FOV/tilt and 3D
                            odometry)
@@ -46,6 +49,8 @@ scripts/                   Nodes (executables):
   waypoint_follower.py     Fly the fixed route via Nav2's NavigateToPose action
   publish_waypoints.py     Preview the fixed route in RViz (no Nav2 calls)
   web_dashboard_bridge.py  HTTP bridge for the GUI
+  target_detector.py       People in the RGB image (YOLO), flagged red or not
+  target_projector.py      Detection + depth -> map-frame target_pose
                            Library modules (imported by the nodes):
   terrain_map.py           The terrain map itself (numpy, no ROS)
   trail_detector.py        Trails from the map (distance transform + gradient)
@@ -56,6 +61,8 @@ scripts/                   Nodes (executables):
   grid_tools.py            Distance transform, A2 smoother, small helpers
   node_params.py           Exposes the modules' settings as ROS parameters
   mission_waypoints.py     Shared fixed route + RViz marker builder
+  colour_classifier.py     Red-shirt check for target_detector.py
+  test_colour_classifier.py  Standalone test for it (python3 <file>)
 test/                      Unit tests for the library modules (no simulator)
 ```
 
@@ -67,7 +74,9 @@ this package. Most of it started as copies from `41068_ignition_bringup`, see
 package is still needed for course worlds like `large_demo`. Also needs:
 
 ```bash
-sudo apt install ros-humble-slam-toolbox ros-humble-nav2-bringup
+sudo apt install ros-humble-slam-toolbox ros-humble-nav2-bringup ros-humble-vision-msgs
+# Person detection (target_detector.py); pulls in PyTorch
+pip install -r src/41068_assignment/requirements.txt
 ```
 
 Build:
@@ -387,6 +396,7 @@ change listed here.
 | `urdf_parrot/common_properties.urdf.xacro`, `meshes/` | Not changed |
 | `worlds/simple_trees.sdf`, `worlds/hiking_trail_1.sdf` | Team-made worlds, not changed |
 | `models/grass_plane`, `elevated_trail`, `launch_pad` | Not changed |
+| `models/rescue_randy_*`, `scripts/target_*.py`, `colour_classifier.py`, `test_colour_classifier.py`, `config/gazebo_bridge_parrot1_camera_info.yaml`, `requirements.txt`, `weights/` | Copied from `Ethan_Colour_Detector_Module_Needs_Integration/`, not the course package. `target_projector.py` has two fixes: the point is rotated from optical axes into `camera_link` axes (the frame Gazebo stamps the depth image with), and the TF lookup no longer fails when TF lags the image |
 | `models/trail_plane` | Heightmap path is `model://` instead of `file:///home/student/...`, so it loads on every machine. Only the two textures it uses were copied |
 
 ## Notes on the Nav2/SLAM setup

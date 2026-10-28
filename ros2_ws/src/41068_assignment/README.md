@@ -24,12 +24,19 @@ launch/
   spawn_parrot.launch.py   Spawns the drone + SLAM/Nav2/RViz + mission nodes
   demo.launch.py           Presentation launch: spawn_parrot + each team part
   modules/                 One launch file per team part (see its README)
-config/worlds/
-  <world>.yaml             Per-world mapping bounds and ranger station
+  navigation.launch.py     SLAM Toolbox + Nav2 (copy of bringup's)
+config/
+  <world>.yaml in worlds/  Per-world mapping bounds and ranger station
+  *.yaml, *.rviz, ...      Bridge, EKF, SLAM, Nav2, RViz and Gazebo server
+                           configs (copies of bringup's, see below)
 worlds/
   assignment_world.sdf     Ground plane + a few trees
+  simple_trees.sdf         Will's demo world (launch pad, trail, hills)
+  hiking_trail_1.sdf       Trail world for trail detection (25 x 25 m)
+models/                    grass_plane, trail_plane, elevated_trail, launch_pad
 urdf_parrot/               Parrot + thermal camera (copies of bringup's xacros
-                           with tunable camera FOV/tilt and 3D odometry)
+                           and meshes, with tunable camera FOV/tilt and 3D
+                           odometry)
 scripts/                   Nodes (executables):
   flight_controller.py     Only node that talks to Gazebo: passes on cmd_vel
                            and holds the target altitude
@@ -54,8 +61,10 @@ test/                      Unit tests for the library modules (no simulator)
 
 ## Prerequisites
 
-Built on top of `41068_ignition_bringup` (URDF, sensor bridge configs,
-localization configs are all reused from there). Also needs:
+Everything this package launches (worlds, models, URDF, configs) is inside
+this package. Most of it started as copies from `41068_ignition_bringup`, see
+[Copied from the course package](#copied-from-the-course-package). That
+package is still needed for course worlds like `large_demo`. Also needs:
 
 ```bash
 sudo apt install ros-humble-slam-toolbox ros-humble-nav2-bringup
@@ -69,8 +78,7 @@ colcon build --packages-select 41068_ignition_bringup 41068_assignment
 source install/setup.bash
 ```
 
-Build both packages after pulling: worlds and models such as
-`hiking_trail_1` / `trail_plane` live in `41068_ignition_bringup`, and if its
+Rebuild after pulling: worlds and models are installed copies, and if the
 install is out of date Gazebo exits straight away (`ign gazebo ... process
 has died ... exit code 255` near the top of the launch output), the drone is
 never spawned, and Nav2 then waits for `parrot1_odom` for ever.
@@ -136,9 +144,9 @@ off with its flag, e.g. `detection:=False`. See
 # Default world (assignment_world)
 ros2 launch 41068_assignment spawn_parrot.launch.py nav2:=True rviz:=True
 
-# The trail world from 41068_ignition_bringup (trails to detect, 25 x 25 m)
+# The trail world (trails to detect, 25 x 25 m)
 ros2 launch 41068_assignment spawn_parrot.launch.py nav2:=True rviz:=True \
-    world_package:=41068_ignition_bringup world:=hiking_trail_1
+    world:=hiking_trail_1
 ```
 
 `nav2:=True` is needed for Mapping mode. Other launch arguments:
@@ -225,7 +233,7 @@ trail, grey unseen). To start a later run from it:
 
 ```bash
 ros2 launch 41068_assignment spawn_parrot.launch.py nav2:=True \
-    world_package:=41068_ignition_bringup world:=hiking_trail_1 \
+    world:=hiking_trail_1 \
     terrain_map:=$HOME/41068_maps/<folder>/terrain.npz
 ```
 
@@ -340,8 +348,8 @@ path following on small synthetic maps, in under a second.
 
 ### Known limits
 
-- **Nav2 only sees obstacles below 2 m** (`max_obstacle_height` in bringup's
-  `nav2_params_parrot1.yaml`), so Mapping mode stays at 0.8 m.
+- **Nav2 only sees obstacles below 2 m** (`max_obstacle_height` in
+  `config/nav2_params_parrot1.yaml`), so Mapping mode stays at 0.8 m.
 - **Hills.** On a heightmap world the lidar is still a flat plane at a fixed
   height, so rising ground ahead looks like a wall to SLAM and Nav2, and
   0.8 m above the spawn point is not 0.8 m above a hill. The terrain map
@@ -364,17 +372,33 @@ run via the `waypoints` ROS parameter (a flat list of the same triples).
 By default the route does not loop once it reaches the last waypoint; pass
 `--ros-args -p loop:=true` to `waypoint_follower.py` to repeat it.
 
+## Copied from the course package
+
+These started as copies of files in `41068_ignition_bringup`, so the demo
+runs from this package alone. The course package is unchanged and still
+holds the originals. If the course updates one, re-copy it and reapply the
+change listed here.
+
+| Here | Changed from the original |
+|---|---|
+| `config/ignition_server.config`, `gazebo_bridge_clock.yaml`, `gazebo_bridge_parrot1.yaml`, `robot_localization_parrot1.yaml`, `41068_parrot1.rviz` | Not changed |
+| `config/nav2_params_parrot1.yaml`, `slam_params_parrot1.yaml` | The team's drone tuning (made in the course package before it was copied) |
+| `launch/navigation.launch.py` | Reads params from this package's `config/` |
+| `urdf_parrot/common_properties.urdf.xacro`, `meshes/` | Not changed |
+| `worlds/simple_trees.sdf`, `worlds/hiking_trail_1.sdf` | Team-made worlds, not changed |
+| `models/grass_plane`, `elevated_trail`, `launch_pad` | Not changed |
+| `models/trail_plane` | Heightmap path is `model://` instead of `file:///home/student/...`, so it loads on every machine. Only the two textures it uses were copied |
+
 ## Notes on the Nav2/SLAM setup
 
-- `nav2_params_parrot1.yaml` and `slam_params_parrot1.yaml` (in
-  `41068_ignition_bringup/config/`) are shared with the main bringup launch,
-  but the Nav2 tolerances and costmap inflation radius have been tuned down
+- `nav2_params_parrot1.yaml` and `slam_params_parrot1.yaml` (in `config/`)
+  are copies of the course ones, but the Nav2 tolerances and costmap inflation radius have been tuned down
   for the drone's small footprint and this world's short waypoint spacing.
 - The global costmap uses a rolling window (`rolling_window: true`, 20x20m)
   rather than relying solely on the SLAM-built static map's extent. Without
   this, path planning can fail for any goal or start pose that falls outside
   whatever area SLAM has explored so far.
-- The EKF parameters come from bringup's `robot_localization_parrot1.yaml`,
+- The EKF parameters come from `config/robot_localization_parrot1.yaml`,
   with `odom0_config` overridden in `spawn_parrot.launch.py` (see
   [Frames and altitude](#frames-and-altitude)).
 - Gazebo's `cmd_vel` is fed only by `flight_controller.py` (the bridge's

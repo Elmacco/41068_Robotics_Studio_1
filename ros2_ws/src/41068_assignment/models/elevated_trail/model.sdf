@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <model name="elevated_trail">
+    <static>true</static>
+    <link name="trail_segments">
+      <visual name="segment_01">
+        <pose>-18.50 -19.50 0.14 0 0 -0.785</pose>
+        <geometry><box><size>4.24 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_01"><pose>-18.50 -19.50 0.14 0 0 -0.785</pose><geometry><box><size>4.24 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_02">
+        <pose>-14.50 -21.00 0.14 0 0 0</pose>
+        <geometry><box><size>5.00 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_02"><pose>-14.50 -21.00 0.14 0 0 0</pose><geometry><box><size>5.00 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_03">
+        <pose>-10.50 -19.50 0.14 0 0 0.785</pose>
+        <geometry><box><size>4.24 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_03"><pose>-10.50 -19.50 0.14 0 0 0.785</pose><geometry><box><size>4.24 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_04">
+        <pose>-7.00 -17.50 0.14 0 0 0.245</pose>
+        <geometry><box><size>4.12 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_04"><pose>-7.00 -17.50 0.14 0 0 0.245</pose><geometry><box><size>4.12 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_05">
+        <pose>-2.50 -18.50 0.14 0 0 -0.540</pose>
+        <geometry><box><size>5.83 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_05"><pose>-2.50 -18.50 0.14 0 0 -0.540</pose><geometry><box><size>5.83 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_06">
+        <pose>2.50 -20.50 0.14 0 0 -0.197</pose>
+        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_06"><pose>2.50 -20.50 0.14 0 0 -0.197</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_07">
+        <pose>7.50 -20.00 0.14 0 0 0.381</pose>
+        <geometry><box><size>5.39 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_07"><pose>7.50 -20.00 0.14 0 0 0.381</pose><geometry><box><size>5.39 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_08">
+        <pose>12.00 -17.50 0.14 0 0 0.644</pose>
+        <geometry><box><size>5.00 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_08"><pose>12.00 -17.50 0.14 0 0 0.644</pose><geometry><box><size>5.00 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_09">
+        <pose>15.00 -13.50 0.14 0 0 1.190</pose>
+        <geometry><box><size>5.39 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_09"><pose>15.00 -13.50 0.14 0 0 1.190</pose><geometry><box><size>5.39 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_10">
+        <pose>16.00 -7.50 0.14 0 0 1.571</pose>
+        <geometry><box><size>7.00 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_10"><pose>16.00 -7.50 0.14 0 0 1.571</pose><geometry><box><size>7.00 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_11">
+        <pose>15.50 -0.50 0.14 0 0 1.713</pose>
+        <geometry><box><size>7.07 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_11"><pose>15.50 -0.50 0.14 0 0 1.713</pose><geometry><box><size>7.07 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_12">
+        <pose>15.50 7.00 0.14 0 0 1.446</pose>
+        <geometry><box><size>8.06 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_12"><pose>15.50 7.00 0.14 0 0 1.446</pose><geometry><box><size>8.06 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_13">
+        <pose>17.00 14.50 0.14 0 0 1.292</pose>
+        <geometry><box><size>7.28 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_13"><pose>17.00 14.50 0.14 0 0 1.292</pose><geometry><box><size>7.28 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_14">
+        <pose>20.00 20.00 0.14 0 0 0.785</pose>
+        <geometry><box><size>5.66 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_14"><pose>20.00 20.00 0.14 0 0 0.785</pose><geometry><box><size>5.66 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_15">
+        <pose>-20.50 -16.00 0.14 0 0 1.816</pose>
+        <geometry><box><size>4.12 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_15"><pose>-20.50 -16.00 0.14 0 0 1.816</pose><geometry><box><size>4.12 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_16">
+        <pose>-21.00 -12.00 0.14 0 0 1.571</pose>
+        <geometry><box><size>4.00 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_16"><pose>-21.00 -12.00 0.14 0 0 1.571</pose><geometry><box><size>4.00 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_17">
+        <pose>-19.50 -9.00 0.14 0 0 0.588</pose>
+        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_17"><pose>-19.50 -9.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_18">
+        <pose>-16.00 -8.50 0.14 0 0 -0.245</pose>
+        <geometry><box><size>4.12 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_18"><pose>-16.00 -8.50 0.14 0 0 -0.245</pose><geometry><box><size>4.12 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_19">
+        <pose>-12.50 -8.00 0.14 0 0 0.588</pose>
+        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_19"><pose>-12.50 -8.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_20">
+        <pose>-9.50 -6.00 0.14 0 0 0.588</pose>
+        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_20"><pose>-9.50 -6.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_21">
+        <pose>-6.50 -4.00 0.14 0 0 0.588</pose>
+        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_21"><pose>-6.50 -4.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_22">
+        <pose>-3.00 -3.00 0.14 0 0 0</pose>
+        <geometry><box><size>4.00 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_22"><pose>-3.00 -3.00 0.14 0 0 0</pose><geometry><box><size>4.00 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_23">
+        <pose>1.00 -4.00 0.14 0 0 -0.464</pose>
+        <geometry><box><size>4.47 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_23"><pose>1.00 -4.00 0.14 0 0 -0.464</pose><geometry><box><size>4.47 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_24">
+        <pose>5.00 -5.00 0.14 0 0 0</pose>
+        <geometry><box><size>4.00 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_24"><pose>5.00 -5.00 0.14 0 0 0</pose><geometry><box><size>4.00 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_25">
+        <pose>8.50 -3.50 0.14 0 0 0.785</pose>
+        <geometry><box><size>4.24 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_25"><pose>8.50 -3.50 0.14 0 0 0.785</pose><geometry><box><size>4.24 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_26">
+        <pose>10.00 1.00 0.14 0 0 1.571</pose>
+        <geometry><box><size>6.00 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_26"><pose>10.00 1.00 0.14 0 0 1.571</pose><geometry><box><size>6.00 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_27">
+        <pose>9.00 6.50 0.14 0 0 1.951</pose>
+        <geometry><box><size>5.39 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_27"><pose>9.00 6.50 0.14 0 0 1.951</pose><geometry><box><size>5.39 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_28">
+        <pose>6.50 10.00 0.14 0 0 2.554</pose>
+        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_28"><pose>6.50 10.00 0.14 0 0 2.554</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_29">
+        <pose>4.00 9.50 0.14 0 0 -2.159</pose>
+        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_29"><pose>4.00 9.50 0.14 0 0 -2.159</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_30">
+        <pose>2.50 5.50 0.14 0 0 -1.768</pose>
+        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_30"><pose>2.50 5.50 0.14 0 0 -1.768</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_31">
+        <pose>1.50 0.50 0.14 0 0 -1.768</pose>
+        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_31"><pose>1.50 0.50 0.14 0 0 -1.768</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+      <visual name="segment_32">
+        <pose>0.50 -4.50 0.14 0 0 -1.768</pose>
+        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
+        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+      </visual>
+      <collision name="segment_32"><pose>0.50 -4.50 0.14 0 0 -1.768</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+    </link>
+  </model>
+</sdf>

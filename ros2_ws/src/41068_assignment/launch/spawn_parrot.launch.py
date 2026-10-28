@@ -24,9 +24,11 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
-    bringup_path = FindPackageShare('41068_ignition_bringup')
-    bringup_config_path = PathJoinSubstitution([bringup_path, 'config'])
+    # Everything this launch uses (configs, worlds, models, URDF) lives in
+    # this package. Most of it started as copies from 41068_ignition_bringup;
+    # see the README for which ones were changed.
     assignment_path = FindPackageShare('41068_assignment')
+    config_path = PathJoinSubstitution([assignment_path, 'config'])
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     ld.add_action(DeclareLaunchArgument(
@@ -46,8 +48,10 @@ def generate_launch_description():
     ld.add_action(DeclareLaunchArgument(
         'world_package',
         default_value='41068_assignment',
-        description='Package whose worlds/ folder holds the world, e.g. '
-                    '41068_ignition_bringup for hiking_trail_1 or simple_trees',
+        description='Package whose worlds/ folder holds the world. Our worlds '
+                    '(assignment_world, simple_trees, hiking_trail_1) are all in '
+                    '41068_assignment; use 41068_ignition_bringup for the course '
+                    'ones like large_demo',
     ))
 
     ld.add_action(DeclareLaunchArgument(
@@ -107,16 +111,21 @@ def generate_launch_description():
                     'Empty starts with a blank map.',
     ))
 
-    # Reuse the common Gazebo server systems (physics, sensors, etc.) curated
-    # in 41068_ignition_bringup so this world doesn't need to redeclare them.
-    server_config_file = PathJoinSubstitution([bringup_config_path, 'ignition_server.config'])
+    # Common Gazebo server systems (physics, sensors, etc.), so the world
+    # files don't need to declare them.
+    server_config_file = PathJoinSubstitution([config_path, 'ignition_server.config'])
     ld.add_action(SetEnvironmentVariable(name='IGN_GAZEBO_SERVER_CONFIG_PATH', value=server_config_file))
     ld.add_action(SetEnvironmentVariable(name='GZ_SIM_SERVER_CONFIG_PATH', value=server_config_file))
 
-    # Let Gazebo resolve model:// URIs (e.g. grass_plane) from the bringup
-    # package's models/ directory, since our world file lives in this package.
-    ld.add_action(SetEnvironmentVariable(name='IGN_GAZEBO_RESOURCE_PATH', value=bringup_path))
-    ld.add_action(SetEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH', value=bringup_path))
+    # Let Gazebo resolve model:// URIs (e.g. grass_plane) from our models/
+    # folder first, then the course package's, which a course world loaded
+    # with world_package:=41068_ignition_bringup may need.
+    resource_path = [
+        PathJoinSubstitution([assignment_path, 'models']), ':',
+        PathJoinSubstitution([FindPackageShare('41068_ignition_bringup'), 'models']),
+    ]
+    ld.add_action(SetEnvironmentVariable(name='IGN_GAZEBO_RESOURCE_PATH', value=resource_path))
+    ld.add_action(SetEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH', value=resource_path))
 
     # Start Gazebo with our world.
     ld.add_action(IncludeLaunchDescription(
@@ -144,13 +153,13 @@ def generate_launch_description():
         name='ros_gz_bridge_clock',
         output='screen',
         parameters=[{
-            'config_file': PathJoinSubstitution([bringup_config_path, 'gazebo_bridge_clock.yaml']),
+            'config_file': PathJoinSubstitution([config_path, 'gazebo_bridge_clock.yaml']),
             'use_sim_time': use_sim_time,
         }],
     ))
 
-    # --- Spawn the Parrot drone, reusing its URDF/xacro, bridge config, and
-    # localization config from 41068_ignition_bringup. ---
+    # --- Spawn the Parrot drone, with the URDF/xacro, bridge config, and
+    # localization config copied from 41068_ignition_bringup. ---
     namespace = 'parrot1'
     frame_prefix = 'parrot1_'
     gz_model_name = 'parrot1'
@@ -194,7 +203,7 @@ def generate_launch_description():
         name='robot_localization',
         output='screen',
         parameters=[
-            PathJoinSubstitution([bringup_config_path, 'robot_localization_parrot1.yaml']),
+            PathJoinSubstitution([config_path, 'robot_localization_parrot1.yaml']),
             {
                 'use_sim_time': use_sim_time,
                 # Override bringup's odom0_config (velocities only) to also
@@ -256,7 +265,7 @@ def generate_launch_description():
         name='gazebo_bridge',
         output='screen',
         parameters=[{
-            'config_file': PathJoinSubstitution([bringup_config_path, 'gazebo_bridge_parrot1.yaml']),
+            'config_file': PathJoinSubstitution([config_path, 'gazebo_bridge_parrot1.yaml']),
             'use_sim_time': use_sim_time,
         }],
         # Only the flight controller talks to Gazebo; everything else
@@ -315,8 +324,8 @@ def generate_launch_description():
 
     # Second, separate bridge node just for the thermal camera topic added
     # in parrot_thermal.urdf.xacro. Kept out of the bridge node above (which
-    # uses bringup's unmodified gazebo_bridge_parrot1.yaml) so that config
-    # stays a faithful copy of the course-provided one.
+    # uses an unmodified copy of bringup's gazebo_bridge_parrot1.yaml) so that
+    # config stays a faithful copy of the course-provided one.
     ld.add_action(Node(
         package='ros_ign_bridge',
         executable='parameter_bridge',
@@ -331,16 +340,15 @@ def generate_launch_description():
         }],
     ))
 
-    # SLAM/Nav2, reusing the same navigation launch file, namespace, and
-    # slam_params_parrot1.yaml / nav2_params_parrot1.yaml configs as the main
-    # bringup package.
+    # SLAM/Nav2, using our copy of bringup's navigation launch file with the
+    # slam_params_parrot1.yaml / nav2_params_parrot1.yaml configs in config/.
     ld.add_action(TimerAction(
         period=7.0,
         actions=[GroupAction(
             scoped=True,
             actions=[IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
-                    PathJoinSubstitution([bringup_path, 'launch', '41068_navigation.launch.py'])
+                    PathJoinSubstitution([assignment_path, 'launch', 'navigation.launch.py'])
                 ),
                 launch_arguments={
                     'use_sim_time': use_sim_time,
@@ -365,7 +373,7 @@ def generate_launch_description():
         condition=_if_true('web_dashboard'),
     ))
 
-    # RViz, reusing the pre-built Parrot display config from
+    # RViz, with the pre-built Parrot display config copied from
     # 41068_ignition_bringup (Lidar, RobotModel, Camera, Depth Pointcloud,
     # Map, Nav2 panels). Placed in the robot namespace so relative topics
     # (tf, scan, camera/image, ...) resolve without extra remapping.
@@ -378,7 +386,7 @@ def generate_launch_description():
             name='rviz2',
             output='screen',
             parameters=[{'use_sim_time': use_sim_time}],
-            arguments=['-d', PathJoinSubstitution([bringup_config_path, '41068_parrot1.rviz'])],
+            arguments=['-d', PathJoinSubstitution([config_path, '41068_parrot1.rviz'])],
             remappings=[
                 ('/tf', 'tf'),
                 ('/tf_static', 'tf_static'),

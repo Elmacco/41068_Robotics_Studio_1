@@ -1,0 +1,338 @@
+<?xml version="1.0"?>
+<sdf version='1.8'>
+  <world name="simple_trees">
+    <!-- Basic world setup  -->
+    <light name="sun" type="directional">
+     <cast_shadows>0</cast_shadows>
+      <pose>0 0 50 0 -0 0</pose>
+      <diffuse>0.7 0.7 0.7 1</diffuse>
+      <specular>0 0 0 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>0 0 -1</direction>
+    </light>
+    <gravity>0 0 -9.81</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+
+    <!-- Explicit thermal baseline for objects without assigned heat. -->
+    <atmosphere type="adiabatic">
+      <temperature>300.0</temperature>
+      <temperature_gradient>0.1</temperature_gradient>
+    </atmosphere>
+
+    <physics name="default_physics" type="ignored">
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+    </physics>
+    <scene>
+      <ambient>0.5 0.5 0.5</ambient>
+      <background>0.8 0.8 0.8</background>
+      <shadows>1</shadows>
+    </scene>
+
+    <!-- Initialise spherical coordinates somewhere -->
+    <spherical_coordinates>
+      <latitude_deg>0.0</latitude_deg>
+      <longitude_deg>0.0</longitude_deg>
+      <elevation>10.0</elevation>
+      <heading_deg>0</heading_deg>
+      <surface_model>EARTH_WGS84</surface_model>
+    </spherical_coordinates>
+
+    <!-- Textured trail over the grass texture -->
+    <include>
+      <uri>
+        model://trail_plane
+      </uri>
+      <name>trail_plane</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <!-- Temporary raised trail geometry for lidar/mapping tests 
+    <include>
+      <uri>model://elevated_trail</uri>
+      <name>elevated_trail_test</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+    -->
+    <!-- Oak trees around the trail -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+      </uri>
+      <name>oak_north_west</name>
+      <pose>-20.0 19.0 0 0 0 0.2</pose>
+      <scale>1.15 1.15 1.15</scale>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine_north_west</name>
+      <pose>-13.0 21.0 0 0 0 0.8</pose>
+      <scale>0.9 0.9 0.9</scale>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+      </uri>
+      <name>oak_north_east</name>
+      <pose>17.0 20.0 0 0 0 -0.4</pose>
+      <scale>0.9 0.9 0.9</scale>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine_north_east</name>
+      <pose>22.0 13.0 0 0 0 0.4</pose>
+      <scale>1.2 1.2 1.2</scale>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+      </uri>
+      <name>oak_south_west</name>
+      <pose>-20.0 -17.0 0 0 0 0.7</pose>
+      <scale>0.85 0.85 0.85</scale>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine_south_west</name>
+      <pose>-14.0 -21.0 0 0 0 -0.2</pose>
+      <scale>1.1 1.1 1.1</scale>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree
+      </uri>
+      <name>oak_south_east</name>
+      <pose>19.0 -19.0 0 0 0 -0.6</pose>
+      <scale>1.05 1.05 1.05</scale>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree
+      </uri>
+      <name>pine_south_east</name>
+      <pose>23.0 -11.0 0 0 0 0.1</pose>
+      <scale>0.8 0.8 0.8</scale>
+    </include>
+
+    <!-- Additional trees spread around the outer trail edges -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_west_mid</name>
+      <pose>-23.0 4.0 0 0 0 0.5</pose>
+      <scale>1.0 1.0 1.0</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_west_south</name>
+      <pose>-21.0 -8.0 0 0 0 -0.3</pose>
+      <scale>0.95 0.95 0.95</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_west_south</name>
+      <pose>-18.0 -13.0 0 0 0 1.0</pose>
+      <scale>0.75 0.75 0.75</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_north_mid</name>
+      <pose>-4.0 23.0 0 0 0 0.1</pose>
+      <scale>1.1 1.1 1.1</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_north_mid</name>
+      <pose>7.0 22.0 0 0 0 -0.7</pose>
+      <scale>0.85 0.85 0.85</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_east_north</name>
+      <pose>21.0 7.0 0 0 0 0.6</pose>
+      <scale>1.2 1.2 1.2</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_east_mid</name>
+      <pose>22.0 -2.0 0 0 0 -0.1</pose>
+      <scale>1.05 1.05 1.05</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_east_south</name>
+      <pose>20.0 -14.0 0 0 0 -0.8</pose>
+      <scale>0.9 0.9 0.9</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_south_mid</name>
+      <pose>5.0 -22.0 0 0 0 0.3</pose>
+      <scale>1.15 1.15 1.15</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_south_mid</name>
+      <pose>-8.0 -23.0 0 0 0 0.9</pose>
+      <scale>0.8 0.8 0.8</scale>
+    </include>
+
+    <!-- Smaller inner group, spaced beside the central trail -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_inner_north_west</name>
+      <pose>-10.0 11.0 0 0 0 0.3</pose>
+      <scale>0.7 0.7 0.7</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_inner_north_east</name>
+      <pose>10.0 10.0 0 0 0 -0.5</pose>
+      <scale>0.75 0.75 0.75</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_inner_east</name>
+      <pose>12.0 1.0 0 0 0 0.9</pose>
+      <scale>0.8 0.8 0.8</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_inner_south_east</name>
+      <pose>9.0 -10.0 0 0 0 0.2</pose>
+      <scale>0.7 0.7 0.7</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_inner_south</name>
+      <pose>-1.0 -12.0 0 0 0 -0.4</pose>
+      <scale>0.75 0.75 0.75</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_inner_south_west</name>
+      <pose>-10.0 -9.0 0 0 0 0.8</pose>
+      <scale>0.8 0.8 0.8</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine_inner_west</name>
+      <pose>-12.0 -1.0 0 0 0 -0.2</pose>
+      <scale>0.7 0.7 0.7</scale>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak%20tree</uri>
+      <name>oak_inner_north</name>
+      <pose>1.0 12.0 0 0 0 0.6</pose>
+      <scale>0.75 0.75 0.75</scale>
+    </include>
+
+    <!-- Rocks of varying sizes around the trail edges -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock_small_west</name>
+      <scale>2.5 2.5 2.5</scale>
+      <pose>-12.0 7.0 0 0.1 0.2 0.4</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock_medium_north</name>
+      <scale>4.5 4.5 4.5</scale>
+      <pose>8.0 18.0 0 0.2 -0.1 1.0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock_large_east</name>
+      <scale>7.0 7.0 7.0</scale>
+      <pose>16.0 5.0 0 -0.1 0.2 0.7</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock_small_south</name>
+      <scale>3.0 3.0 3.0</scale>
+      <pose>-5.0 -17.0 0 0.2 0.1 -0.5</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%201
+      </uri>
+      <name>rock_medium_south_east</name>
+      <scale>5.5 5.5 5.5</scale>
+      <pose>12.0 -15.0 0 -0.2 0.1 -1.1</pose>
+    </include>
+    
+    
+    <!-- Launch pad for the parrot on simple_trees -->
+    <include>
+      <uri>model://launch_pad</uri>
+      <name>launch_pad</name>
+      <pose>2.0 0.0 0.02 0 0 0</pose>
+    </include>
+
+        <!-- Trail 1, dude 1 -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person</name>
+      <pose>-15.0 12.0 0 0 0 0</pose>
+    </include>
+
+   <!-- Trail 1, dude 2 -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person2</name>
+      <pose>-15.0 -19.0 0 0 0 0</pose>
+    </include>
+
+    <!-- Trail 3, dude 3 -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person3</name>
+      <pose>20.0 -7.0 5 0 0 0</pose>
+    </include>
+
+    <!-- Test, dude 4 -->
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+      <name>standing_person4</name>
+      <pose>5.0 1.0 0 0 0 0</pose>
+    </include>
+
+
+        <!-- Platypus -
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/platypus
+      </uri>
+      <name>platypus</name>
+      <pose>-2.0 -22.0 0 0 0 0</pose>
+    </include>
+    -->
+  </world>
+</sdf>

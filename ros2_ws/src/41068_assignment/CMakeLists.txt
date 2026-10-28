@@ -11,7 +11,7 @@ find_package(rclcpp REQUIRED)
 include_directories(include)
 
 install(
-  DIRECTORY launch worlds config urdf_parrot
+  DIRECTORY launch worlds config urdf_parrot models
   DESTINATION share/${PROJECT_NAME}
 )
 

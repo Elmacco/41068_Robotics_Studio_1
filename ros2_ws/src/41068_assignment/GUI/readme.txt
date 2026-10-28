@@ -4,7 +4,7 @@ source /opt/ros/humble/setup.bash
 cd /home/student/subjects/41068_robotics_studio_1/ros2_ws
 source install/setup.bash
 ros2 launch 41068_assignment spawn_parrot.launch.py \
-  world_package:=41068_ignition_bringup world:=simple_trees \
+  world:=simple_trees \
   gui:=True rviz:=False nav2:=True web_dashboard:=True
   
 

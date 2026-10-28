@@ -2,6 +2,11 @@
 <model name="trail_plane">
     <static>true</static>
     <link name="link">
+        <!-- Flat for now, matching the visual. The hills heightmap below
+             only ever loaded as collision (the visual stays a flat plane),
+             so the drone hit hills nobody could see, up to 1.5 m high at
+             the old launch pad. Swap it back in once the visual is a
+             heightmap too.
         <collision name="collision">
             <geometry>
             <heightmap>
@@ -9,6 +14,15 @@
                     <pos>0 0 0</pos>
                     <size>50 50 5</size>
                 </heightmap>
+            </geometry>
+        </collision>
+        -->
+        <collision name="collision">
+            <geometry>
+                <plane>
+                    <normal>0 0 1</normal>
+                    <size>50 50</size>
+                </plane>
             </geometry>
         </collision>
         <visual name="visual">

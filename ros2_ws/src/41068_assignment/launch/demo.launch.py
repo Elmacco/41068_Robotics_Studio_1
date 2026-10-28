@@ -49,8 +49,9 @@ def generate_launch_description():
     demo_args = [
         ('world', 'simple_trees', 'World file (without .sdf) to load from <world_package>/worlds'),
         ('world_package', '41068_assignment', 'Package whose worlds/ folder holds the world'),
-        ('x', '-4.0', 'Spawn x (m), the launch pad in simple_trees'),
-        ('y', '-23.0', 'Spawn y (m), the launch pad in simple_trees'),
+        # Keep x/y on the launch_pad pose in worlds/simple_trees.sdf.
+        ('x', '2.0', 'Spawn x (m), the launch pad in simple_trees'),
+        ('y', '0.0', 'Spawn y (m), the launch pad in simple_trees'),
         ('z', '0.8', 'Spawn height (m)'),
         ('rviz', 'True', 'Flag to launch RViz'),
         ('nav2', 'True', 'Flag to launch Nav2 (and SLAM). Mapping mode needs it.'),

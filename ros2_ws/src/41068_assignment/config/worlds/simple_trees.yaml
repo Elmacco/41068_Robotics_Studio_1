@@ -1,10 +1,11 @@
 # Per-world settings for terrain_mapper (see assignment_world.yaml).
 /**:
   ros__parameters:
-    # Mapping area: trail_plane, 25 x 25 m centred on the origin.
+    # Mapping area: trail_plane, 50 x 50 m centred on the origin.
     terrain:
-      x_min: -12.5
-      x_max: 12.5
-      y_min: -12.5
-      y_max: 12.5
-    ranger_station: [0.0, -4.0]
+      x_min: -25.0
+      x_max: 25.0
+      y_min: -25.0
+      y_max: 25.0
+    # The launch pad, which is also where demo.launch.py spawns the drone.
+    ranger_station: [2.0, 0.0]

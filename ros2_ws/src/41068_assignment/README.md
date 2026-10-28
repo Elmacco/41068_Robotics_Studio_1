@@ -31,7 +31,7 @@ config/
                            configs (copies of bringup's, see below)
 worlds/
   assignment_world.sdf     Ground plane + a few trees
-  simple_trees.sdf         Will's demo world (launch pad, trail, hills)
+  simple_trees.sdf         Will's demo world (launch pad, trail, trees)
   hiking_trail_1.sdf       Trail world for trail detection (25 x 25 m)
 models/                    grass_plane, trail_plane, elevated_trail, launch_pad,
                            rescue_randy_base/_red/_green (Ethan's)
@@ -397,7 +397,7 @@ change listed here.
 | `worlds/simple_trees.sdf`, `worlds/hiking_trail_1.sdf` | Team-made worlds, not changed |
 | `models/grass_plane`, `elevated_trail`, `launch_pad` | Not changed |
 | `models/rescue_randy_*`, `scripts/target_*.py`, `colour_classifier.py`, `test_colour_classifier.py`, `config/gazebo_bridge_parrot1_camera_info.yaml`, `requirements.txt`, `weights/` | Copied from `Ethan_Colour_Detector_Module_Needs_Integration/`, not the course package. `target_projector.py` has two fixes: the point is rotated from optical axes into `camera_link` axes (the frame Gazebo stamps the depth image with), and the TF lookup no longer fails when TF lags the image |
-| `models/trail_plane` | Heightmap path is `model://` instead of `file:///home/student/...`, so it loads on every machine. Only the two textures it uses were copied |
+| `models/trail_plane` | Collision is a flat plane matching the visual; the hills heightmap is commented out until its visual loads (it was invisible but solid). Only the two textures it uses were copied |
 
 ## Notes on the Nav2/SLAM setup
 

@@ -26,6 +26,7 @@ altitude from the Gazebo odometry, as everywhere else in this stack.
 
 import json
 import math
+import numpy as np
 
 import rclpy
 from geometry_msgs.msg import Pose2D, Twist
@@ -40,8 +41,10 @@ from std_msgs.msg import Float64, String
 from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformException, TransformListener
 from visualization_msgs.msg import MarkerArray
+from sensor_msgs.msg import Image
 
 from coverage_explorer import CoverageExplorer
+from active_mode import ActiveMode
 from mapping_mode import MappingMode
 from mission_modes import FlyPathMode, FollowConfig, HoverMode
 from node_params import declare_config
@@ -68,6 +71,7 @@ class MissionManager(Node):
         self.declare_parameter('cruise_altitude', 8.0)
         # Active mode drops to this height for a closer look (m).
         self.declare_parameter('active_altitude', 3.0)
+        self.declare_parameter('thermal_max_age', 1.0)
         # The drone counts as at a target altitude within this (m).
         self.declare_parameter('altitude_tolerance', 0.15)
         # Mapping mode: give up on a Nav2 goal after this long (s), and finish
@@ -92,6 +96,8 @@ class MissionManager(Node):
         self.altitude = None
         self.terrain_grid = None
         self.trails = {}
+        self.latest_thermal = None
+        self.latest_thermal_time = None
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
@@ -101,6 +107,9 @@ class MissionManager(Node):
         self.create_subscription(Odometry, 'odometry', self.odom_callback, 10)
         self.create_subscription(OccupancyGrid, 'terrain/occupancy', self.grid_callback, latched)
         self.create_subscription(String, 'trails', self.trails_callback, latched)
+        # A person detector should publish a map-frame Pose2D here.
+        self.create_subscription(Pose2D, 'person_detection', self.person_detection_callback, 10)
+        self.create_subscription(Image, 'thermal_camera/image', self.thermal_callback, 10)
 
         self.state_pub = self.create_publisher(String, 'mission_state', latched)
         self.altitude_pub = self.create_publisher(Float64, 'target_altitude', 10)
@@ -140,7 +149,7 @@ class MissionManager(Node):
             self.switch_to(FlyPathMode(self, f'PASSIVE {trail["name"]}', path,
                                        self.cruise_altitude))
         elif command == 'active':
-            self.switch_to(HoverMode(self, 'ACTIVE', self.get_parameter('active_altitude').value))
+            self.switch_to(ActiveMode(self))
         elif command == 'return_home':
             self.switch_to(FlyPathMode(self, 'RETURN HOME', [(home_x, home_y)],
                                        self.cruise_altitude, final_altitude=home_z))
@@ -226,6 +235,59 @@ class MissionManager(Node):
     def trails_callback(self, msg: String):
         data = json.loads(msg.data)
         self.trails = {trail['name']: trail for trail in data['trails']}
+
+    def person_detection_callback(self, pose: Pose2D):
+        if isinstance(self.mode, ActiveMode):
+            if self.mode.last_person_confirmed:
+                return
+            self.mode.person_detected(pose)
+        elif isinstance(self.mode, MappingMode):
+            active_mode = ActiveMode(self)
+            if active_mode.person_detected(pose):
+                self.get_logger().warning(
+                    'Person confirmed during Mapping; interrupting mapping and hovering'
+                )
+                self.switch_to(active_mode)
+
+    def thermal_callback(self, msg: Image):
+        if msg.encoding not in ('16UC1', 'mono16'):
+            self.get_logger().warning(
+                f'Unexpected thermal image encoding: {msg.encoding}'
+            )
+            return
+
+        # L16 thermal data contains unsigned 16-bit pixel values.
+        pixels = np.frombuffer(msg.data, dtype=np.uint16)
+
+        # msg.step is bytes per row; uint16 uses two bytes per pixel.
+        row_pixels = msg.step // 2
+        if row_pixels < msg.width:
+            self.get_logger().warning(
+                f'Thermal image step ({msg.step}) is smaller than its width ({msg.width})'
+            )
+            return
+        required_pixels = msg.height * row_pixels
+        if pixels.size < required_pixels:
+            self.get_logger().warning(
+                f'Thermal image data is truncated: expected {required_pixels} pixels, '
+                f'got {pixels.size}'
+            )
+            return
+        pixels = pixels.reshape((msg.height, row_pixels))[:, :msg.width]
+
+        if msg.is_bigendian:
+            pixels = pixels.byteswap()
+
+        # The URDF specifies 0.01 Kelvin per pixel unit.
+        self.latest_thermal = pixels.astype(np.float32) * 0.01
+        self.latest_thermal_time = self.get_clock().now()
+
+    def thermal_is_current(self) -> bool:
+        """Return whether the buffered thermal image is recent enough to use."""
+        if self.latest_thermal is None or self.latest_thermal_time is None:
+            return False
+        age = (self.get_clock().now() - self.latest_thermal_time).nanoseconds * 1e-9
+        return 0.0 <= age <= self.get_parameter('thermal_max_age').value
 
 
 def main():

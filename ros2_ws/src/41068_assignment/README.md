@@ -8,8 +8,8 @@ one of three mission modes:
   the map and flies home.
 - **Passive**: flies along a trail the ranger picks, at a fixed altitude above
   the trees.
-- **Active**: drops lower over the current spot for a closer look (first step
-  only; the rest is still to be designed).
+- **Active**: drops lower over the current spot, then reports when a
+  person-detection message is confirmed by the thermal camera.
 
 From the terrain map it can also plan the least-effort walking route for a
 ranger to any point, e.g. to a person who needs help. The older fixed
@@ -165,7 +165,7 @@ ros2 topic echo /parrot1/mission_state        # e.g. "MAPPING: 42% observed, fly
 |---|---|
 | `mapping` | Settle at 0.8 m, then fly to frontiers (the edge of the ground the camera has seen) until none are left. Then save the terrain map and Return Home |
 | `passive T3` | Climb on the spot to 8 m, fly to the nearer end of trail T3 and along it, then hover at its end |
-| `active` | Drop to 3 m over the current spot and hover |
+| `active` | Drop to 3 m over the current spot and hover; when a `person_detection` Pose2D is received, confirm it when the latest thermal frame contains at least 20 pixels at or above 30 C and report the confirmed position |
 | `return_home` | Climb to 8 m, fly straight home, descend to the spawn height |
 | `stop` / `take_over` | Stop all autonomy and hover where it is; the dashboard's manual sliders keep working |
 | `takeoff` | Hover at 0.8 m |
@@ -181,6 +181,13 @@ Trails are only detected where the camera has seen them, so run Mapping mode
 (or load a saved map) before Passive mode. Names are re-assigned by length each
 time detection runs (every 5 s), so check the list right before sending a
 `passive` command.
+
+While Mapping is active, a recent thermal frame is used as the coarse person
+cue and a `person_detection` Pose2D supplies the precise map-frame location.
+When both are available, Mapping cancels its current Nav2 goal, the mission
+switches to Active mode, and the terminal logs the confirmed position. A
+thermal frame older than the `thermal_max_age` parameter (default 1 second) is
+not used for confirmation.
 
 ### Ranger route
 

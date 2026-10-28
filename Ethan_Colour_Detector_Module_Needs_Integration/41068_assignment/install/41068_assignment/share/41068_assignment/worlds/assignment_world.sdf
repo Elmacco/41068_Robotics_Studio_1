@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<sdf version='1.8'>
+  <world name="assignment_world">
+    <!-- Basic world setup -->
+    <light name="sun" type="directional">
+      <cast_shadows>1</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+    <gravity>0 0 -9.81</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+    <physics name="default_physics" type="ignored">
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+    </physics>
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <shadows>1</shadows>
+    </scene>
+
+    <!-- Initialise spherical coordinates somewhere -->
+    <spherical_coordinates>
+      <latitude_deg>0.0</latitude_deg>
+      <longitude_deg>0.0</longitude_deg>
+      <elevation>10.0</elevation>
+      <heading_deg>0</heading_deg>
+      <surface_model>EARTH_WGS84</surface_model>
+    </spherical_coordinates>
+
+    <!-- Ground plane, reused from 41068_ignition_bringup -->
+    <include>
+      <uri>
+        model://grass_plane
+      </uri>
+      <name>grass_plane</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <!-- Add obstacles/features for the assignment task below -->
+
+    <!-- Single tree near the drone's flight line (x=0). The waypoint route
+         passes close to it, ending beside it rather than behind it. -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine1</name>
+      <pose>0.0 3.0 0 0 0 0</pose>
+    </include>
+    
+
+    <!-- Landmark trees scattered around (not on) the flight path. The world
+         is otherwise a large flat plane with nothing to scan-match against,
+         which let SLAM's pose estimate drift badly whenever the drone was
+         far from pine1. These give the lidar something to lock onto from
+         anywhere in the operating area. -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine2</name>
+      <pose>-6.0 -6.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine3</name>
+      <pose>6.0 -2.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine%20tree</uri>
+      <name>pine4</name>
+      <pose>-6.0 4.0 0 0 0 0</pose>
+    </include>
+
+    <!-- Three people in a line along y at x = -5, 2 m apart: red, normal,
+         green. person1 is the original (un-recoloured) Rescue Randy; the red
+         and green ones are recoloured local copies built by
+         tools/make_randy_variants.py into this package's models/ folder.
+         Keep LINE_PEOPLE_XY in scripts/mission_waypoints.py in sync with
+         these poses. -->
+    <include>
+      <uri>model://rescue_randy_red</uri>
+      <name>person_red</name>
+      <pose>-5 -2 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Rescue%20Randy</uri>
+      <name>person1</name>
+      <pose>-5 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://rescue_randy_green</uri>
+      <name>person_green</name>
+      <pose>-5 2 0 0 0 0</pose>
+    </include>
+
+  </world>
+</sdf>

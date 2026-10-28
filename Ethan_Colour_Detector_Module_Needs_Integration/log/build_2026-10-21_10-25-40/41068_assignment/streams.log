@@ -1,0 +1,152 @@
+[0.017s] Invoking command in '/home/ethanqcw/ros2_ws/src/build/41068_assignment': AMENT_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:/home/ethanqcw/ros2_ws/install/41068_assignment:/home/ethanqcw/ros2_ws/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake /home/ethanqcw/ros2_ws/src/41068_assignment -DCMAKE_INSTALL_PREFIX=/home/ethanqcw/ros2_ws/src/install/41068_assignment
+[0.080s] -- The C compiler identification is GNU 11.4.0
+[0.349s] -- The CXX compiler identification is GNU 11.4.0
+[0.428s] -- Detecting C compiler ABI info
+[0.487s] -- Detecting C compiler ABI info - done
+[0.490s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.491s] -- Detecting C compile features
+[0.491s] -- Detecting C compile features - done
+[0.492s] -- Detecting CXX compiler ABI info
+[0.555s] -- Detecting CXX compiler ABI info - done
+[0.559s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.559s] -- Detecting CXX compile features
+[0.559s] -- Detecting CXX compile features - done
+[0.560s] -- Found ament_cmake: 1.3.14 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.791s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.905s] -- Found rclcpp: 16.0.21 (/opt/ros/humble/share/rclcpp/cmake)
+[0.995s] -- Found rosidl_generator_c: 3.1.9 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.998s] -- Found rosidl_adapter: 3.1.9 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[1.002s] -- Found rosidl_generator_cpp: 3.1.9 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[1.009s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.017s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.077s] -- Found rmw_implementation_cmake: 6.1.4 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[1.080s] -- Found rmw_fastrtps_cpp: 6.2.10 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[1.632s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[2.142s] -- Found FastRTPS: /opt/ros/humble/include  
+[3.022s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[3.036s] -- Looking for pthread.h
+[3.104s] -- Looking for pthread.h - found
+[3.104s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[3.164s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[3.165s] -- Found Threads: TRUE  
+[3.225s] -- Found ament_lint_auto: 0.12.15 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[3.255s] WARNING: Package name "41068_assignment" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits, underscores, and dashes.
+[3.269s] -- Added test 'copyright' to check source files copyright and LICENSE
+[3.283s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[3.284s] -- Configured cppcheck include dirs: /home/ethanqcw/ros2_ws/src/41068_assignment/include
+[3.284s] -- Configured cppcheck exclude dirs and/or files: 
+[3.289s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[3.289s] -- Configured cpplint exclude dirs and/or files: 
+[3.290s] -- Added test 'flake8' to check Python code syntax and style conventions
+[3.292s] -- Added test 'lint_cmake' to check CMake code style
+[3.293s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[3.298s] -- Added test 'uncrustify' to check C / C++ code style
+[3.299s] -- Configured uncrustify additional arguments: 
+[3.299s] -- Added test 'xmllint' to check XML markup files
+[3.300s] -- Configuring done
+[3.303s] -- Generating done
+[3.304s] -- Build files have been written to: /home/ethanqcw/ros2_ws/src/build/41068_assignment
+[3.309s] Invoked command in '/home/ethanqcw/ros2_ws/src/build/41068_assignment' returned '0': AMENT_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:/home/ethanqcw/ros2_ws/install/41068_assignment:/home/ethanqcw/ros2_ws/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake /home/ethanqcw/ros2_ws/src/41068_assignment -DCMAKE_INSTALL_PREFIX=/home/ethanqcw/ros2_ws/src/install/41068_assignment
+[3.310s] Invoking command in '/home/ethanqcw/ros2_ws/src/build/41068_assignment': AMENT_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:/home/ethanqcw/ros2_ws/install/41068_assignment:/home/ethanqcw/ros2_ws/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --build /home/ethanqcw/ros2_ws/src/build/41068_assignment -- -j28 -l28
+[3.329s] Invoked command in '/home/ethanqcw/ros2_ws/src/build/41068_assignment' returned '0': AMENT_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:/home/ethanqcw/ros2_ws/install/41068_assignment:/home/ethanqcw/ros2_ws/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --build /home/ethanqcw/ros2_ws/src/build/41068_assignment -- -j28 -l28
+[3.330s] Invoking command in '/home/ethanqcw/ros2_ws/src/build/41068_assignment': AMENT_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:/home/ethanqcw/ros2_ws/install/41068_assignment:/home/ethanqcw/ros2_ws/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --install /home/ethanqcw/ros2_ws/src/build/41068_assignment
+[3.333s] -- Install configuration: ""
+[3.333s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/launch
+[3.333s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/launch/spawn_parrot.launch.py
+[3.333s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/launch/spawn_parrot.launch.py:Zone.Identifier
+[3.334s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/worlds
+[3.334s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/worlds/assignment_world.sdf
+[3.334s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/worlds/assignment_world.sdf:Zone.Identifier
+[3.335s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/config
+[3.335s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/config/gazebo_bridge_parrot1_thermal.yaml
+[3.335s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/config/gazebo_bridge_parrot1_thermal.yaml:Zone.Identifier
+[3.336s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/config/gazebo_bridge_parrot1_camera_info.yaml
+[3.336s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/config/gazebo_bridge_parrot1_camera_info.yaml:Zone.Identifier
+[3.336s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/urdf_parrot
+[3.336s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/urdf_parrot/parrot_thermal.urdf.xacro
+[3.336s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/urdf_parrot/parrot_thermal.urdf.xacro:Zone.Identifier
+[3.336s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models
+[3.337s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green
+[3.337s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/model.sdf
+[3.337s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/model.config
+[3.337s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials
+[3.337s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/textures
+[3.337s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/textures/RescueRandy_Thermal.png
+[3.339s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/textures/rescue_randy_metalness.png
+[3.340s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/textures/rescue_randy_roughness.png
+[3.341s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/textures/rescue_randy_albedo_green.png
+[3.345s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/textures/rescue_randy_normal.png
+[3.349s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/scripts
+[3.349s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/materials/scripts/rescue_randy.material
+[3.349s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/meshes
+[3.350s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/meshes/rescue_randy.dae
+[3.351s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/thumbnails
+[3.351s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/thumbnails/4.png
+[3.352s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/thumbnails/2.png
+[3.352s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/thumbnails/1.png
+[3.352s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/thumbnails/5.png
+[3.353s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_green/thumbnails/3.png
+[3.353s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red
+[3.353s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/model.sdf
+[3.353s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/model.config
+[3.354s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials
+[3.354s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/textures
+[3.354s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/textures/RescueRandy_Thermal.png
+[3.356s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/textures/rescue_randy_metalness.png
+[3.356s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/textures/rescue_randy_roughness.png
+[3.357s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/textures/rescue_randy_albedo_red.png
+[3.362s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/textures/rescue_randy_normal.png
+[3.369s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/scripts
+[3.370s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/materials/scripts/rescue_randy.material
+[3.370s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/meshes
+[3.370s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/meshes/rescue_randy.dae
+[3.372s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/thumbnails
+[3.372s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/thumbnails/4.png
+[3.373s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/thumbnails/2.png
+[3.373s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/thumbnails/1.png
+[3.374s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/thumbnails/5.png
+[3.375s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_red/thumbnails/3.png
+[3.375s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/README.md:Zone.Identifier
+[3.375s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/README.md
+[3.376s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base
+[3.376s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/model.sdf
+[3.376s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/model.config
+[3.376s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials
+[3.377s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/textures
+[3.377s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/textures/RescueRandy_Thermal.png
+[3.380s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/textures/rescue_randy_metalness.png
+[3.380s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/textures/rescue_randy_roughness.png
+[3.381s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/textures/rescue_randy_albedo_base.png
+[3.386s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/textures/rescue_randy_normal.png
+[3.393s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/scripts
+[3.393s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/materials/scripts/rescue_randy.material
+[3.393s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/meshes
+[3.393s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/meshes/rescue_randy.dae
+[3.395s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/thumbnails
+[3.395s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/thumbnails/4.png
+[3.395s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/thumbnails/2.png
+[3.395s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/thumbnails/1.png
+[3.396s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/thumbnails/5.png
+[3.396s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/models/rescue_randy_base/thumbnails/3.png
+[3.397s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/lib/41068_assignment/waypoint_follower.py
+[3.397s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/lib/41068_assignment/publish_waypoints.py
+[3.397s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/lib/41068_assignment/target_detector.py
+[3.397s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/lib/41068_assignment/target_projector.py
+[3.397s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/lib/41068_assignment/mission_waypoints.py
+[3.397s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/lib/41068_assignment/colour_classifier.py
+[3.398s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/ament_index/resource_index/package_run_dependencies/41068_assignment
+[3.398s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/ament_index/resource_index/parent_prefix_path/41068_assignment
+[3.398s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/environment/ament_prefix_path.sh
+[3.398s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/environment/ament_prefix_path.dsv
+[3.398s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/environment/path.sh
+[3.398s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/environment/path.dsv
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/local_setup.bash
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/local_setup.sh
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/local_setup.zsh
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/local_setup.dsv
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/package.dsv
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/ament_index/resource_index/packages/41068_assignment
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/cmake/41068_assignmentConfig.cmake
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/cmake/41068_assignmentConfig-version.cmake
+[3.399s] -- Installing: /home/ethanqcw/ros2_ws/src/install/41068_assignment/share/41068_assignment/package.xml
+[3.400s] Invoked command in '/home/ethanqcw/ros2_ws/src/build/41068_assignment' returned '0': AMENT_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ethanqcw/ros2_ws/src/install/41068_ignition_bringup:/home/ethanqcw/ros2_ws/install/41068_assignment:/home/ethanqcw/ros2_ws/install/41068_ignition_bringup:/opt/ros/humble /usr/bin/cmake --install /home/ethanqcw/ros2_ws/src/build/41068_assignment

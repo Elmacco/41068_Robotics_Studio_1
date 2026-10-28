@@ -365,8 +365,8 @@ def generate_launch_description():
         xacro_parts=['urdf_parrot', 'parrot.urdf.xacro'],
         bridge_config='gazebo_bridge_parrot1.yaml',
         localization_config='robot_localization_parrot1.yaml',
-        x=PythonExpression(["'-4.0' if '", world, "' == 'simple_trees' else '2.0'"]),
-        y=PythonExpression(["'-23.0' if '", world, "' == 'simple_trees' else '0.0'"]),
+        x='2.0',
+        y='0.0',
         z='0.8',
         spawn_delay=6.0,
     )

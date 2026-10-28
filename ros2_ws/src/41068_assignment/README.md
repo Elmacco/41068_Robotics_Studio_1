@@ -22,6 +22,8 @@ GUI/
   index.html, app.js, style.css   Static browser dashboard for the drone UI
 launch/
   spawn_parrot.launch.py   Spawns the drone + SLAM/Nav2/RViz + mission nodes
+  demo.launch.py           Presentation launch: spawn_parrot + each team part
+  modules/                 One launch file per team part (see its README)
 config/worlds/
   <world>.yaml             Per-world mapping bounds and ranger station
 worlds/
@@ -72,6 +74,18 @@ Build both packages after pulling: worlds and models such as
 install is out of date Gazebo exits straight away (`ign gazebo ... process
 has died ... exit code 255` near the top of the launch output), the drone is
 never spawned, and Nav2 then waits for `parrot1_odom` for ever.
+
+## Demo
+
+```bash
+ros2 launch 41068_assignment demo.launch.py
+```
+
+This starts Will's `simple_trees` world with the drone on the launch pad, plus
+Nav2, RViz and mapping mode. It then adds each team member's part from
+`launch/modules/` and skips any part that hasn't been merged yet. Turn a part
+off with its flag, e.g. `detection:=False`. See
+[launch/modules/README.md](launch/modules/README.md) to add your part.
 
 ## Running it
 

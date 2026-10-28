@@ -1,9 +1,0 @@
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/uninstall.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/41068_assignment_uninstall.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/test.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/edit_cache.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/rebuild_cache.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/list_install_components.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/install.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/install/local.dir
-/home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/install/strip.dir

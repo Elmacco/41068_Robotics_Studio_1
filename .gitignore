@@ -1,7 +1,11 @@
-# ROS 2 generated folders
-ros2_ws/build/
-ros2_ws/install/
-ros2_ws/log/
+# ROS 2 generated folders. Matched anywhere, because colcon run from inside a
+# package folder writes them there too. (Copies already committed under
+# 41068_ignition_bringup/ and Ethan's folder stay tracked until those are
+# cleaned up.)
+build/
+install/
+log/
+ros2_ws/symlink_install_manifest.txt
 
 # Separate upstream repo (github.com/ros/ros_tutorials), not part of this repo's history
 ros2_ws/src/ros_tutorials/

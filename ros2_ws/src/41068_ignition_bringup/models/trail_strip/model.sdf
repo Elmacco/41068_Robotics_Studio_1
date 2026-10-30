@@ -19,6 +19,11 @@
           <ambient>0.28 0.18 0.08 1</ambient>
           <diffuse>0.38 0.24 0.10 1</diffuse>
           <specular>0.05 0.05 0.05 1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
         </material>
       </visual>
     </link>

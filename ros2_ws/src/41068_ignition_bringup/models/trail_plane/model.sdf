@@ -2,6 +2,7 @@
 <model name="trail_plane">
     <static>true</static>
     <link name="link">
+        <!--
         <collision name="collision">
             <geometry>
             <heightmap>
@@ -9,6 +10,15 @@
                     <pos>0 0 0</pos>
                     <size>50 50 5</size>
                 </heightmap>
+            </geometry>
+        </collision>
+        -->
+        <collision name="collision">
+            <geometry>
+            <box>
+                <normal>0 0 1</normal>
+                <size>50 50 0.01</size>
+            </box>
             </geometry>
         </collision>
         <visual name="visual">

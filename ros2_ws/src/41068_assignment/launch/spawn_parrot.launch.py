@@ -117,6 +117,7 @@ def generate_launch_description():
     ld.add_action(SetEnvironmentVariable(name='IGN_GAZEBO_SERVER_CONFIG_PATH', value=server_config_file))
     ld.add_action(SetEnvironmentVariable(name='GZ_SIM_SERVER_CONFIG_PATH', value=server_config_file))
 
+<<<<<<< HEAD
     # Let Gazebo resolve model:// URIs (e.g. grass_plane) from our models/
     # folder first, then the course package's, which a course world loaded
     # with world_package:=41068_ignition_bringup may need.
@@ -124,6 +125,15 @@ def generate_launch_description():
         PathJoinSubstitution([assignment_path, 'models']), ':',
         PathJoinSubstitution([FindPackageShare('41068_ignition_bringup'), 'models']),
     ]
+=======
+    randy_models_path = (
+        '/home/student/subjects/41068_robotics_studio_1/'
+        'Ethan_Colour_Detector_Module_Needs_Integration/41068_assignment/models'
+    )
+    # Let Gazebo resolve model:// URIs (e.g. grass_plane) from the bringup
+    # package's models/ directory, since our world file lives in this package.
+    resource_path = [bringup_path, ':', randy_models_path]
+>>>>>>> a7707bf (revised world file)
     ld.add_action(SetEnvironmentVariable(name='IGN_GAZEBO_RESOURCE_PATH', value=resource_path))
     ld.add_action(SetEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH', value=resource_path))
 

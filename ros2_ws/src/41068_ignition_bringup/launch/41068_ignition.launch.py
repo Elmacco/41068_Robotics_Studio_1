@@ -293,13 +293,17 @@ def generate_launch_description():
         name='GZ_SIM_SERVER_CONFIG_PATH',
         value=server_config_file,
     ))
+    randy_models_path = (
+        '/home/student/subjects/41068_robotics_studio_1/'
+        'Ethan_Colour_Detector_Module_Needs_Integration/41068_assignment/models'
+    )
     ld.add_action(SetEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH',
-        value=PathJoinSubstitution([pkg_path, 'models']),
+        value=[PathJoinSubstitution([pkg_path, 'models']), ':', randy_models_path],
     ))
     ld.add_action(SetEnvironmentVariable(
         name='IGN_GAZEBO_RESOURCE_PATH',
-        value=PathJoinSubstitution([pkg_path, 'models']),
+        value=[PathJoinSubstitution([pkg_path, 'models']), ':', randy_models_path],
     ))
 
     # Start Gazebo once.

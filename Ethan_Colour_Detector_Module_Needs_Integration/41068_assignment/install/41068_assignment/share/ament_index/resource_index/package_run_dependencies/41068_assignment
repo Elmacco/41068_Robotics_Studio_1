@@ -1,1 +1,0 @@
-rclcpp;rclpy;41068_ignition_bringup;ros_ign_gazebo;ros_ign_bridge;robot_state_publisher;robot_localization;xacro;slam_toolbox;nav2_bringup;nav2_msgs;geometry_msgs;action_msgs;std_msgs;visualization_msgs;sensor_msgs;vision_msgs;cv_bridge;python3-opencv;message_filters;tf2_ros;tf2_geometry_msgs;ament_lint_auto;ament_lint_common

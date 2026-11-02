@@ -1,9 +1,0 @@
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/uninstall.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/41068_assignment_uninstall.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/test.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/edit_cache.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/rebuild_cache.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/list_install_components.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/install.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/install/local.dir
-/home/ethanqcw/ros2_ws/src/41068_assignment/build/41068_assignment/CMakeFiles/install/strip.dir

@@ -1,9 +1,0 @@
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/uninstall.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/41068_ignition_bringup_uninstall.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/test.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/edit_cache.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/rebuild_cache.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/list_install_components.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/install.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/install/local.dir
-/home/ethanqcw/ros2_ws/src/build/41068_ignition_bringup/CMakeFiles/install/strip.dir

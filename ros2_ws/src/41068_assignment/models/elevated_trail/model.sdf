@@ -4,197 +4,1484 @@
     <static>true</static>
     <link name="trail_segments">
       <visual name="segment_01">
-        <pose>-18.50 -19.50 0.14 0 0 -0.785</pose>
-        <geometry><box><size>4.24 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-19.53 -16.11 0.14 0 0 -1.463</pose>
+        <geometry><box><size>2.57 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_01"><pose>-18.50 -19.50 0.14 0 0 -0.785</pose><geometry><box><size>4.24 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_01">
+        <pose>-19.53 -16.11 0.14 0 0 -1.463</pose>
+        <geometry><box><size>2.57 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_02">
-        <pose>-14.50 -21.00 0.14 0 0 0</pose>
-        <geometry><box><size>5.00 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-18.95 -18.46 0.14 0 0 -1.190</pose>
+        <geometry><box><size>2.60 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_02"><pose>-14.50 -21.00 0.14 0 0 0</pose><geometry><box><size>5.00 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_02">
+        <pose>-18.95 -18.46 0.14 0 0 -1.190</pose>
+        <geometry><box><size>2.60 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_03">
-        <pose>-10.50 -19.50 0.14 0 0 0.785</pose>
-        <geometry><box><size>4.24 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-17.51 -20.25 0.14 0 0 -0.588</pose>
+        <geometry><box><size>2.50 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_03"><pose>-10.50 -19.50 0.14 0 0 0.785</pose><geometry><box><size>4.24 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_03">
+        <pose>-17.51 -20.25 0.14 0 0 -0.588</pose>
+        <geometry><box><size>2.50 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_04">
-        <pose>-7.00 -17.50 0.14 0 0 0.245</pose>
-        <geometry><box><size>4.12 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-15.23 -21.16 0.14 0 0 -0.197</pose>
+        <geometry><box><size>2.81 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_04"><pose>-7.00 -17.50 0.14 0 0 0.245</pose><geometry><box><size>4.12 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_04">
+        <pose>-15.23 -21.16 0.14 0 0 -0.197</pose>
+        <geometry><box><size>2.81 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_05">
-        <pose>-2.50 -18.50 0.14 0 0 -0.540</pose>
-        <geometry><box><size>5.83 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-12.79 -21.16 0.14 0 0 0.225</pose>
+        <geometry><box><size>2.49 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_05"><pose>-2.50 -18.50 0.14 0 0 -0.540</pose><geometry><box><size>5.83 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_05">
+        <pose>-12.79 -21.16 0.14 0 0 0.225</pose>
+        <geometry><box><size>2.49 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_06">
-        <pose>2.50 -20.50 0.14 0 0 -0.197</pose>
-        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-11.00 -20.08 0.14 0 0 0.896</pose>
+        <geometry><box><size>2.23 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_06"><pose>2.50 -20.50 0.14 0 0 -0.197</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_06">
+        <pose>-11.00 -20.08 0.14 0 0 0.896</pose>
+        <geometry><box><size>2.23 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_07">
-        <pose>7.50 -20.00 0.14 0 0 0.381</pose>
-        <geometry><box><size>5.39 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-10.35 -18.29 0.14 0 0 1.571</pose>
+        <geometry><box><size>2.10 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_07"><pose>7.50 -20.00 0.14 0 0 0.381</pose><geometry><box><size>5.39 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_07">
+        <pose>-10.35 -18.29 0.14 0 0 1.571</pose>
+        <geometry><box><size>2.10 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_08">
-        <pose>12.00 -17.50 0.14 0 0 0.644</pose>
-        <geometry><box><size>5.00 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-9.70 -16.73 0.14 0 0 0.733</pose>
+        <geometry><box><size>1.90 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_08"><pose>12.00 -17.50 0.14 0 0 0.644</pose><geometry><box><size>5.00 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_08">
+        <pose>-9.70 -16.73 0.14 0 0 0.733</pose>
+        <geometry><box><size>1.90 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_09">
-        <pose>15.00 -13.50 0.14 0 0 1.190</pose>
-        <geometry><box><size>5.39 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-7.91 -16.02 0.14 0 0 0.114</pose>
+        <geometry><box><size>2.44 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_09"><pose>15.00 -13.50 0.14 0 0 1.190</pose><geometry><box><size>5.39 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_09">
+        <pose>-7.91 -16.02 0.14 0 0 0.114</pose>
+        <geometry><box><size>2.44 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_10">
-        <pose>16.00 -7.50 0.14 0 0 1.571</pose>
-        <geometry><box><size>7.00 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-5.63 -16.21 0.14 0 0 -0.278</pose>
+        <geometry><box><size>2.52 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_10"><pose>16.00 -7.50 0.14 0 0 1.571</pose><geometry><box><size>7.00 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_10">
+        <pose>-5.63 -16.21 0.14 0 0 -0.278</pose>
+        <geometry><box><size>2.52 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_11">
-        <pose>15.50 -0.50 0.14 0 0 1.713</pose>
-        <geometry><box><size>7.07 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-3.35 -17.09 0.14 0 0 -0.452</pose>
+        <geometry><box><size>2.68 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_11"><pose>15.50 -0.50 0.14 0 0 1.713</pose><geometry><box><size>7.07 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_11">
+        <pose>-3.35 -17.09 0.14 0 0 -0.452</pose>
+        <geometry><box><size>2.68 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_12">
-        <pose>15.50 7.00 0.14 0 0 1.446</pose>
-        <geometry><box><size>8.06 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-1.24 -17.81 0.14 0 0 -0.165</pose>
+        <geometry><box><size>2.13 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_12"><pose>15.50 7.00 0.14 0 0 1.446</pose><geometry><box><size>8.06 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_12">
+        <pose>-1.24 -17.81 0.14 0 0 -0.165</pose>
+        <geometry><box><size>2.13 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_13">
-        <pose>17.00 14.50 0.14 0 0 1.292</pose>
-        <geometry><box><size>7.28 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>0.55 -17.64 0.14 0 0 0.381</pose>
+        <geometry><box><size>1.90 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_13"><pose>17.00 14.50 0.14 0 0 1.292</pose><geometry><box><size>7.28 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_13">
+        <pose>0.55 -17.64 0.14 0 0 0.381</pose>
+        <geometry><box><size>1.90 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_14">
-        <pose>20.00 20.00 0.14 0 0 0.785</pose>
-        <geometry><box><size>5.66 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>1.76 -16.50 0.14 0 0 1.123</pose>
+        <geometry><box><size>1.96 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_14"><pose>20.00 20.00 0.14 0 0 0.785</pose><geometry><box><size>5.66 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_14">
+        <pose>1.76 -16.50 0.14 0 0 1.123</pose>
+        <geometry><box><size>1.96 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_15">
-        <pose>-20.50 -16.00 0.14 0 0 1.816</pose>
-        <geometry><box><size>4.12 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>2.08 -14.55 0.14 0 0 1.628</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_15"><pose>-20.50 -16.00 0.14 0 0 1.816</pose><geometry><box><size>4.12 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_15">
+        <pose>2.08 -14.55 0.14 0 0 1.628</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_16">
-        <pose>-21.00 -12.00 0.14 0 0 1.571</pose>
-        <geometry><box><size>4.00 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>1.69 -12.27 0.14 0 0 1.849</pose>
+        <geometry><box><size>2.52 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_16"><pose>-21.00 -12.00 0.14 0 0 1.571</pose><geometry><box><size>4.00 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_16">
+        <pose>1.69 -12.27 0.14 0 0 1.849</pose>
+        <geometry><box><size>2.52 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_17">
-        <pose>-19.50 -9.00 0.14 0 0 0.588</pose>
-        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>0.72 -10.16 0.14 0 0 2.159</pose>
+        <geometry><box><size>2.50 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_17"><pose>-19.50 -9.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_17">
+        <pose>0.72 -10.16 0.14 0 0 2.159</pose>
+        <geometry><box><size>2.50 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_18">
-        <pose>-16.00 -8.50 0.14 0 0 -0.245</pose>
-        <geometry><box><size>4.12 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-0.91 -8.37 0.14 0 0 2.447</pose>
+        <geometry><box><size>2.69 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_18"><pose>-16.00 -8.50 0.14 0 0 -0.245</pose><geometry><box><size>4.12 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_18">
+        <pose>-0.91 -8.37 0.14 0 0 2.447</pose>
+        <geometry><box><size>2.69 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_19">
-        <pose>-12.50 -8.00 0.14 0 0 0.588</pose>
-        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-3.03 -6.84 0.14 0 0 2.580</pose>
+        <geometry><box><size>2.84 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_19"><pose>-12.50 -8.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_19">
+        <pose>-3.03 -6.84 0.14 0 0 2.580</pose>
+        <geometry><box><size>2.84 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_20">
-        <pose>-9.50 -6.00 0.14 0 0 0.588</pose>
-        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-5.31 -5.53 0.14 0 0 2.667</pose>
+        <geometry><box><size>2.71 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_20"><pose>-9.50 -6.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_20">
+        <pose>-5.31 -5.53 0.14 0 0 2.667</pose>
+        <geometry><box><size>2.71 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_21">
-        <pose>-6.50 -4.00 0.14 0 0 0.588</pose>
-        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-7.42 -4.56 0.14 0 0 2.761</pose>
+        <geometry><box><size>2.25 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_21"><pose>-6.50 -4.00 0.14 0 0 0.588</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_21">
+        <pose>-7.42 -4.56 0.14 0 0 2.761</pose>
+        <geometry><box><size>2.25 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_22">
-        <pose>-3.00 -3.00 0.14 0 0 0</pose>
-        <geometry><box><size>4.00 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-8.82 -3.74 0.14 0 0 2.356</pose>
+        <geometry><box><size>1.35 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_22"><pose>-3.00 -3.00 0.14 0 0 0</pose><geometry><box><size>4.00 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_22">
+        <pose>-8.82 -3.74 0.14 0 0 2.356</pose>
+        <geometry><box><size>1.35 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_23">
-        <pose>1.00 -4.00 0.14 0 0 -0.464</pose>
-        <geometry><box><size>4.47 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-8.98 -2.83 0.14 0 0 1.081</pose>
+        <geometry><box><size>1.26 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_23"><pose>1.00 -4.00 0.14 0 0 -0.464</pose><geometry><box><size>4.47 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_23">
+        <pose>-8.98 -2.83 0.14 0 0 1.081</pose>
+        <geometry><box><size>1.26 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_24">
-        <pose>5.00 -5.00 0.14 0 0 0</pose>
-        <geometry><box><size>4.00 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-7.91 -1.86 0.14 0 0 0.540</pose>
+        <geometry><box><size>2.05 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_24"><pose>5.00 -5.00 0.14 0 0 0</pose><geometry><box><size>4.00 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_24">
+        <pose>-7.91 -1.86 0.14 0 0 0.540</pose>
+        <geometry><box><size>2.05 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_25">
-        <pose>8.50 -3.50 0.14 0 0 0.785</pose>
-        <geometry><box><size>4.24 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-6.12 -0.88 0.14 0 0 0.464</pose>
+        <geometry><box><size>2.33 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_25"><pose>8.50 -3.50 0.14 0 0 0.785</pose><geometry><box><size>4.24 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_25">
+        <pose>-6.12 -0.88 0.14 0 0 0.464</pose>
+        <geometry><box><size>2.33 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_26">
-        <pose>10.00 1.00 0.14 0 0 1.571</pose>
-        <geometry><box><size>6.00 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-4.17 0.10 0.14 0 0 0.464</pose>
+        <geometry><box><size>2.33 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_26"><pose>10.00 1.00 0.14 0 0 1.571</pose><geometry><box><size>6.00 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_26">
+        <pose>-4.17 0.10 0.14 0 0 0.464</pose>
+        <geometry><box><size>2.33 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_27">
-        <pose>9.00 6.50 0.14 0 0 1.951</pose>
-        <geometry><box><size>5.39 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-2.21 1.14 0.14 0 0 0.516</pose>
+        <geometry><box><size>2.39 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_27"><pose>9.00 6.50 0.14 0 0 1.951</pose><geometry><box><size>5.39 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_27">
+        <pose>-2.21 1.14 0.14 0 0 0.516</pose>
+        <geometry><box><size>2.39 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_28">
-        <pose>6.50 10.00 0.14 0 0 2.554</pose>
-        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>-0.42 1.56 0.14 0 0 -0.159</pose>
+        <geometry><box><size>1.80 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_28"><pose>6.50 10.00 0.14 0 0 2.554</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
-      <visual name="segment_29">
-        <pose>4.00 9.50 0.14 0 0 -2.159</pose>
-        <geometry><box><size>3.61 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
-      </visual>
-      <collision name="segment_29"><pose>4.00 9.50 0.14 0 0 -2.159</pose><geometry><box><size>3.61 1.5 0.18</size></box></geometry></collision>
-      <visual name="segment_30">
-        <pose>2.50 5.50 0.14 0 0 -1.768</pose>
-        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
-      </visual>
-      <collision name="segment_30"><pose>2.50 5.50 0.14 0 0 -1.768</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_28">
+        <pose>-0.42 1.56 0.14 0 0 -0.159</pose>
+        <geometry><box><size>1.80 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_31">
-        <pose>1.50 0.50 0.14 0 0 -1.768</pose>
-        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>5.27 0.36 0.14 0 0 0.409</pose>
+        <geometry><box><size>2.28 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_31"><pose>1.50 0.50 0.14 0 0 -1.768</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_31">
+        <pose>5.27 0.36 0.14 0 0 0.409</pose>
+        <geometry><box><size>2.28 1.5 0.18</size></box></geometry>
+      </collision>
       <visual name="segment_32">
-        <pose>0.50 -4.50 0.14 0 0 -1.768</pose>
-        <geometry><box><size>5.10 1.5 0.18</size></box></geometry>
-        <material><ambient>0.45 0.25 0.08 1</ambient><diffuse>0.65 0.35 0.10 1</diffuse></material>
+        <pose>7.06 1.50 0.14 0 0 0.722</pose>
+        <geometry><box><size>2.32 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
-      <collision name="segment_32"><pose>0.50 -4.50 0.14 0 0 -1.768</pose><geometry><box><size>5.10 1.5 0.18</size></box></geometry></collision>
+      <collision name="segment_32">
+        <pose>7.06 1.50 0.14 0 0 0.722</pose>
+        <geometry><box><size>2.32 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_33">
+        <pose>8.30 3.19 0.14 0 0 1.162</pose>
+        <geometry><box><size>2.28 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_33">
+        <pose>8.30 3.19 0.14 0 0 1.162</pose>
+        <geometry><box><size>2.28 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_34">
+        <pose>8.79 5.47 0.14 0 0 1.521</pose>
+        <geometry><box><size>2.76 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_34">
+        <pose>8.79 5.47 0.14 0 0 1.521</pose>
+        <geometry><box><size>2.76 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_35">
+        <pose>8.92 8.24 0.14 0 0 1.526</pose>
+        <geometry><box><size>3.08 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_35">
+        <pose>8.92 8.24 0.14 0 0 1.526</pose>
+        <geometry><box><size>3.08 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_36">
+        <pose>8.98 11.17 0.14 0 0 1.571</pose>
+        <geometry><box><size>3.08 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_36">
+        <pose>8.98 11.17 0.14 0 0 1.571</pose>
+        <geometry><box><size>3.08 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_37">
+        <pose>8.98 14.10 0.14 0 0 1.571</pose>
+        <geometry><box><size>3.08 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_37">
+        <pose>8.98 14.10 0.14 0 0 1.571</pose>
+        <geometry><box><size>3.08 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_38">
+        <pose>9.24 16.86 0.14 0 0 1.373</pose>
+        <geometry><box><size>2.81 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_38">
+        <pose>9.24 16.86 0.14 0 0 1.373</pose>
+        <geometry><box><size>2.81 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_39">
+        <pose>9.99 19.37 0.14 0 0 1.186</pose>
+        <geometry><box><size>2.75 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_39">
+        <pose>9.99 19.37 0.14 0 0 1.186</pose>
+        <geometry><box><size>2.75 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_40">
+        <pose>11.30 21.48 0.14 0 0 0.842</pose>
+        <geometry><box><size>2.59 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_40">
+        <pose>11.30 21.48 0.14 0 0 0.842</pose>
+        <geometry><box><size>2.59 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_41">
+        <pose>13.25 22.98 0.14 0 0 0.475</pose>
+        <geometry><box><size>2.71 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_41">
+        <pose>13.25 22.98 0.14 0 0 0.475</pose>
+        <geometry><box><size>2.71 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_42">
+        <pose>15.69 23.76 0.14 0 0 0.149</pose>
+        <geometry><box><size>2.78 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_42">
+        <pose>15.69 23.76 0.14 0 0 0.149</pose>
+        <geometry><box><size>2.78 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_43">
+        <pose>18.13 23.70 0.14 0 0 -0.225</pose>
+        <geometry><box><size>2.49 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_43">
+        <pose>18.13 23.70 0.14 0 0 -0.225</pose>
+        <geometry><box><size>2.49 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_44">
+        <pose>20.18 22.75 0.14 0 0 -0.644</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_44">
+        <pose>20.18 22.75 0.14 0 0 -0.644</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_45">
+        <pose>21.48 21.00 0.14 0 0 -1.222</pose>
+        <geometry><box><size>2.44 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_45">
+        <pose>21.48 21.00 0.14 0 0 -1.222</pose>
+        <geometry><box><size>2.44 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_46">
+        <pose>21.81 18.55 0.14 0 0 -1.618</pose>
+        <geometry><box><size>2.89 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_46">
+        <pose>21.81 18.55 0.14 0 0 -1.618</pose>
+        <geometry><box><size>2.89 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_47">
+        <pose>21.61 15.72 0.14 0 0 -1.659</pose>
+        <geometry><box><size>3.09 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_47">
+        <pose>21.61 15.72 0.14 0 0 -1.659</pose>
+        <geometry><box><size>3.09 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_48">
+        <pose>21.39 12.63 0.14 0 0 -1.631</pose>
+        <geometry><box><size>3.41 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_48">
+        <pose>21.39 12.63 0.14 0 0 -1.631</pose>
+        <geometry><box><size>3.41 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_49">
+        <pose>21.19 9.38 0.14 0 0 -1.631</pose>
+        <geometry><box><size>3.41 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_49">
+        <pose>21.19 9.38 0.14 0 0 -1.631</pose>
+        <geometry><box><size>3.41 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_50">
+        <pose>20.96 6.12 0.14 0 0 -1.651</pose>
+        <geometry><box><size>3.42 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_50">
+        <pose>20.96 6.12 0.14 0 0 -1.651</pose>
+        <geometry><box><size>3.42 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_51">
+        <pose>20.64 2.86 0.14 0 0 -1.690</pose>
+        <geometry><box><size>3.43 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_51">
+        <pose>20.64 2.86 0.14 0 0 -1.690</pose>
+        <geometry><box><size>3.43 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_52">
+        <pose>20.12 -0.39 0.14 0 0 -1.768</pose>
+        <geometry><box><size>3.47 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_52">
+        <pose>20.12 -0.39 0.14 0 0 -1.768</pose>
+        <geometry><box><size>3.47 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_53">
+        <pose>19.27 -3.32 0.14 0 0 -1.951</pose>
+        <geometry><box><size>2.95 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_53">
+        <pose>19.27 -3.32 0.14 0 0 -1.951</pose>
+        <geometry><box><size>2.95 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_54">
+        <pose>18.03 -5.27 0.14 0 0 -2.404</pose>
+        <geometry><box><size>2.09 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_54">
+        <pose>18.03 -5.27 0.14 0 0 -2.404</pose>
+        <geometry><box><size>2.09 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_55">
+        <pose>16.34 -6.02 0.14 0 0 -3.042</pose>
+        <geometry><box><size>2.11 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_55">
+        <pose>16.34 -6.02 0.14 0 0 -3.042</pose>
+        <geometry><box><size>2.11 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_56">
+        <pose>14.23 -5.70 0.14 0 0 2.786</pose>
+        <geometry><box><size>2.58 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_56">
+        <pose>14.23 -5.70 0.14 0 0 2.786</pose>
+        <geometry><box><size>2.58 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_57">
+        <pose>11.95 -4.72 0.14 0 0 2.689</pose>
+        <geometry><box><size>2.68 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_57">
+        <pose>11.95 -4.72 0.14 0 0 2.689</pose>
+        <geometry><box><size>2.68 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_58">
+        <pose>9.67 -3.58 0.14 0 0 2.667</pose>
+        <geometry><box><size>2.71 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_58">
+        <pose>9.67 -3.58 0.14 0 0 2.667</pose>
+        <geometry><box><size>2.71 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_59">
+        <pose>7.39 -2.34 0.14 0 0 2.622</pose>
+        <geometry><box><size>2.77 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_59">
+        <pose>7.39 -2.34 0.14 0 0 2.622</pose>
+        <geometry><box><size>2.77 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_60">
+        <pose>5.11 -1.04 0.14 0 0 2.622</pose>
+        <geometry><box><size>2.77 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_60">
+        <pose>5.11 -1.04 0.14 0 0 2.622</pose>
+        <geometry><box><size>2.77 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_63">
+        <pose>-0.75 2.70 0.14 0 0 2.111</pose>
+        <geometry><box><size>2.05 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_63">
+        <pose>-0.75 2.70 0.14 0 0 2.111</pose>
+        <geometry><box><size>2.05 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_64">
+        <pose>-1.24 4.65 0.14 0 0 1.571</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_64">
+        <pose>-1.24 4.65 0.14 0 0 1.571</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_65">
+        <pose>-1.07 6.93 0.14 0 0 1.429</pose>
+        <geometry><box><size>2.45 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_65">
+        <pose>-1.07 6.93 0.14 0 0 1.429</pose>
+        <geometry><box><size>2.45 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_66">
+        <pose>-0.98 9.38 0.14 0 0 1.621</pose>
+        <geometry><box><size>2.76 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_66">
+        <pose>-0.98 9.38 0.14 0 0 1.621</pose>
+        <geometry><box><size>2.76 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_67">
+        <pose>-1.30 11.98 0.14 0 0 1.768</pose>
+        <geometry><box><size>2.81 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_67">
+        <pose>-1.30 11.98 0.14 0 0 1.768</pose>
+        <geometry><box><size>2.81 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_68">
+        <pose>-2.05 14.42 0.14 0 0 1.976</pose>
+        <geometry><box><size>2.63 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_68">
+        <pose>-2.05 14.42 0.14 0 0 1.976</pose>
+        <geometry><box><size>2.63 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_69">
+        <pose>-3.35 16.37 0.14 0 0 2.356</pose>
+        <geometry><box><size>2.45 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_69">
+        <pose>-3.35 16.37 0.14 0 0 2.356</pose>
+        <geometry><box><size>2.45 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_70">
+        <pose>-5.14 17.74 0.14 0 0 2.626</pose>
+        <geometry><box><size>2.39 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_70">
+        <pose>-5.14 17.74 0.14 0 0 2.626</pose>
+        <geometry><box><size>2.39 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_71">
+        <pose>-7.26 18.72 0.14 0 0 2.786</pose>
+        <geometry><box><size>2.58 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_71">
+        <pose>-7.26 18.72 0.14 0 0 2.786</pose>
+        <geometry><box><size>2.58 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_72">
+        <pose>-9.54 19.47 0.14 0 0 2.863</pose>
+        <geometry><box><size>2.52 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_72">
+        <pose>-9.54 19.47 0.14 0 0 2.863</pose>
+        <geometry><box><size>2.52 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_73">
+        <pose>-11.98 19.92 0.14 0 0 3.042</pose>
+        <geometry><box><size>2.77 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_73">
+        <pose>-11.98 19.92 0.14 0 0 3.042</pose>
+        <geometry><box><size>2.77 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_74">
+        <pose>-14.42 20.05 0.14 0 0 3.142</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_74">
+        <pose>-14.42 20.05 0.14 0 0 3.142</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_75">
+        <pose>-16.44 19.86 0.14 0 0 -2.923</pose>
+        <geometry><box><size>1.95 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_75">
+        <pose>-16.44 19.86 0.14 0 0 -2.923</pose>
+        <geometry><box><size>1.95 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_76">
+        <pose>-17.84 19.08 0.14 0 0 -2.297</pose>
+        <geometry><box><size>1.72 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_76">
+        <pose>-17.84 19.08 0.14 0 0 -2.297</pose>
+        <geometry><box><size>1.72 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_77">
+        <pose>-18.55 17.51 0.14 0 0 -1.768</pose>
+        <geometry><box><size>2.14 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_77">
+        <pose>-18.55 17.51 0.14 0 0 -1.768</pose>
+        <geometry><box><size>2.14 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_78">
+        <pose>-18.68 15.40 0.14 0 0 -1.514</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_78">
+        <pose>-18.68 15.40 0.14 0 0 -1.514</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_79">
+        <pose>-18.33 13.28 0.14 0 0 -1.279</pose>
+        <geometry><box><size>2.19 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_79">
+        <pose>-18.33 13.28 0.14 0 0 -1.279</pose>
+        <geometry><box><size>2.19 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_80">
+        <pose>-17.29 11.65 0.14 0 0 -0.716</pose>
+        <geometry><box><size>2.13 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_80">
+        <pose>-17.29 11.65 0.14 0 0 -0.716</pose>
+        <geometry><box><size>2.13 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_81">
+        <pose>-15.72 10.68 0.14 0 0 -0.381</pose>
+        <geometry><box><size>1.90 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_81">
+        <pose>-15.72 10.68 0.14 0 0 -0.381</pose>
+        <geometry><box><size>1.90 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_82">
+        <pose>-14.58 9.70 0.14 0 0 -1.107</pose>
+        <geometry><box><size>1.61 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_82">
+        <pose>-14.58 9.70 0.14 0 0 -1.107</pose>
+        <geometry><box><size>1.61 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_83">
+        <pose>-14.26 8.07 0.14 0 0 -1.571</pose>
+        <geometry><box><size>2.10 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_83">
+        <pose>-14.26 8.07 0.14 0 0 -1.571</pose>
+        <geometry><box><size>2.10 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_84">
+        <pose>-14.03 6.12 0.14 0 0 -1.342</pose>
+        <geometry><box><size>2.16 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_84">
+        <pose>-14.03 6.12 0.14 0 0 -1.342</pose>
+        <geometry><box><size>2.16 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_85">
+        <pose>-13.22 4.65 0.14 0 0 -0.695</pose>
+        <geometry><box><size>1.68 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_85">
+        <pose>-13.22 4.65 0.14 0 0 -0.695</pose>
+        <geometry><box><size>1.68 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_86">
+        <pose>-11.65 4.36 0.14 0 0 0.197</pose>
+        <geometry><box><size>2.14 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_86">
+        <pose>-11.65 4.36 0.14 0 0 0.197</pose>
+        <geometry><box><size>2.14 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_87">
+        <pose>-9.54 4.95 0.14 0 0 0.330</pose>
+        <geometry><box><size>2.56 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_87">
+        <pose>-9.54 4.95 0.14 0 0 0.330</pose>
+        <geometry><box><size>2.56 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_88">
+        <pose>-7.26 5.40 0.14 0 0 0.057</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_88">
+        <pose>-7.26 5.40 0.14 0 0 0.057</pose>
+        <geometry><box><size>2.43 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_89">
+        <pose>-5.14 5.14 0.14 0 0 -0.322</pose>
+        <geometry><box><size>2.21 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_89">
+        <pose>-5.14 5.14 0.14 0 0 -0.322</pose>
+        <geometry><box><size>2.21 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_90">
+        <pose>-3.35 4.17 0.14 0 0 -0.675</pose>
+        <geometry><box><size>2.23 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_90">
+        <pose>-3.35 4.17 0.14 0 0 -0.675</pose>
+        <geometry><box><size>2.23 1.5 0.18</size></box></geometry>
+      </collision>
+      <visual name="segment_91">
+        <pose>-1.89 2.86 0.14 0 0 -0.785</pose>
+        <geometry><box><size>1.99 1.5 0.18</size></box></geometry>
+        <material>
+          <ambient>0.45 0.25 0.08 1</ambient>
+          <diffuse>0.65 0.35 0.10 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://trail_plane/materials/textures/dirt.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="segment_91">
+        <pose>-1.89 2.86 0.14 0 0 -0.785</pose>
+        <geometry><box><size>1.99 1.5 0.18</size></box></geometry>
+      </collision>
     </link>
   </model>
 </sdf>

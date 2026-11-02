@@ -43,6 +43,12 @@ const manualControls = {
 	yawRight: document.getElementById('btn-yaw-right')
 };
 
+const mapView = {
+	frame: document.getElementById('map'),
+	image: document.getElementById('map-image'),
+	marker: document.getElementById('drone-marker')
+};
+
 const directionButtons = document.querySelectorAll('[data-direction]');
 const statusIndicator = document.querySelector('.status-pill-online');
 const bridgeBaseUrl = 'http://localhost:8081';
@@ -54,6 +60,11 @@ const cameraFeedsUrl = {
 	thermal: `${bridgeBaseUrl}/api/frame/thermal.jpg`
 };
 
+const cameraStreamsUrl = {
+	rgb: `${bridgeBaseUrl}/stream/rgb.mjpg`,
+	thermal: `${bridgeBaseUrl}/stream/thermal.mjpg`
+};
+
 const localState = {
 	heading: 0,
 	altitude: 0,
@@ -62,6 +73,13 @@ const localState = {
 	latitude: 0,
 	longitude: 0,
 	mode: 'STANDBY'
+};
+
+const mapBounds = {
+	xMin: -25,
+	xMax: 25,
+	yMin: -25,
+	yMax: 25
 };
 
 let fallbackTimer = null;
@@ -87,6 +105,55 @@ function formatMetric(value, decimals = 1, suffix = '') {
 		return 'N/A';
 	}
 	return `${Number(value).toFixed(decimals)}${suffix}`;
+}
+
+function clamp(value, min, max) {
+	return Math.max(min, Math.min(max, value));
+}
+
+function initMapView() {
+	if (!mapView.frame || !mapView.image) {
+		return;
+	}
+
+	mapView.image.addEventListener('load', () => {
+		mapView.frame.classList.add('map-active');
+	});
+
+	mapView.image.addEventListener('error', () => {
+		mapView.frame.classList.remove('map-active');
+	});
+
+	if (mapView.image.complete && mapView.image.naturalWidth > 0) {
+		mapView.frame.classList.add('map-active');
+	}
+}
+
+function updateDroneMarker(x, y, heading = 0) {
+	if (!mapView.marker) {
+		return;
+	}
+
+	const xVal = Number(x);
+	const yVal = Number(y);
+	const headingVal = Number(heading);
+	const normalizedHeading = Number.isFinite(headingVal) ? ((headingVal % 360) + 360) % 360 : 0;
+	// Odometry heading is 0 at +X and increases CCW; the CSS arrow points up by
+	// default in screen space, so convert to screen rotation.
+	const screenRotation = 90 - normalizedHeading;
+	mapView.marker.style.setProperty('--marker-rotation', `${screenRotation.toFixed(1)}deg`);
+
+	if (!Number.isFinite(xVal) || !Number.isFinite(yVal)) {
+		mapView.marker.style.display = 'none';
+		return;
+	}
+
+	mapView.marker.style.display = 'block';
+	const xNorm = clamp((xVal - mapBounds.xMin) / (mapBounds.xMax - mapBounds.xMin), 0, 1);
+	const yNorm = clamp((yVal - mapBounds.yMin) / (mapBounds.yMax - mapBounds.yMin), 0, 1);
+
+	mapView.marker.style.left = `${(xNorm * 100).toFixed(2)}%`;
+	mapView.marker.style.top = `${((1 - yNorm) * 100).toFixed(2)}%`;
 }
 
 function setFeedActive(feedKey, active) {
@@ -116,9 +183,25 @@ function configureCameraFeed(feedKey, streamUrl) {
 	setFeedActive(feedKey, true);
 }
 
+function configureCameraStream(feedKey, streamUrl, fallbackFrameUrl) {
+	const feed = cameraFeeds[feedKey];
+	if (!feed || !feed.image) {
+		return;
+	}
+
+	feed.image.onload = () => setFeedActive(feedKey, true);
+	feed.image.onerror = () => {
+		setFeedActive(feedKey, false);
+		configureCameraFeed(feedKey, fallbackFrameUrl);
+	};
+
+	feed.image.src = `${streamUrl}?t=${Date.now()}`;
+}
+
 function renderTelemetry(state) {
 	const latitude = toNumber(state.latitude, 0);
 	const longitude = toNumber(state.longitude, 0);
+	updateDroneMarker(latitude, longitude, state.heading);
 	telemetryValues.coords.textContent = Number.isFinite(latitude) && Number.isFinite(longitude)
 		? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
 		: 'N/A';
@@ -231,14 +314,10 @@ async function refreshTelemetry() {
 }
 
 function connectBridge() {
-	configureCameraFeed('rgb', cameraFeedsUrl.rgb);
-	configureCameraFeed('thermal', cameraFeedsUrl.thermal);
+	configureCameraStream('rgb', cameraStreamsUrl.rgb, cameraFeedsUrl.rgb);
+	configureCameraStream('thermal', cameraStreamsUrl.thermal, cameraFeedsUrl.thermal);
 	refreshTelemetry();
-	telemetryTimer = setInterval(refreshTelemetry, 1000);
-	cameraTimer = setInterval(() => {
-		configureCameraFeed('rgb', cameraFeedsUrl.rgb);
-		configureCameraFeed('thermal', cameraFeedsUrl.thermal);
-	}, 400);
+	telemetryTimer = setInterval(refreshTelemetry, 100);
 	updateManualState();
 }
 
@@ -348,6 +427,7 @@ function bindMomentaryManualButton(button, vector) {
 	button.addEventListener('touchcancel', release);
 }
 
+initMapView();
 renderTelemetry(localState);
 connectBridge();
 bindCommandButtons();

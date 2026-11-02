@@ -8,7 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Drone Ground Control Station</title>
-    <link rel="stylesheet" href="style.css?v=20261020a">
+    <link rel="stylesheet" href="style.css?v=20261102d">
 </head>
 
 <body>
@@ -33,6 +33,13 @@
                     <span class="panel-tag">Live position overlay</span>
                 </div>
                 <div class="map-frame" id="map">
+                    <img
+                        id="map-image"
+                        class="map-image"
+                        src="models/trail_plane/materials/textures/empty_grass.png"
+                        alt="Top down terrain map"
+                    />
+                    <div id="drone-marker" class="drone-marker" aria-label="Drone location"></div>
                     <div class="placeholder-copy">
                         <span class="placeholder-title">Map Space</span>
                     </div>
@@ -160,7 +167,7 @@
         </main>
     </div>
 
-    <script src="app.js?v=20261020a"></script>
+    <script src="app.js?v=20261102d"></script>
 </body>
 
 </html>

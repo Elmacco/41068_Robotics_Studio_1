@@ -66,7 +66,7 @@ class TargetDetector(Node):
         # 'cpu', 'cuda', or 'cuda:0' etc. Falls back to CPU everywhere unless
         # you know a GPU is passed through to this environment.
         self.declare_parameter('device', 'cpu')
-        self.declare_parameter('debug', False)
+        self.declare_parameter('debug', True)
 
         # Red flagging. The torso_* values pick the slice of each person box
         # that gets sampled: heights are fractions of box height from the top,

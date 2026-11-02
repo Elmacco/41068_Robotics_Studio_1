@@ -291,9 +291,7 @@
 
         <!-- Trail 1, dude 1 -->
     <include>
-      <uri>
-        file:///home/student/subjects/41068_robotics_studio_1/Ethan_Colour_Detector_Module_Needs_Integration/41068_assignment/models/rescue_randy_red
-      </uri>
+      <uri>models://rescue_randy_red</uri>
       <name>standing_person</name>
       <pose>-15.0 12.0 0 0 0 0</pose>
     </include>
@@ -301,7 +299,7 @@
    <!-- Trail 1, dude 2 -->
     <include>
       <uri>
-        file:///home/student/subjects/41068_robotics_studio_1/Ethan_Colour_Detector_Module_Needs_Integration/41068_assignment/models/rescue_randy_green
+        models://rescue_randy_green
       </uri>
       <name>standing_person2</name>
       <pose>-15.0 -19.0 0 0 0 0</pose>
@@ -310,7 +308,7 @@
     <!-- Trail 3, dude 3 -->
     <include>
       <uri>
-        file:///home/student/subjects/41068_robotics_studio_1/Ethan_Colour_Detector_Module_Needs_Integration/41068_assignment/models/rescue_randy_green
+        models://rescue_randy_green
       </uri>
       <name>standing_person3</name>
       <pose>20.0 -7.0 0 0 0 0</pose>
@@ -319,7 +317,7 @@
     <!-- Test, dude 4 -->
     <include>
       <uri>
-        file:///home/student/subjects/41068_robotics_studio_1/Ethan_Colour_Detector_Module_Needs_Integration/41068_assignment/models/rescue_randy_base
+        models://rescue_randy_base
       </uri>
       <name>standing_person4</name>
       <pose>5.0 1.0 0 0 0 0</pose>

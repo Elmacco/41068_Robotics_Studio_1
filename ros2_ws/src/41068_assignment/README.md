@@ -65,10 +65,29 @@ scripts/                   Nodes (executables):
   grid_tools.py            Distance transform, A2 smoother, small helpers
   node_params.py           Exposes the modules' settings as ROS parameters
   mission_waypoints.py     Shared fixed route + RViz marker builder
-  colour_classifier.py     Red-shirt check for target_detector.py
+  colour_classifier.py     Red-shirt check for target_detector.py; Active mode
+                           uses this YOLO/colour result first, then requires a
+                           current thermal presence check inside the YOLO box
   test_colour_classifier.py  Standalone test for it (python3 <file>)
 test/                      Unit tests for the library modules (no simulator)
 ```
+
+Colour detection is enabled by default when the detection module is launched.
+To start the full demo with detection enabled:
+
+```bash
+ros2 launch 41068_assignment demo.launch.py detection:=True
+```
+
+To run only the detection module and explicitly enable colour classification:
+
+```bash
+ros2 launch 41068_assignment launch/modules/detection.launch.py colour_enabled:=true
+```
+
+The detector publishes `target_colour` (`red` or `none`) and
+`target_detections`; Active mode uses the highest-confidence YOLO box to
+restrict its thermal presence check to that person.
 
 ## Prerequisites
 

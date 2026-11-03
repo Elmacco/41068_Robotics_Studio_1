@@ -31,6 +31,11 @@ behind a standing person is hidden from a camera 1 m up, so a frontier
 stays there, the nearest one, and reaching it (facing the person) revealed
 nothing, so it was chosen again and again. The fixed timeout is now only a
 backstop.
+
+Also new: a frontier further than Nav2's rolling costmap reaches is flown to
+in hops (CoverageExplorer.select_goal). A hop is a stopover, not a place to
+look from: reaching one having seen nothing new is still a success, and it
+is only stale once its frontier, not the hop itself, has been seen.
 """
 
 import math
@@ -162,6 +167,10 @@ class MappingMode:
         self.no_goal_count = 0
         frontier = self.explorer.selected_
         self.status = f'flying to F{frontier.frontier_id} at [{goal.x:.1f}, {goal.y:.1f}]'
+        if self.explorer.is_waypoint_:
+            target = self.explorer.target_pose_
+            self.status = (f'flying to F{frontier.frontier_id} at [{target.x:.1f}, {target.y:.1f}]'
+                           f' via [{goal.x:.1f}, {goal.y:.1f}]')
         self.send_goal(goal)
         return f'{coverage:.0f}% observed, {self.status}'
 
@@ -217,10 +226,11 @@ class MappingMode:
         nothing to see there from where Nav2 stops (this also covers AT3's
         goal reached instantly, which sees nothing new). Blacklisted over
         no_gain_blacklist_radius, so the next goal is not the frontier cell
-        beside it, with the same view blocked.
+        beside it, with the same view blocked. A hop towards a far frontier
+        is exempt: it is there to get within range, not to see anything.
         """
         gain = self.watchdog.gain(self.observed_area())
-        if success and gain < self.min_goal_gain:
+        if success and gain < self.min_goal_gain and not self.explorer.is_waypoint_:
             success = False
             radius = self.no_gain_blacklist_radius
             self.manager.get_logger().info(
@@ -238,7 +248,7 @@ class MappingMode:
         """Give up on a goal whose frontier the camera has already seen (AT3)."""
         if not self.waiting_for_result:
             return
-        goal = self.explorer.goal_pose_
+        goal = self.explorer.target_pose_       # the frontier end, not a hop
         if goal is None or self.explorer.goal_still_useful(goal):
             return
         self.manager.get_logger().info(

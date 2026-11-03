@@ -49,6 +49,40 @@ def test_goals_beyond_max_goal_distance_are_skipped():
     assert math.hypot(goal.x - 2.0, goal.y - 1.0) <= explorer.max_goal_distance + 1.0
 
 
+def far_frontier_grid():
+    """10 x 30 m, mapped up to y = 25 m, with a wall at y = 10 m open at its east end."""
+    grid = np.full((300, 100), -1, np.int8)
+    grid[:250, :] = 0
+    grid[100:103, :70] = 100
+    return grid
+
+
+def test_a_frontier_out_of_range_is_reached_in_hops():
+    explorer = explorer_on(far_frontier_grid())
+    start = pose(2.0, 1.0)
+    goal = explorer.select_goal(start)
+    assert goal is not None
+    assert explorer.is_waypoint_
+    assert explorer.target_pose_.y > 23.0                    # the frontier end
+    assert math.hypot(goal.x - start.x, goal.y - start.y) <= explorer.max_goal_distance
+    assert goal.x > 6.0                                      # heading for the gap in the wall
+    row, col = explorer.map_.world_to_grid(goal.x, goal.y)
+    assert explorer.clearance_[row, col] >= explorer.min_clearance
+
+
+def test_hops_lead_to_the_frontier():
+    explorer = explorer_on(far_frontier_grid())
+    here = pose(2.0, 1.0)
+    for _ in range(5):
+        goal = explorer.select_goal(here)
+        assert goal is not None
+        if not explorer.is_waypoint_:
+            break
+        here = goal
+    assert not explorer.is_waypoint_
+    assert goal.y > 23.0
+
+
 def test_trunk_shadow_is_not_worth_a_trip():
     grid = np.zeros((100, 100), np.int8)
     grid[48:52, 48:52] = 100                    # trunk

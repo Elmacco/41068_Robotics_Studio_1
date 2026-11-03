@@ -79,14 +79,24 @@ class FakeManager:
         return self.logger
 
 
-def mapping_mode_at_goal(gain_m2):
-    """A MappingMode that just reached a goal, having seen gain_m2 of new ground."""
-    grid = np.full((100, 100), -1, np.int8)
-    grid[:, :50] = 0
+def mapping_mode_at_goal(gain_m2, far=False):
+    """A MappingMode that just reached a goal, having seen gain_m2 of new ground.
+
+    far: the frontier is 24 m off, so the goal is a hop towards it.
+    """
+    if far:
+        grid = np.full((300, 100), -1, np.int8)
+        grid[:250, :] = 0
+        start = Pose2D(x=5.0, y=1.0)
+    else:
+        grid = np.full((100, 100), -1, np.int8)
+        grid[:, :50] = 0
+        start = Pose2D(x=2.0, y=5.0)
     explorer = CoverageExplorer()
     explorer.update_map(MapGrid(grid, RES, 0.0, 0.0))
     explorer.find_frontiers()
-    explorer.select_goal(Pose2D(x=2.0, y=5.0))
+    explorer.select_goal(start)
+    assert explorer.is_waypoint_ == far
 
     mode = MappingMode.__new__(MappingMode)     # no ROS node behind it
     mode.manager = FakeManager()
@@ -96,6 +106,8 @@ def mapping_mode_at_goal(gain_m2):
     mode.watchdog = watchdog()
     observed = explorer.exploration_stats()['observed_area_m2']
     mode.watchdog.start(0.0, observed - gain_m2, distance=0.0)
+    mode.waiting_for_result = True
+    mode.goal_handle = None
     return mode
 
 
@@ -110,3 +122,15 @@ def test_a_goal_reached_with_new_ground_is_not_blacklisted():
     mode = mapping_mode_at_goal(gain_m2=4.0)
     mode.goal_finished(success=True)
     assert mode.explorer.blacklist_ == []
+
+
+def test_a_hop_reached_without_new_ground_is_not_blacklisted():
+    mode = mapping_mode_at_goal(gain_m2=0.0, far=True)
+    mode.goal_finished(success=True)
+    assert mode.explorer.blacklist_ == []
+
+
+def test_a_hop_far_from_any_frontier_is_not_stale():
+    mode = mapping_mode_at_goal(gain_m2=0.0, far=True)
+    mode.abandon_stale_goal()
+    assert mode.waiting_for_result

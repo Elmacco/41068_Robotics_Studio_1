@@ -17,7 +17,8 @@ blacklisting and stand-off logic. What changed is the map it runs on:
 
 Other changes from AT3, each for a reason given where it is used:
   - sizes are in metres (AT3 counted cells at 0.3 m; this grid is 0.1 m)
-  - goals are capped at max_goal_distance (Nav2's rolling global costmap)
+  - a frontier further than max_goal_distance (Nav2's rolling global
+    costmap) is reached in hops along the wavefront route to it
   - stand-off clearances match the Parrot's costmap, not the Husky's
   - the marker frame is a parameter (parrot1_map, not map)
   - exploration_stats reports camera coverage of the world
@@ -168,7 +169,8 @@ class CoverageExplorer:
 
         # Nav2's global costmap is a 20 x 20 m rolling window centred on the
         # drone (nav2_params_parrot1.yaml), and the planner rejects goals off
-        # it. Cap goals at a little under its 10 m half-width.
+        # it. No goal sent to Nav2 is further than a little under its 10 m
+        # half-width; a frontier beyond that is flown to in hops of this size.
         self.max_goal_distance = max_goal_distance
 
         # Neighbourhood used to point the goal at the unknown space (m).
@@ -184,7 +186,9 @@ class CoverageExplorer:
         self.scan_count_ = 0
         self.blacklist_: List[Tuple[float, float, Optional[float]]] = []   # x, y, radius
         self.selected_: Optional[Frontier] = None
-        self.goal_pose_: Optional[Pose2D] = None
+        self.goal_pose_: Optional[Pose2D] = None          # the goal sent to Nav2
+        self.target_pose_: Optional[Pose2D] = None        # stand-off at the frontier
+        self.is_waypoint_ = False                         # goal is a hop towards target
         self.goal_cell_xy_: Optional[Tuple[float, float]] = None
 
     def update_map(self, grid: MapGrid):
@@ -374,6 +378,8 @@ class CoverageExplorer:
         """Forget the current goal, e.g. when another mode takes over."""
         self.selected_ = None
         self.goal_pose_ = None
+        self.target_pose_ = None
+        self.is_waypoint_ = False
         self.goal_cell_xy_ = None
 
     def select_goal(self, robot_pose: Pose2D) -> Optional[Pose2D]:
@@ -381,9 +387,13 @@ class CoverageExplorer:
         Choose the next exploration goal, or None when no frontier is reachable.
 
         AT3's ranking: information gain (cluster size), travel cost (wavefront
-        distance) and turn cost, skipping blacklisted, unreachable and
-        out-of-range candidates. The goal faces the unknown ground, which
-        matters more here than in AT3: the camera only looks forwards.
+        distance) and turn cost, skipping blacklisted and unreachable
+        candidates. The goal faces the unknown ground, which matters more here
+        than in AT3: the camera only looks forwards.
+
+        New: a goal beyond max_goal_distance is off Nav2's rolling costmap, so
+        a hop along the way to it is returned instead (is_waypoint_), and
+        target_pose_ holds the goal at the frontier.
         """
         self.clear_selection()
         if self.map_ is None or not self.frontiers_ or robot_pose is None:
@@ -428,6 +438,10 @@ class CoverageExplorer:
         goal.theta = float(self._heading_into_unknown(row, col, robot_pose))
 
         self.selected_ = frontier
+        self.target_pose_ = goal
+        if math.hypot(goal_x - robot_pose.x, goal_y - robot_pose.y) > self.max_goal_distance:
+            goal = self._waypoint_towards(row, col, dist_field, robot_pose)
+            self.is_waypoint_ = True
         self.goal_pose_ = goal
         return goal
 
@@ -437,9 +451,10 @@ class CoverageExplorer:
         Pick the reachable cell of a cluster nearest its middle (AT3).
 
         Cells are excluded per cell, not per cluster, if they are near a
-        blacklisted goal (AT3) or beyond max_goal_distance from the drone
-        (new: Nav2's rolling costmap), so a big frontier is approached from
-        its nearer end rather than abandoned.
+        blacklisted goal (AT3). New: cells within max_goal_distance of the
+        drone are preferred, so a big frontier is approached directly from
+        its nearer end; a frontier entirely out of range is still a candidate,
+        reached in hops (_waypoint_towards).
         """
         rows, cols = np.nonzero(self.labels_ == frontier.frontier_id)
         if rows.size == 0:
@@ -449,17 +464,72 @@ class CoverageExplorer:
         usable = np.isfinite(costs)
         xs = self.map_.origin_x + (cols + 0.5) * self.map_.resolution
         ys = self.map_.origin_y + (rows + 0.5) * self.map_.resolution
-        usable &= np.hypot(xs - robot_pose.x, ys - robot_pose.y) <= self.max_goal_distance
         for bx, by, radius in self.blacklist_:
             radius = self.blacklist_radius if radius is None else radius
             usable &= np.hypot(xs - bx, ys - by) > radius
         if not usable.any():
             return None
+        in_range = usable & (np.hypot(xs - robot_pose.x, ys - robot_pose.y)
+                             <= self.max_goal_distance)
+        if in_range.any():
+            usable = in_range
 
         centre_row, centre_col = self.map_.world_to_grid(frontier.x, frontier.y)
         to_centre = np.hypot(rows - centre_row, cols - centre_col)
         idx = int(np.argmin(np.where(usable, to_centre, np.inf)))
         return int(rows[idx]), int(cols[idx]), float(costs[idx])
+
+    def _route_to(self, row: int, col: int, dist_field: np.ndarray) -> List[Tuple[int, int]]:
+        """
+        Cells of the wavefront route from the drone to (row, col), drone first.
+
+        Follows the distance field (AT3's wavefront) downhill from the goal.
+        Of equally near neighbours the one furthest from hazards is taken, so
+        the route keeps off tree trunks.
+        """
+        route = [(row, col)]
+        while dist_field[row, col] > 0:
+            best = None
+            for d_row in (-1, 0, 1):
+                for d_col in (-1, 0, 1):
+                    r, c = row + d_row, col + d_col
+                    if (d_row or d_col) and self.map_.in_bounds(r, c):
+                        key = (dist_field[r, c], -self.clearance_[r, c])
+                        if best is None or key < best[0]:
+                            best = (key, r, c)
+            if best is None or best[0][0] >= dist_field[row, col]:
+                break                      # cannot happen on a wavefront; be safe
+            _, row, col = best
+            route.append((row, col))
+        route.reverse()
+        return route
+
+    def _waypoint_towards(self, row: int, col: int, dist_field: np.ndarray,
+                          robot_pose: Pose2D) -> Pose2D:
+        """
+        A hop along the wavefront route to a goal beyond max_goal_distance.
+
+        The furthest route cell before the route first leaves max_goal_distance
+        of the drone, preferring one with min_clearance so Nav2 accepts it.
+        It faces along the route, towards the frontier.
+        """
+        route = np.array(self._route_to(row, col, dist_field))
+        xs = self.map_.origin_x + (route[:, 1] + 0.5) * self.map_.resolution
+        ys = self.map_.origin_y + (route[:, 0] + 0.5) * self.map_.resolution
+        out_of_range = np.hypot(xs - robot_pose.x, ys - robot_pose.y) > self.max_goal_distance
+        end = int(np.argmax(out_of_range)) if out_of_range.any() else len(route)
+        end = max(end, 1)
+        clear = self.clearance_[route[:end, 0], route[:end, 1]] >= self.min_clearance
+        idx = int(np.nonzero(clear)[0][-1]) if clear.any() else end - 1
+
+        ahead = min(idx + self.map_.metres_to_cells(self.heading_window), len(route) - 1)
+        goal = Pose2D()
+        goal.x, goal.y = float(xs[idx]), float(ys[idx])
+        if ahead > idx:
+            goal.theta = float(math.atan2(ys[ahead] - ys[idx], xs[ahead] - xs[idx]))
+        else:
+            goal.theta = float(math.atan2(goal.y - robot_pose.y, goal.x - robot_pose.x))
+        return goal
 
     def _standoff_cell(self, row: int, col: int, dist_field: np.ndarray) -> Tuple[int, int]:
         """

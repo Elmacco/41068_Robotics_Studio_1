@@ -2,6 +2,10 @@
 
 Not an executable node: terrain_mapper.py serves it as a ROS service.
 
+walking_grids() turns the terrain map into what a route search needs, for
+both searches: trail_graph.py's roadmap (the default) and plan_route()
+here, which searches every cell and is kept to compare against.
+
 This is the 49274 A2 path planner on the drone's terrain map:
 
   - Graph: every cell is a node, joined to its 8 neighbours.
@@ -50,20 +54,22 @@ class RouteConfig:
     ranger_mass: float = 90.0        # kg
     gravity: float = 9.81            # m/s^2
 
-    # Resistance per terrain type. Only the ratios change the route: a route
-    # along trail is chosen over grass unless the trail is twice as long,
-    # and unmapped ground is avoided unless the detour is three times as
-    # long - it could hide anything.
+    # Resistance per terrain type. Only the ratios change the route, so
+    # these are preference weights more than measured resistances: a route
+    # along trail is chosen over grass unless the trail is ten times as
+    # long, so nearly all walking is done on the trail, and unmapped ground
+    # is avoided unless the detour is three times as long as over grass -
+    # it could hide anything.
     mu_trail: float = 0.05
-    mu_grass: float = 0.10
-    mu_unknown: float = 0.30
+    mu_grass: float = 0.5
+    mu_unknown: float = 1.5
     # Under low branches (1.2-2.0 m): passable by ducking or pushing
     # through, at 2.5x the effort of open grass, trail or not.
-    mu_overhead: float = 0.25
+    mu_overhead: float = 1.25
 
-    # A cell is trail if at least this share of its ground points were
-    # trail-coloured (same rule as trail_detector.py).
-    min_trail_fraction: float = 0.5
+    # Route search: 'prm' (trail_graph.py, the default) or 'grid'
+    # (plan_route below, every cell a node; slower, kept to compare).
+    planner: str = 'prm'
 
     # Half a person's width (m). Cells closer than this to an obstacle are
     # blocked, so the route only uses gaps at least 0.6 m wide.
@@ -101,7 +107,7 @@ class Route:
 
     def summary(self) -> str:
         return (f'{self.length:.1f} m, {self.energy / 1000:.1f} kJ, '
-                f'{100 * self.trail_share:.0f}% on trail, {self.expanded} cells searched')
+                f'{100 * self.trail_share:.0f}% on trail, {self.expanded} nodes expanded')
 
 
 # 8-connected neighbours: (d_row, d_col, step length in cells)
@@ -111,7 +117,7 @@ NEIGHBOURS = [(-1, 0, 1.0), (1, 0, 1.0), (0, -1, 1.0), (0, 1, 1.0),
 
 
 def walking_grids(obstacles: np.ndarray, overhead: np.ndarray, observed: np.ndarray,
-                  trail_fraction: np.ndarray, resolution: float,
+                  trail_cells: np.ndarray, resolution: float,
                   config: RouteConfig) -> WalkingGrids:
     """Blocked mask, per-cell mu and trail mask from the terrain map's layers."""
     # Clearance from each cell's edge to the nearest obstacle (m), measured
@@ -120,7 +126,7 @@ def walking_grids(obstacles: np.ndarray, overhead: np.ndarray, observed: np.ndar
     clearance = (distance_to_outside(~obstacles) - 0.5) * resolution
     blocked = obstacles | (clearance < config.clearance)
 
-    trail = observed & (trail_fraction >= config.min_trail_fraction)
+    trail = observed & trail_cells
     mu = np.full(obstacles.shape, config.mu_grass, dtype=np.float64)
     mu[trail] = config.mu_trail
     mu[overhead] = config.mu_overhead       # ducking under branches, even on a trail

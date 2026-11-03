@@ -4,8 +4,8 @@ Not an executable node: terrain_mapper.py runs it on the latest terrain map.
 
 Pipeline (each step is a standard image-processing operation on the grid):
 
-  1. Trail mask: cells whose ground points were mostly trail-coloured
-     (terrain_map.py classifies each point's colour).
+  1. Trail mask: TerrainMap.trail_cells(), cells whose ground is trail-
+     coloured or raised above the grass, depending on the world.
   2. Clean the mask with a morphological close (fill pinholes) and open
      (drop specks).
   3. Distance transform of the mask: each trail cell's distance to the
@@ -30,9 +30,13 @@ Pipeline (each step is a standard image-processing operation on the grid):
   8. Order each section's cells end to end, smooth it with A2's
      gradient-descent smoother (kept inside the trail), and resample it to
      evenly spaced waypoints.
+  9. Name the trail networks: trails on the same connected piece of the
+     mask share a network (N1, N2, ...), so separate trail systems, such as
+     the two in simple_trees, can be patrolled one at a time.
 
 The result is a list of Trail objects, longest first, named T1, T2, ...
-Passive mode flies along one of them.
+Passive mode flies along one of them; trail_graph.py puts its route-graph
+nodes along them.
 """
 
 import math
@@ -42,16 +46,11 @@ from typing import Dict, List, Tuple
 import cv2
 import numpy as np
 
-from grid_tools import distance_to_outside, path_length, resample, smooth_path
+from grid_tools import distance_to_outside, path_length, resample, smooth_path, thin
 
 
 @dataclass
 class TrailConfig:
-    # A cell is trail if at least this share of its ground points were
-    # trail-coloured, judged from at least min_ground_points points.
-    min_trail_fraction: float = 0.5
-    min_ground_points: int = 3
-
     # Radius (m) of the close/open clean-up. Small next to a ~0.9 m trail.
     clean_radius: float = 0.15
 
@@ -84,9 +83,10 @@ class Trail:
     points: List[Tuple[float, float]]      # world (x, y) waypoints, end to end
     length: float                          # m
     width: float                           # mean width along the centreline (m)
+    network: str = ''                      # 'N1', 'N2', ...: connected trail system
 
     def to_dict(self) -> Dict:
-        return {'name': self.name, 'length': round(self.length, 2),
+        return {'name': self.name, 'network': self.network, 'length': round(self.length, 2),
                 'width': round(self.width, 2),
                 'points': [[round(x, 3), round(y, 3)] for x, y in self.points]}
 
@@ -106,20 +106,15 @@ class TrailResult:
 RING = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
 
 
-def detect_trails(ground_hits: np.ndarray, trail_hits: np.ndarray,
-                  resolution: float, origin_x: float, origin_y: float,
-                  config: TrailConfig) -> TrailResult:
-    """Run the pipeline above on a terrain map's ground/trail point totals."""
+def detect_trails(trail_cells: np.ndarray, resolution: float, origin_x: float,
+                  origin_y: float, config: TrailConfig) -> TrailResult:
+    """Run the pipeline above on a terrain map's trail cells (bool grid)."""
     cfg = config
-
-    # 1. Trail mask
-    fraction = trail_hits / np.maximum(ground_hits, 1)
-    mask = (ground_hits >= cfg.min_ground_points) & (fraction >= cfg.min_trail_fraction)
 
     # 2. Clean-up
     radius = max(1, int(round(cfg.clean_radius / resolution)))
     disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * radius + 1, 2 * radius + 1))
-    mask_u8 = mask.astype(np.uint8)
+    mask_u8 = trail_cells.astype(np.uint8)
     mask_u8 = cv2.morphologyEx(mask_u8, cv2.MORPH_CLOSE, disc)
     mask_u8 = cv2.morphologyEx(mask_u8, cv2.MORPH_OPEN, disc)
     mask = mask_u8 > 0
@@ -130,7 +125,7 @@ def detect_trails(ground_hits: np.ndarray, trail_hits: np.ndarray,
     ridge = mask & (np.hypot(grad_x, grad_y) < cfg.ridge_grad_max) & (dist >= cfg.min_half_width)
 
     # 5. One-cell-wide skeleton of the whole mask
-    skeleton = cv2.ximgproc.thinning(mask.astype(np.uint8) * 255) > 0
+    skeleton = thin(mask)
 
     # 6. Split at junctions. Removing each junction with its 8 neighbours
     # separates the branches cleanly, whatever shape the thinning left there.
@@ -139,7 +134,9 @@ def detect_trails(ground_hits: np.ndarray, trail_hits: np.ndarray,
     sections = skeleton & ~cut
     count, labels = cv2.connectedComponents(sections.astype(np.uint8), connectivity=8)
 
-    # 7-8. Keep sections that follow the ridge; order, smooth and resample them
+    # 7-8. Keep sections that follow the ridge; order, smooth and resample
+    # them. Each is tagged with the connected piece of the mask it is on.
+    _, pieces = cv2.connectedComponents(mask.astype(np.uint8), connectivity=8)
     trails = []
     for label in range(1, count):
         section = labels == label
@@ -158,11 +155,17 @@ def detect_trails(ground_hits: np.ndarray, trail_hits: np.ndarray,
         # trail is half a cell nearer (as in AT3's clearance).
         rows, cols = zip(*cells)
         width = 2.0 * (float(np.mean(dist[list(rows), list(cols)])) - 0.5 * resolution)
-        trails.append(Trail('', resample(world, cfg.waypoint_spacing), length, width))
+        trail = Trail('', resample(world, cfg.waypoint_spacing), length, width)
+        trails.append((trail, int(pieces[cells[0]])))
 
-    trails.sort(key=lambda t: t.length, reverse=True)
-    for i, trail in enumerate(trails):
+    # 9. Name trails longest first, and networks in the order their longest
+    # trail appears
+    trails.sort(key=lambda pair: pair[0].length, reverse=True)
+    networks = {}
+    for i, (trail, piece) in enumerate(trails):
         trail.name = f'T{i + 1}'
+        trail.network = networks.setdefault(piece, f'N{len(networks) + 1}')
+    trails = [trail for trail, _ in trails]
 
     return TrailResult(trails, mask, ridge, skeleton, junctions)
 

@@ -11,7 +11,7 @@ find_package(rclcpp REQUIRED)
 include_directories(include)
 
 install(
-  DIRECTORY launch worlds config urdf_parrot models
+  DIRECTORY launch worlds config urdf_parrot models maps
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -40,6 +40,7 @@ install(
         scripts/trail_detector.py scripts/route_planner.py scripts/coverage_explorer.py
         scripts/node_params.py scripts/mapping_mode.py scripts/mission_modes.py
         scripts/active_mode.py scripts/colour_classifier.py
+        scripts/trail_graph.py scripts/map_overview.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

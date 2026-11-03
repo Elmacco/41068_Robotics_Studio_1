@@ -7,6 +7,7 @@ The algorithms are the ones from 49274 Space Robotics:
   - distance_to_outside: the distance transform used by AT3's cave_geometry.py
   - is_occluded and smooth_path: A2's collision check and gradient-descent
     path smoother (Task 5), working in cell coordinates instead of pixels
+  - thin: Zhang-Suen thinning, for the trail skeleton
 """
 
 import math
@@ -28,6 +29,51 @@ def distance_to_outside(mask: np.ndarray) -> np.ndarray:
                                 cv2.BORDER_CONSTANT, value=0)
     dist = cv2.distanceTransform(padded, cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
     return dist[1:-1, 1:-1]
+
+
+def thin(mask: np.ndarray) -> np.ndarray:
+    """One-cell-wide skeleton of a mask (Zhang-Suen thinning).
+
+    The same algorithm as OpenCV's cv2.ximgproc.thinning, written out because
+    ximgproc is only in the opencv-contrib build: the pip opencv-python that
+    ultralytics needs (requirements.txt) hides the apt build that has it.
+
+    Neighbours are named as in Zhang and Suen's paper, clockwise from the one
+    above: P2 (row - 1), P3, P4 (col + 1), ..., P9. Each pass removes, all at
+    once, the edge cells that are safe to remove:
+      - 2 to 6 neighbours set (not an end point, not an interior cell)
+      - exactly one 0 -> 1 step going round P2 ... P9 (removing it does not
+        split the shape)
+      - sub-pass 1 peels the south-east edge (P2.P4.P6 = 0 and P4.P6.P8 = 0),
+        sub-pass 2 the north-west edge (P2.P4.P8 = 0 and P2.P6.P8 = 0)
+    until a pass removes nothing.
+    """
+    img = np.pad(mask.astype(bool), 1)
+    height, width = mask.shape
+
+    def neighbours():
+        # P2 ... P9 as shifted views of the padded image
+        offsets = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+        return [img[1 + dr:1 + dr + height, 1 + dc:1 + dc + width] for dr, dc in offsets]
+
+    while True:
+        removed = False
+        for sub_pass in (0, 1):
+            p = neighbours()
+            p2, p3, p4, p5, p6, p7, p8, p9 = p
+            count = sum(n.astype(np.uint8) for n in p)
+            steps = sum((~p[i] & p[(i + 1) % 8]).astype(np.uint8) for i in range(8))
+            if sub_pass == 0:
+                side = ~(p2 & p4 & p6) & ~(p4 & p6 & p8)
+            else:
+                side = ~(p2 & p4 & p8) & ~(p2 & p6 & p8)
+            centre = img[1:-1, 1:-1]
+            remove = centre & (count >= 2) & (count <= 6) & (steps == 1) & side
+            if remove.any():
+                centre[remove] = False
+                removed = True
+        if not removed:
+            return img[1:-1, 1:-1].copy()
 
 
 def is_occluded(blocked: np.ndarray, p1: Sequence[float], p2: Sequence[float]) -> bool:

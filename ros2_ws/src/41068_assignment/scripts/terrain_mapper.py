@@ -17,7 +17,17 @@ Publishes
   trails               std_msgs/String          detected trails as JSON, for
                                                 Passive mode and the dashboard
   terrain/trail_markers visualization_msgs/MarkerArray
+  terrain/overview     sensor_msgs/Image        top-down picture of the map, +y
+                                                up (map_overview.py), for the
+                                                dashboard
+  terrain/overview_info std_msgs/String         JSON: frame, resolution, origin
+                                                and size of that picture, and
+                                                the ranger station
+  terrain/route_graph  std_msgs/String          JSON: the route roadmap's nodes
+                                                and edges (trail_graph.py)
   ranger_route         nav_msgs/Path            the last route planned
+  ranger_route/info    std_msgs/String          JSON: its goal, length, energy
+                                                and share on trail
 Services
   terrain/save         std_srvs/Trigger         save map + trails to disk
   plan_ranger_route    nav_msgs/GetPlan         least-effort walking route; an
@@ -45,17 +55,19 @@ from rclpy.executors import ExternalShutdownException, MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile
 from rclpy.time import Time
-from sensor_msgs.msg import PointCloud2, PointField
+from sensor_msgs.msg import Image, PointCloud2, PointField
 from sensor_msgs_py import point_cloud2
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformException, TransformListener
 from visualization_msgs.msg import Marker, MarkerArray
 
+from map_overview import render_overview
 from node_params import declare_config
 from route_planner import RouteConfig, plan_route, walking_grids
 from terrain_map import TerrainConfig, TerrainMap
 from trail_detector import TrailConfig, detect_trails, trail_lengths_summary
+from trail_graph import GraphConfig, build_graph, plan_route_prm
 
 # Colours for terrain/cloud (RGB)
 GRASS_RGB = (70, 150, 60)
@@ -110,9 +122,14 @@ class TerrainMapper(Node):
         self.terrain = TerrainMap(declare_config(self, TerrainConfig(), 'terrain.'))
         self.trail_config = declare_config(self, TrailConfig(), 'trails.')
         self.route_config = declare_config(self, RouteConfig(), 'route.')
+        self.graph_config = declare_config(self, GraphConfig(), 'graph.')
 
+        # A missing file only warns: demo.launch.py points at the world's
+        # preloaded map in maps/, which may not have been recorded yet.
         load_file = os.path.expanduser(self.get_parameter('map_load_file').value)
-        if load_file:
+        if load_file and not os.path.isfile(load_file):
+            self.get_logger().warn(f'No terrain map at {load_file}, starting with a blank map')
+        elif load_file:
             self.terrain.load(load_file)
             self.get_logger().info(f'Loaded terrain map {load_file} '
                                    f'({100 * self.terrain.coverage():.0f}% observed)')
@@ -120,6 +137,9 @@ class TerrainMapper(Node):
         self.odom = None
         self.trail_result = None
         self.clouds_used = 0
+        # Route roadmap, rebuilt with the trails when the map has changed
+        self.graph = None
+        self.graph_clouds = -1           # clouds_used when it was built
 
         # TF callbacks run in their own reentrant group (inside
         # TransformListener) on the multi-threaded executor, so the cloud
@@ -140,6 +160,10 @@ class TerrainMapper(Node):
         self.trails_pub = self.create_publisher(String, 'trails', latched)
         self.trail_marker_pub = self.create_publisher(MarkerArray, 'terrain/trail_markers', latched)
         self.route_pub = self.create_publisher(Path, 'ranger_route', latched)
+        self.route_info_pub = self.create_publisher(String, 'ranger_route/info', latched)
+        self.overview_pub = self.create_publisher(Image, 'terrain/overview', latched)
+        self.overview_info_pub = self.create_publisher(String, 'terrain/overview_info', latched)
+        self.graph_pub = self.create_publisher(String, 'terrain/route_graph', latched)
 
         self.create_service(Trigger, 'terrain/save', self.save_callback, callback_group=group)
         self.create_service(GetPlan, 'plan_ranger_route', self.route_callback,
@@ -228,10 +252,34 @@ class TerrainMapper(Node):
         self.occupancy_pub.publish(grid)
 
         self.cloud_pub.publish(self.terrain_cloud(stamp))
+        self.publish_overview(stamp)
 
         self.get_logger().info(
             f'Observed {100 * terrain.coverage():.0f}% of the world '
             f'({self.clouds_used} clouds used)', throttle_duration_sec=10.0)
+
+    def publish_overview(self, stamp):
+        """The dashboard's top-down map picture, and where it sits in the world."""
+        terrain = self.terrain
+        trail = (self.trail_result.mask if self.trail_result is not None
+                 else terrain.trail_cells())
+        pixels = render_overview(terrain.observed(), terrain.obstacles(), terrain.overhead(), trail)
+
+        image = Image()
+        image.header.frame_id = self.frame_id
+        image.header.stamp = stamp
+        image.height, image.width = pixels.shape[:2]
+        image.encoding = 'rgb8'
+        image.step = 3 * image.width
+        image.data = pixels.tobytes()
+        self.overview_pub.publish(image)
+
+        info = {'frame_id': self.frame_id, 'resolution': terrain.resolution,
+                'origin': [terrain.origin_x, terrain.origin_y],
+                'width': terrain.width, 'height': terrain.height,
+                'ranger_station': list(self.get_parameter('ranger_station').value),
+                'coverage': round(terrain.coverage(), 3)}
+        self.overview_info_pub.publish(String(data=json.dumps(info)))
 
     def terrain_cloud(self, stamp) -> PointCloud2:
         """One coloured point per observed cell, at its ground height."""
@@ -240,8 +288,7 @@ class TerrainMapper(Node):
         rows, cols = np.nonzero(observed)
         x, y = terrain.cell_to_world(rows, cols)
         colour = np.tile(np.array(GRASS_RGB, dtype=np.uint32), (len(rows), 1))
-        trail = terrain.trail_fraction()[rows, cols] >= self.trail_config.min_trail_fraction
-        colour[trail] = TRAIL_RGB
+        colour[terrain.trail_cells()[rows, cols]] = TRAIL_RGB
         colour[terrain.overhead()[rows, cols]] = OVERHEAD_RGB
         colour[terrain.obstacles()[rows, cols]] = OBSTACLE_RGB
         packed = (colour[:, 0] << 16) | (colour[:, 1] << 8) | colour[:, 2]
@@ -268,14 +315,37 @@ class TerrainMapper(Node):
 
     def update_trails(self):
         terrain = self.terrain
-        self.trail_result = detect_trails(terrain.ground_hits, terrain.trail_hits,
-                                          terrain.resolution, terrain.origin_x,
-                                          terrain.origin_y, self.trail_config)
+        self.trail_result = detect_trails(terrain.trail_cells(), terrain.resolution,
+                                          terrain.origin_x, terrain.origin_y, self.trail_config)
         trails = self.trail_result.trails
         message = {'frame_id': self.frame_id, 'trails': [t.to_dict() for t in trails]}
         self.trails_pub.publish(String(data=json.dumps(message)))
         self.trail_marker_pub.publish(self.trail_markers(trails))
         self.get_logger().info(trail_lengths_summary(trails), throttle_duration_sec=30.0)
+
+        if self.clouds_used != self.graph_clouds:
+            self.rebuild_graph()
+
+    def walking_grids(self):
+        terrain = self.terrain
+        return walking_grids(terrain.obstacles(), terrain.overhead(), terrain.observed(),
+                             terrain.trail_cells(), terrain.resolution, self.route_config)
+
+    def rebuild_graph(self):
+        """Route roadmap from the current trails and map (~0.3 s on simple_trees)."""
+        terrain = self.terrain
+        trails = self.trail_result.trails if self.trail_result is not None else []
+        started = time.perf_counter()
+        self.graph = build_graph(self.walking_grids(), terrain.elevation(), terrain.resolution,
+                                 terrain.origin_x, terrain.origin_y, trails,
+                                 self.graph_config, self.route_config)
+        self.graph_clouds = self.clouds_used
+        message = {'frame_id': self.frame_id, **self.graph.to_dict()}
+        self.graph_pub.publish(String(data=json.dumps(message)))
+        self.get_logger().info(
+            f'Route roadmap: {len(self.graph.nodes)} nodes ({int(self.graph.on_trail.sum())} '
+            f'on trails), {self.graph.edge_count()} edges '
+            f'({1000 * (time.perf_counter() - started):.0f} ms)', throttle_duration_sec=30.0)
 
     def trail_markers(self, trails) -> MarkerArray:
         markers = MarkerArray()
@@ -341,11 +411,26 @@ class TerrainMapper(Node):
             start = tuple(self.get_parameter('ranger_station').value)
         goal = (request.goal.pose.position.x, request.goal.pose.position.y)
 
-        grids = walking_grids(terrain.obstacles(), terrain.overhead(), terrain.observed(),
-                              terrain.trail_fraction(), terrain.resolution, self.route_config)
+        grids = self.walking_grids()
+        planner = self.route_config.planner
         started = time.perf_counter()
-        route = plan_route(grids, terrain.elevation(), terrain.resolution,
-                           terrain.origin_x, terrain.origin_y, start, goal, self.route_config)
+        if planner == 'grid':
+            route = plan_route(grids, terrain.elevation(), terrain.resolution,
+                               terrain.origin_x, terrain.origin_y, start, goal, self.route_config)
+        else:
+            if self.graph is None:
+                self.update_trails()             # trails first: they hold the graph's nodes
+            route = plan_route_prm(self.graph, grids, terrain.elevation(), terrain.resolution,
+                                   terrain.origin_x, terrain.origin_y, start, goal,
+                                   self.graph_config, self.route_config)
+            if route is None:
+                # The roadmap can miss a route the grid has, e.g. through a
+                # gap no random node landed near, so check every cell before
+                # reporting there is none
+                planner = 'grid (no roadmap route)'
+                route = plan_route(grids, terrain.elevation(), terrain.resolution,
+                                   terrain.origin_x, terrain.origin_y, start, goal,
+                                   self.route_config)
         took = time.perf_counter() - started
 
         path = Path()
@@ -364,9 +449,17 @@ class TerrainMapper(Node):
                 pose.pose.position.z = (float(z) if np.isfinite(z) else 0.0) + 0.1
                 pose.pose.orientation.w = 1.0
                 path.poses.append(pose)
-            self.get_logger().info(f'Ranger route {start} -> {goal}: {route.summary()} '
-                                   f'({1000 * took:.0f} ms)')
+            self.get_logger().info(f'Ranger route {start} -> {goal} ({planner}): '
+                                   f'{route.summary()} ({1000 * took:.0f} ms)')
         self.route_pub.publish(path)
+
+        info = {'start': list(start), 'goal': list(goal), 'found': route is not None,
+                'planner': planner, 'time_ms': round(1000 * took, 1)}
+        if route is not None:
+            info.update(length=round(route.length, 2), energy=round(route.energy, 1),
+                        trail_share=round(route.trail_share, 3))
+        self.route_info_pub.publish(String(data=json.dumps(info)))
+
         response.plan = path
         return response
 

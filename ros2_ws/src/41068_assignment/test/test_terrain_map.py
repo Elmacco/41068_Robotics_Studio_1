@@ -113,3 +113,46 @@ def test_low_branches_are_overhead_not_obstacles():
     assert not terrain.obstacles()[20:30, 20:30].any()
     assert terrain.overhead()[21:29, 21:29].all()
     assert (terrain.occupancy()[21:29, 21:29] == 0).all()                 # the drone flies under
+
+
+def raised_path_map(trail_source='height'):
+    """Grass with a solid 1.5 m wide path 0.23 m high along y = 1.75-3.25, as
+    simple_trees' boxes: the camera sees its top, never the grass under it."""
+    terrain = TerrainMap(TerrainConfig(x_min=0.0, x_max=5.0, y_min=0.0, y_max=5.0,
+                                       trail_source=trail_source))
+    for _ in range(2):          # second pass: local ground is known everywhere
+        terrain.add_points(*ground_points(0, 5, 0, 1.75, GRASS))
+        terrain.add_points(*ground_points(0, 5, 3.25, 5, GRASS))
+        terrain.add_points(*ground_points(0, 5, 1.75, 3.25, TRAIL, z=0.23))
+    return terrain
+
+
+def test_raised_path_edge_is_a_step_not_a_wall():
+    # Between cells the 0.23 m edge is a 49 deg slope, over max_slope_deg,
+    # but a person steps up it.
+    assert not raised_path_map().obstacles().any()
+
+
+def test_raised_path_is_found_across_its_whole_width():
+    path = raised_path_map().raised_path()
+    assert path[18:32, :].all()                # y 1.8-3.2 m: all of it
+    assert not path[:17, :].any() and not path[33:, :].any()
+
+
+def test_raised_path_keeps_its_colour_to_the_edges():
+    # Its top is 0.23 m above the local ground near the edge; colour is
+    # measured from the cell's own ground, so the edge cells still count.
+    fraction = raised_path_map().trail_fraction()
+    assert fraction[18:32, :].min() > 0.9
+
+
+def test_trail_source_picks_the_evidence():
+    # Brown grass (simple_trees' tinted plane) fools the colour rule, not the
+    # height rule; 'both' needs both.
+    for source, expected_grass in (('colour', True), ('height', False), ('both', False)):
+        terrain = raised_path_map(source)
+        for _ in range(3):      # brown grass, outvoting the green seen before
+            terrain.add_points(*ground_points(0, 5, 0, 1.0, TRAIL))
+        cells = terrain.trail_cells()
+        assert cells[20:30, :].all()
+        assert cells[2:8, :].all() == expected_grass

@@ -8,6 +8,12 @@ here from the start and simply turns on once its file is merged.
 
   ros2 launch 41068_assignment demo.launch.py
   ros2 launch 41068_assignment demo.launch.py detection:=False   # drop a part
+  ros2 launch 41068_assignment demo.launch.py terrain_map:=''    # map from scratch
+
+The terrain map starts from the world's preloaded map, maps/<world>/terrain.npz
+(see maps/README.md), so trails, routes and the dashboard map work straight
+away. Mapping mode finishes at once on a complete map; to show it mapping,
+start from a blank map with terrain_map:=''.
 
 See launch/modules/README.md for what a module launch file receives.
 """
@@ -19,7 +25,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, LogInfo
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 
 # (flag, file in launch/modules/, owner). Add a row when a new part appears.
 MODULES = [
@@ -41,9 +47,10 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
-    launch_dir = os.path.join(get_package_share_directory('41068_assignment'), 'launch')
+    share_dir = get_package_share_directory('41068_assignment')
+    launch_dir = os.path.join(share_dir, 'launch')
 
-    # Demo defaults. Anything not declared here (gui, mission, terrain_map,
+    # Demo defaults. Anything not declared here (gui, mission,
     # use_sim_time, ...) can still be passed on the command line and reaches
     # spawn_parrot.launch.py as usual.
     demo_args = [
@@ -55,6 +62,11 @@ def generate_launch_description():
         ('z', '0.8', 'Spawn height (m)'),
         ('rviz', 'True', 'Flag to launch RViz'),
         ('nav2', 'True', 'Flag to launch Nav2 (and SLAM). Mapping mode needs it.'),
+        ('terrain_map',
+         PathJoinSubstitution([os.path.join(share_dir, 'maps'), LaunchConfiguration('world'),
+                               'terrain.npz']),
+         "Terrain map to start from: the world's preloaded map. '' starts blank "
+         '(to show Mapping mode); a missing file also starts blank, with a warning.'),
     ]
     for name, default, description in demo_args:
         ld.add_action(DeclareLaunchArgument(name, default_value=default, description=description))

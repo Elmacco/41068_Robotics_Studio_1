@@ -7,5 +7,9 @@
       x_max: 25.0
       y_min: -25.0
       y_max: 25.0
+      # The trail is a raised path (models/elevated_trail, 0.23 m high) and
+      # the grass plane is tinted brown, so trails are found by height, not
+      # colour (see terrain_map.py).
+      trail_source: height
     # The launch pad, which is also where demo.launch.py spawns the drone.
     ranger_station: [2.0, 0.0]

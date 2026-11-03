@@ -23,7 +23,16 @@ Each grid cell keeps running totals over every camera point that landed in it:
 From those it derives the layers the rest of the system uses: observed,
 obstacles (including terrain too steep to walk, the A2 rule that a large
 terrain gradient is an obstacle), overhead branches, elevation, slope and
-trail fraction.
+trail cells.
+
+Trail cells come from one of two kinds of evidence, chosen per world
+(trail_source):
+  colour  the ground is mostly trail-coloured: hiking_trail_1, whose trails
+          are a texture on flat ground
+  height  the ground is raised above the grass around it: simple_trees,
+          whose trail is a 0.23 m high path of boxes. Its grass is tinted
+          brown, so there colour cannot tell trail from grass, but height
+          can: the drone does not tilt and the simulated depth has no noise.
 
 Why two height bands: with a single 0.3-2.0 m band, the canopies of the oak
 rows in hiking_trail_1 (which start 1.23 m up and are up to 12 m across)
@@ -91,6 +100,25 @@ class TerrainConfig:
     trail_hue_min: int = 5
     trail_hue_max: int = 30
     trail_saturation_min: int = 40
+
+    # What marks a cell as trail: 'colour', 'height' or 'both' (see the
+    # module docstring). Set per world in config/worlds/<world>.yaml.
+    trail_source: str = 'colour'
+
+    # Colour rule: at least this share of the cell's ground points were
+    # trail-coloured, judged from at least min_ground_points points.
+    min_trail_fraction: float = 0.5
+    min_ground_points: int = 3
+
+    # Height rule: the cell's ground is at least path_min_height above the
+    # grass, taken as the lowest ground within base_window (m). The window
+    # has to reach past the path's edge from anywhere on it: 3 m does for
+    # simple_trees' 1.5 m wide path, also at bends where its segments
+    # overlap. Ground more than obstacle_min_height up is an obstacle, not
+    # a path. Only for flat worlds: on a slope the window's lowest ground
+    # is downhill, 1.5 m * tan(4 deg) = 0.1 m lower already.
+    path_min_height: float = 0.1
+    base_window: float = 3.0
 
 
 class TerrainMap:
@@ -161,7 +189,8 @@ class TerrainMap:
         # Height of each point above the ground around it. Cells with no
         # ground yet have local ground +inf, which makes the height -inf and
         # drops the point from every test below.
-        height_above = z - self.local_ground()[row, col]
+        local = self.local_ground()[row, col]
+        height_above = z - local
 
         if update_geometry:
             cfg = self.config
@@ -172,7 +201,16 @@ class TerrainMap:
             np.add.at(self.obstacle_hits, (row[obstacle], col[obstacle]), 1)
             np.add.at(self.overhead_hits, (row[overhead], col[overhead]), 1)
 
-        on_ground = np.abs(height_above) < self.config.ground_tolerance
+        # A point is ground, and its colour counts, if it is close to its own
+        # cell's lowest point, and that lowest point is no more than a step
+        # above the ground around it (not the top of a rock or a person).
+        # Measuring from the cell rather than from the local ground keeps
+        # the edges of a raised path, whose top is a step above the grass
+        # beside it. Unmapped cells (ground +inf) give inf or NaN: not ground.
+        cell_ground = self.ground_z[row, col]
+        with np.errstate(invalid='ignore'):
+            on_ground = ((np.abs(z - cell_ground) < self.config.ground_tolerance)
+                         & (cell_ground - local < self.config.obstacle_min_height))
         trail = self.is_trail_colour(rgb[on_ground])
         np.add.at(self.ground_hits, (row[on_ground], col[on_ground]), 1)
         np.add.at(self.trail_hits, (row[on_ground][trail], col[on_ground][trail]), 1)
@@ -189,15 +227,30 @@ class TerrainMap:
 
     # ---------------------------------------------------------------- layers
 
-    def local_ground(self) -> np.ndarray:
+    def _window(self, size: float) -> np.ndarray:
+        """Square kernel about size m across, with an odd number of cells so
+        it is centred on the cell."""
+        half = int(round(size / 2 / self.resolution))
+        return np.ones((2 * half + 1, 2 * half + 1), dtype=np.uint8)
+
+    def local_ground(self, window: float = None) -> np.ndarray:
         """Lowest ground height within ground_window of each cell (+inf if none).
 
         A grey-scale erosion is a moving minimum, so this is one OpenCV call.
-        The window has an odd number of cells so it is centred on the cell.
         """
-        half = int(round(self.config.ground_window / 2 / self.resolution))
-        kernel = np.ones((2 * half + 1, 2 * half + 1), dtype=np.uint8)
+        kernel = self._window(self.config.ground_window if window is None else window)
         return cv2.erode(self.ground_z, kernel, borderType=cv2.BORDER_REPLICATE)
+
+    def ground_relief(self) -> np.ndarray:
+        """Highest minus lowest ground within ground_window of each cell (m).
+
+        -inf where no ground is known nearby. A grey-scale dilation is a
+        moving maximum; unknown cells are -inf for it so they never win.
+        """
+        kernel = self._window(self.config.ground_window)
+        known = np.where(np.isfinite(self.ground_z), self.ground_z, -np.inf).astype(np.float32)
+        highest = cv2.dilate(known, kernel, borderType=cv2.BORDER_REPLICATE)
+        return highest - self.local_ground()
 
     def observed(self) -> np.ndarray:
         return self.point_count >= self.config.min_observed_points
@@ -216,10 +269,19 @@ class TerrainMap:
         return np.degrees(np.arctan(np.hypot(grad_x, grad_y)))
 
     def obstacles(self) -> np.ndarray:
-        """Cells a walking person cannot enter: something in the way, or too steep."""
-        hit = self.obstacle_hits >= self.config.min_obstacle_points
+        """Cells a walking person cannot enter: something in the way, or too steep.
+
+        Steep needs both a slope over max_slope_deg and a rise of at least
+        obstacle_min_height within ground_window. Between two 0.1 m cells a
+        0.23 m kerb is a 49 deg slope, but a person steps up it, as they step
+        over anything lower than obstacle_min_height; without the second test
+        the raised path in simple_trees was walled off along both edges.
+        """
+        cfg = self.config
+        hit = self.obstacle_hits >= cfg.min_obstacle_points
         with np.errstate(invalid='ignore'):
-            steep = self.slope_deg() > self.config.max_slope_deg
+            steep = ((self.slope_deg() > cfg.max_slope_deg)
+                     & (self.ground_relief() >= cfg.obstacle_min_height))
         return hit | steep
 
     def overhead(self) -> np.ndarray:
@@ -229,6 +291,28 @@ class TerrainMap:
     def trail_fraction(self) -> np.ndarray:
         """Share of each cell's ground points that were trail-coloured (0-1)."""
         return self.trail_hits / np.maximum(self.ground_hits, 1)
+
+    def raised_path(self) -> np.ndarray:
+        """Cells whose ground is a step above the grass around it (height rule)."""
+        cfg = self.config
+        with np.errstate(invalid='ignore'):
+            rise = self.ground_z - self.local_ground(cfg.base_window)
+        return (self.observed() & (rise >= cfg.path_min_height)
+                & (rise < cfg.obstacle_min_height) & ~self.obstacles())
+
+    def trail_cells(self) -> np.ndarray:
+        """Cells on a trail, by the world's trail_source."""
+        cfg = self.config
+        colour = ((self.ground_hits >= cfg.min_ground_points)
+                  & (self.trail_fraction() >= cfg.min_trail_fraction))
+        if cfg.trail_source == 'colour':
+            return colour
+        if cfg.trail_source == 'height':
+            return self.raised_path()
+        if cfg.trail_source == 'both':
+            return colour & self.raised_path()
+        raise ValueError(f"trail_source must be 'colour', 'height' or 'both', "
+                         f"not {cfg.trail_source!r}")
 
     def occupancy(self) -> np.ndarray:
         """OccupancyGrid-style int8: -1 unobserved, 0 free, 100 obstacle.

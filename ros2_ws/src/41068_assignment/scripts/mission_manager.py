@@ -179,6 +179,9 @@ class MissionManager(Node):
         self.mode = mode
         self.mode.start()
         self.get_logger().info(f'Mode: {mode.name}')
+        # Now rather than at the next 1 s tick, so the dashboard shows it at once.
+        self.status = 'starting'
+        self.publish_state()
 
     # ------------------------------------------------------------ main loop
 

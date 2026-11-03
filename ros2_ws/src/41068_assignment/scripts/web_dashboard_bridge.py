@@ -22,6 +22,7 @@ import base64
 import json
 import math
 import threading
+import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from socketserver import ThreadingMixIn
@@ -40,6 +41,14 @@ from std_msgs.msg import Float64, String
 
 POI_TYPES = ('red', 'green', 'person')
 
+# Telemetry shows MANUAL for this long (s) after the last manual command;
+# the page resends held buttons every 0.3 s.
+MANUAL_HOLD = 1.0
+
+# Sent on a camera stream until the first frame arrives.
+_, BLANK_JPEG = cv2.imencode('.jpg', np.zeros((240, 320, 3), dtype=np.uint8))
+BLANK_JPEG = BLANK_JPEG.tobytes()
+
 
 class DashboardState:
     def __init__(self):
@@ -54,9 +63,15 @@ class DashboardState:
         self.heading = 0.0
         self.speed = 0.0
         self.battery = 98.0
+        # Mission mode from mission_state; MANUAL overrides it while manual
+        # commands keep arriving (see telemetry_snapshot).
         self.mode = 'STANDBY'
-        self.rgb_frame = None
-        self.thermal_frame = None
+        self.last_manual = None          # time.monotonic() of the last one
+        # Latest JPEG per camera, and a count that goes up with each new one,
+        # so a stream can wait for the next frame instead of resending.
+        self.frames = {'rgb': None, 'thermal': None}
+        self.frame_seq = {'rgb': 0, 'thermal': 0}
+        self.new_frame = threading.Condition(self.lock)
         # Top-down map
         self.map_png = None
         self.map_info = None
@@ -67,6 +82,8 @@ class DashboardState:
 
     def telemetry_snapshot(self):
         with self.lock:
+            manual = (self.last_manual is not None
+                      and time.monotonic() - self.last_manual < MANUAL_HOLD)
             return {
                 # latitude/longitude carry the map x/y once odometry arrives
                 # (see odom_callback); x and y name them plainly for the map
@@ -79,7 +96,7 @@ class DashboardState:
                 'heading': self.heading,
                 'speed': self.speed,
                 'battery': self.battery,
-                'mode': self.mode,
+                'mode': 'MANUAL' if manual else self.mode,
             }
 
     def set_odom(self, latitude, longitude, altitude, heading, speed):
@@ -96,18 +113,28 @@ class DashboardState:
         with self.lock:
             self.mode = mode
 
+    def manual_command_sent(self):
+        with self.lock:
+            self.last_manual = time.monotonic()
+
     def set_frame(self, which, frame_bytes):
         with self.lock:
-            if which == 'rgb':
-                self.rgb_frame = frame_bytes
-            else:
-                self.thermal_frame = frame_bytes
+            self.frames[which] = frame_bytes
+            self.frame_seq[which] += 1
+            self.new_frame.notify_all()
 
     def get_frame(self, which):
         with self.lock:
-            if which == 'rgb':
-                return self.rgb_frame
-            return self.thermal_frame
+            return self.frames[which]
+
+    def wait_frame(self, which, last_seq, timeout):
+        """Wait up to timeout (s) for a frame newer than last_seq.
+
+        Returns (seq, frame); seq == last_seq if none arrived in time.
+        """
+        with self.new_frame:
+            self.new_frame.wait_for(lambda: self.frame_seq[which] != last_seq, timeout)
+            return self.frame_seq[which], self.frames[which]
 
     def set_map(self, **values):
         with self.lock:
@@ -139,9 +166,11 @@ class BridgeNode(Node):
         self.create_subscription(Image, '/parrot1/camera/image', self.rgb_callback, 10)
         self.create_subscription(Image, '/parrot1/thermal_camera/image', self.thermal_callback, 10)
 
-        # Top-down map. These topics are latched, so subscribe the same way
-        # to get the latest message even if it was sent before we started.
+        # Top-down map and mission state. These topics are latched, so
+        # subscribe the same way to get the latest message even if it was
+        # sent before we started.
         latched = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.create_subscription(String, '/parrot1/mission_state', self.mission_state_callback, latched)
         self.create_subscription(Image, '/parrot1/terrain/overview', self.overview_callback, latched)
         self.create_subscription(String, '/parrot1/terrain/overview_info', self.overview_info_callback, latched)
         self.create_subscription(String, '/parrot1/terrain/route_graph', self.graph_callback, latched)
@@ -166,6 +195,10 @@ class BridgeNode(Node):
         speed = math.sqrt(linear.x * linear.x + linear.y * linear.y + linear.z * linear.z)
 
         self.state.set_odom(position.x, position.y, position.z, heading_deg, speed)
+
+    def mission_state_callback(self, msg: String):
+        # "MAPPING: 42% observed, flying to F7" -> "MAPPING"
+        self.state.set_mode(msg.data.split(':', 1)[0].strip())
 
     def rgb_callback(self, msg: Image):
         frame = self._image_to_jpeg(msg, thermal=False)
@@ -269,15 +302,11 @@ class BridgeNode(Node):
         return data if isinstance(data, dict) else None
 
     def publish_command(self, command: str):
+        # The mode shown comes back on mission_state once mission_manager
+        # has switched, so a command it rejects doesn't change it.
         message = String()
         message.data = command
         self.command_pub.publish(message)
-        if command == 'return_home':
-            self.state.set_mode('RETURN HOME')
-        elif command == 'takeoff':
-            self.state.set_mode('TAKE OFF')
-        else:
-            self.state.set_mode('TAKE OVER')
 
     def publish_manual(self, forward: float, lateral: float, yaw: float = 0.0, altitude: Optional[float] = None):
         message = Twist()
@@ -292,7 +321,7 @@ class BridgeNode(Node):
             target_msg.data = max(0.0, altitude)
             self.target_altitude_pub.publish(target_msg)
 
-        self.state.set_mode('MANUAL')
+        self.state.manual_command_sent()
 
     @staticmethod
     def _image_to_jpeg(msg: Image, thermal: bool) -> Optional[bytes]:
@@ -509,16 +538,13 @@ class DashboardRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
 
+        # Send each frame once, as it arrives. With no new frame for a second
+        # the last one is sent again, so the connection never goes quiet.
+        seq = -1
         while True:
-            frame = self.server.state.get_frame(which)
+            seq, frame = self.server.state.wait_frame(which, seq, timeout=1.0)
             if frame is None:
-                self.wfile.write(b'--frame\r\n')
-                self.wfile.write(b'Content-Type: image/jpeg\r\n\r\n')
-                blank = np.zeros((240, 320, 3), dtype=np.uint8)
-                ok, encoded = cv2.imencode('.jpg', blank)
-                if not ok:
-                    break
-                frame = encoded.tobytes()
+                frame = BLANK_JPEG
             try:
                 self.wfile.write(b'--frame\r\n')
                 self.wfile.write(b'Content-Type: image/jpeg\r\n')
@@ -529,15 +555,7 @@ class DashboardRequestHandler(BaseHTTPRequestHandler):
                 break
 
     def _serve_single_frame(self, which: str):
-        frame = self.server.state.get_frame(which)
-        if frame is None:
-            blank = np.zeros((240, 320, 3), dtype=np.uint8)
-            ok, encoded = cv2.imencode('.jpg', blank)
-            if not ok:
-                self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
-                self.end_headers()
-                return
-            frame = encoded.tobytes()
+        frame = self.server.state.get_frame(which) or BLANK_JPEG
 
         self.send_response(HTTPStatus.OK)
         self.send_header('Content-Type', 'image/jpeg')

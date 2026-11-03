@@ -330,7 +330,7 @@ Add these displays (all under `/parrot1/`):
   0.3–1.2 m above the surrounding ground are obstacles a person can't get
   past (trunks, rocks, bushes). Points 1.2–2.0 m up are low branches, passable
   but slow. A cell is trail by colour (its ground points are mostly brown,
-  `hiking_trail_1`) or by height (its ground is 0.1–0.3 m above the grass
+  `hiking_trail_1`) or by height (its ground is 0.2–0.3 m above the grass
   within 1.5 m, `simple_trees`, whose trail is a raised path and whose grass
   is tinted brown), set per world by `terrain.trail_source`. Terrain steeper
   than 35° is an obstacle (the A2 "large gradient" rule) if it also rises at
@@ -470,6 +470,11 @@ change listed here.
 - `nav2_params_parrot1.yaml` and `slam_params_parrot1.yaml` (in `config/`)
   are copies of the course ones, but the Nav2 tolerances and costmap inflation radius have been tuned down
   for the drone's small footprint and this world's short waypoint spacing.
+- The footprint is 0.6 x 0.6 m (the drone's collision box is 0.5 x 0.5 m;
+  the course's 1 x 1 m kept it over 1 m from everything) with a 0.5 m
+  inflation radius, and DWB may move sideways at up to 0.3 m/s (the drone
+  is holonomic), so it edges round obstacles instead of turning on the spot
+  and driving. The velocity smoother has the same y limits.
 - The global costmap uses a rolling window (`rolling_window: true`, 20x20m)
   rather than relying solely on the SLAM-built static map's extent. Without
   this, path planning can fail for any goal or start pose that falls outside

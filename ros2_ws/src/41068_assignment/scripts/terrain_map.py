@@ -111,13 +111,16 @@ class TerrainConfig:
     min_ground_points: int = 3
 
     # Height rule: the cell's ground is at least path_min_height above the
-    # grass, taken as the lowest ground within base_window (m). The window
+    # grass, taken as the lowest ground within base_window (m). 0.2 m sits
+    # between simple_trees' path (0.23 m) and its launch pad (0.12-0.17 m),
+    # which at 0.1 m was taken for trail; the margin is small, but the
+    # simulated depth has no noise. The window
     # has to reach past the path's edge from anywhere on it: 3 m does for
     # simple_trees' 1.5 m wide path, also at bends where its segments
     # overlap. Ground more than obstacle_min_height up is an obstacle, not
     # a path. Only for flat worlds: on a slope the window's lowest ground
     # is downhill, 1.5 m * tan(4 deg) = 0.1 m lower already.
-    path_min_height: float = 0.1
+    path_min_height: float = 0.2
     base_window: float = 3.0
 
 

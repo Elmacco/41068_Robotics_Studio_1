@@ -156,3 +156,17 @@ def test_trail_source_picks_the_evidence():
         cells = terrain.trail_cells()
         assert cells[20:30, :].all()
         assert cells[2:8, :].all() == expected_grass
+
+
+def test_launch_pad_is_not_a_raised_path():
+    # simple_trees' launch pad: a 2 m disc 0.12 m high with a 1.5 m tier to
+    # 0.17 m, lower than the 0.23 m path
+    terrain = TerrainMap(TerrainConfig(x_min=0.0, x_max=8.0, y_min=0.0, y_max=8.0,
+                                       trail_source='height'))
+    xyz, rgb = ground_points(0, 8, 0, 8, GRASS)
+    r = np.hypot(xyz[:, 0] - 4.0, xyz[:, 1] - 4.0)
+    xyz[:, 2] = np.where(r <= 1.5, 0.171, np.where(r <= 2.0, 0.12, 0.0))
+    for _ in range(2):
+        terrain.add_points(xyz, rgb)
+    assert not terrain.trail_cells().any()
+    assert not terrain.obstacles().any()

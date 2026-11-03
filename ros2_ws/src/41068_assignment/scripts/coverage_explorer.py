@@ -121,7 +121,7 @@ class CoverageExplorer:
         blacklist_radius: float = 1.5,
         goal_stale_radius: float = 4.0,
         preferred_clearance: float = 1.0,
-        min_clearance: float = 0.75,
+        min_clearance: float = 0.5,
         standoff_search: float = 3.0,
         max_goal_distance: float = 9.0,
         heading_window: float = 1.2,
@@ -146,11 +146,12 @@ class CoverageExplorer:
         self.goal_stale_radius = goal_stale_radius
 
         # Goal stand-off, matched to nav2_params_parrot1.yaml as AT3 matched
-        # the Husky's: the footprint is 1 x 1 m (inscribed radius 0.5 m,
-        # circumscribed 0.71 m) with a 0.6 m inflation radius. A goal closer
+        # the Husky's: the footprint is 0.6 x 0.6 m (inscribed radius 0.3 m,
+        # circumscribed 0.42 m) with a 0.5 m inflation radius. A goal closer
         # than the inscribed radius to an obstacle is lethal and Nav2 rejects
-        # it; min_clearance 0.75 sits just past the circumscribed radius, and
-        # preferred_clearance 1.0 leaves room to turn on arrival.
+        # it; min_clearance 0.5 sits just past the circumscribed radius, and
+        # preferred_clearance 1.0 leaves room to turn on arrival and keeps the
+        # camera back far enough to see the frontier.
         self.preferred_clearance = preferred_clearance
         self.min_clearance = min_clearance
         self.standoff_search = standoff_search

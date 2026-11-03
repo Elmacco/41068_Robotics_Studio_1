@@ -106,7 +106,9 @@ controller_server:
     use_sim_time: true
     controller_frequency: 5.0
     min_x_velocity_threshold: 0.001
-    min_y_velocity_threshold: 0.5
+    # Was 0.5 (a diff-drive default): odometry y speeds below it read as 0,
+    # which hid the drone's sideways motion from the controller.
+    min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
     failure_tolerance: 0.3
     progress_checker_plugin: progress_checker
@@ -126,22 +128,26 @@ controller_server:
     FollowPath:
       plugin: dwb_core::DWBLocalPlanner
       debug_trajectory_details: false
+      # The drone can move sideways (Gazebo's velocity control takes y), so
+      # DWB may strafe, which edges it round an obstacle without the
+      # turn-on-the-spot then drive dithering of a diff-drive model. Kept to
+      # 0.3 m/s so it still mostly flies forwards: the camera looks ahead.
       min_vel_x: 0.0
-      min_vel_y: 0.0
+      min_vel_y: -0.3
       max_vel_x: 1.0
-      max_vel_y: 0.0
+      max_vel_y: 0.3
       max_vel_theta: 1.5
       min_speed_xy: 0.0
       max_speed_xy: 1.0
       min_speed_theta: 0.0
       acc_lim_x: 2.5
-      acc_lim_y: 0.0
+      acc_lim_y: 2.5
       acc_lim_theta: 3.2
       decel_lim_x: -2.5
-      decel_lim_y: 0.0
+      decel_lim_y: -2.5
       decel_lim_theta: -3.2
       vx_samples: 7
-      vy_samples: 1
+      vy_samples: 5
       vtheta_samples: 7
       sim_time: 2.0
       linear_granularity: 0.2
@@ -183,14 +189,17 @@ local_costmap:
       width: 10
       height: 10
       resolution: 0.05
-      footprint: '[ [0.5, 0.5], [0.5, -0.5], [-0.5, -0.5], [-0.5, 0.5] ]'
+      # The drone's collision box is 0.5 x 0.5 m (urdf_parrot); 0.6 x 0.6 m
+      # leaves a margin. Was 1 x 1 m, which with the inflation kept it over
+      # 1 m from anything, e.g. the person beside the launch pad.
+      footprint: '[ [0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3] ]'
       plugins:
       - obstacle_layer
       - inflation_layer
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
-        inflation_radius: 0.6
+        inflation_radius: 0.5      # past the footprint's 0.42 m corners
       obstacle_layer:
         plugin: nav2_costmap_2d::ObstacleLayer
         enabled: true
@@ -217,7 +226,10 @@ global_costmap:
       global_frame: parrot1_map
       robot_base_frame: parrot1_base_link
       use_sim_time: true
-      footprint: '[ [0.5, 0.5], [0.5, -0.5], [-0.5, -0.5], [-0.5, 0.5] ]'
+      # The drone's collision box is 0.5 x 0.5 m (urdf_parrot); 0.6 x 0.6 m
+      # leaves a margin. Was 1 x 1 m, which with the inflation kept it over
+      # 1 m from anything, e.g. the person beside the launch pad.
+      footprint: '[ [0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3] ]'
       resolution: 0.1
       rolling_window: true
       width: 20
@@ -247,7 +259,7 @@ global_costmap:
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
-        inflation_radius: 0.6
+        inflation_radius: 0.5      # past the footprint's 0.42 m corners
       always_send_full_costmap: true
 map_server:
   ros__parameters:
@@ -329,21 +341,22 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: false
     feedback: OPEN_LOOP
+    # x, y, yaw: y matches DWB's sideways limits above
     max_velocity:
     - 1.0
-    - 0.0
+    - 0.3
     - 1.5
     min_velocity:
     - -1.0
-    - 0.0
+    - -0.3
     - -1.5
     max_accel:
     - 2.5
-    - 0.0
+    - 2.5
     - 3.2
     max_decel:
     - -2.5
-    - 0.0
+    - -2.5
     - -3.2
     odom_topic: odom
     odom_duration: 0.1

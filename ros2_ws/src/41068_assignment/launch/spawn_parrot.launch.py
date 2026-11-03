@@ -111,6 +111,13 @@ def generate_launch_description():
                     'Empty starts with a blank map.',
     ))
 
+    # One thread for numpy's OpenBLAS in our Python nodes. Their matrices are
+    # small (a point cloud times a 3x3 rotation), and a thread per core spent
+    # ~14x the CPU for no speed-up, then kept spinning: terrain_mapper used
+    # ~3.5 cores. Not scoped, so the module launches included after this
+    # one get it too.
+    ld.add_action(SetEnvironmentVariable(name='OPENBLAS_NUM_THREADS', value='1'))
+
     # Common Gazebo server systems (physics, sensors, etc.), so the world
     # files don't need to declare them.
     server_config_file = PathJoinSubstitution([config_path, 'ignition_server.config'])
@@ -127,23 +134,35 @@ def generate_launch_description():
     ld.add_action(SetEnvironmentVariable(name='IGN_GAZEBO_RESOURCE_PATH', value=resource_path))
     ld.add_action(SetEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH', value=resource_path))
 
-    # Start Gazebo with our world.
-    ld.add_action(IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution([
-                FindPackageShare('ros_ign_gazebo'),
-                'launch',
-                'ign_gazebo.launch.py',
-            ])
-        ),
-        launch_arguments={
-            'ign_args': [
-                PathJoinSubstitution([FindPackageShare(world_package), 'worlds', [world, '.sdf']]),
-                ' -r',
-                PythonExpression(["'' if '", LaunchConfiguration('gui'),
-                                  "'.lower() in ['true', '1', 'yes', 'on'] else ' -s'"]),
-            ]
-        }.items(),
+    # Start Gazebo with our world, rendering on the CPU (llvmpipe). WSL2's GPU
+    # driver (Mesa d3d12) offers OpenGL 4.2, and Gazebo's Ogre 2 needs 4.3:
+    # it aborts, and forcing 4.5 with MESA_GL_VERSION_OVERRIDE drops people,
+    # trunks and distant ground from the camera images. RViz (Ogre 1, OpenGL
+    # 3) works on the GPU, so only Gazebo's server and window get this; the
+    # scoped group keeps it from reaching the rest of the launch.
+    ld.add_action(GroupAction(
+        scoped=True,
+        actions=[
+            SetEnvironmentVariable(name='LIBGL_ALWAYS_SOFTWARE', value='1'),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    PathJoinSubstitution([
+                        FindPackageShare('ros_ign_gazebo'),
+                        'launch',
+                        'ign_gazebo.launch.py',
+                    ])
+                ),
+                launch_arguments={
+                    'ign_args': [
+                        PathJoinSubstitution([FindPackageShare(world_package), 'worlds',
+                                              [world, '.sdf']]),
+                        ' -r',
+                        PythonExpression(["'' if '", LaunchConfiguration('gui'),
+                                          "'.lower() in ['true', '1', 'yes', 'on'] else ' -s'"]),
+                    ]
+                }.items(),
+            ),
+        ],
     ))
 
     # Bridge the global simulation clock.

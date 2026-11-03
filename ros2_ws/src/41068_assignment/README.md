@@ -343,6 +343,12 @@ Add these displays (all under `/parrot1/`):
   hasn't. The terrain grid only covers the world's area, so the world's edges
   bound the exploration. The drone flies at 0.8 m, so the lidar scans at chest
   height (what a walker would hit) and the camera sees under the canopy.
+  A goal is given up once, for 8 s, the camera has seen no new ground and the
+  drone has got no closer, and a goal reached having seen under 1 m² of new
+  ground counts as failed; both are blacklisted over 3 m. That stops the
+  drone circling a frontier it cannot see into, such as the ground hidden
+  behind the standing person by the launch pad. 25 s is only a backstop
+  (`stall_time`, `min_goal_gain`, `goal_timeout` in `mission_manager.py`).
 - **Trails** (`trail_detector.py`). Take the trail cells' distance transform
   (distance to the nearest grass). Its ridge, where the gradient is flat
   (|∇d| < 0.6, as in AT3's `cave_geometry.py`), is the trail centreline. The

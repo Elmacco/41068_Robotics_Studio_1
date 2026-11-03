@@ -74,9 +74,23 @@ class MissionManager(Node):
         self.declare_parameter('thermal_max_age', 1.0)
         # The drone counts as at a target altitude within this (m).
         self.declare_parameter('altitude_tolerance', 0.15)
-        # Mapping mode: give up on a Nav2 goal after this long (s), and finish
-        # after this many consecutive selections find no frontier.
-        self.declare_parameter('goal_timeout', 40.0)
+        # Mapping mode goals (see GoalWatchdog in mapping_mode.py). A goal is
+        # given up once, for stall_time (s), the camera has seen less than
+        # min_gain_area (m2) of new ground and the drone has got less than
+        # min_progress (m) closer; 8 s is a spin recovery and a turn on the
+        # spot. A goal reached having seen less than min_goal_gain (m2) is
+        # treated as failed. Either way its frontier is blacklisted within
+        # no_gain_blacklist_radius (m), twice a plain failure's 1.5 m, so the
+        # next goal is not the cell beside it with the same view blocked.
+        # goal_timeout (s) is only a backstop now: 25 s covers the longest
+        # goal (9 m, max_goal_distance) at half Nav2's 1 m/s, plus turning.
+        self.declare_parameter('stall_time', 8.0)
+        self.declare_parameter('min_gain_area', 0.5)
+        self.declare_parameter('min_progress', 0.5)
+        self.declare_parameter('min_goal_gain', 1.0)
+        self.declare_parameter('no_gain_blacklist_radius', 3.0)
+        self.declare_parameter('goal_timeout', 25.0)
+        # Finish after this many consecutive selections find no frontier.
         self.declare_parameter('no_goal_limit', 5)
         self.declare_parameter('rate', 5.0)
 
@@ -85,11 +99,9 @@ class MissionManager(Node):
         self.home = tuple(self.get_parameter(name).value for name in ('home_x', 'home_y', 'home_z'))
         self.cruise_altitude = self.get_parameter('cruise_altitude').value
         self.altitude_tolerance = self.get_parameter('altitude_tolerance').value
-        self.mapping_params = {
-            'mapping_altitude': self.get_parameter('mapping_altitude').value,
-            'goal_timeout': self.get_parameter('goal_timeout').value,
-            'no_goal_limit': self.get_parameter('no_goal_limit').value,
-        }
+        self.mapping_params = {name: self.get_parameter(name).value for name in (
+            'mapping_altitude', 'stall_time', 'min_gain_area', 'min_progress',
+            'min_goal_gain', 'no_gain_blacklist_radius', 'goal_timeout', 'no_goal_limit')}
         self.follow_config = declare_config(self, FollowConfig(), 'follow.')
         self.explorer = CoverageExplorer(frame_id=self.frame_id)
 

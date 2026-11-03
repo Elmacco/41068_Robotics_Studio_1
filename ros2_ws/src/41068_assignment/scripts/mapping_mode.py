@@ -20,6 +20,17 @@ New here: the drone first settles at mapping_altitude. Low enough that the
 lidar plane (0.2 m above the drone) sees tree trunks, which is also roughly
 the height of what a walking person would hit, and the camera sees the
 ground under the canopy.
+
+Also new: goals are judged by the information they bring (GoalWatchdog),
+not only by time. A goal is given up once, for stall_time, the camera has
+seen no new ground and the drone has got no closer; and a goal that is
+reached having seen almost nothing new is blacklisted like a failed one.
+Both are blacklisted over a wider radius than a plain failure. Without this
+the drone circled the person by the launch pad in simple_trees: the ground
+behind a standing person is hidden from a camera 1 m up, so a frontier
+stays there, the nearest one, and reaching it (facing the person) revealed
+nothing, so it was chosen again and again. The fixed timeout is now only a
+backstop.
 """
 
 import math
@@ -32,6 +43,50 @@ from nav2_msgs.action import NavigateToPose
 from coverage_explorer import CoverageExplorer, MapGrid
 
 
+class GoalWatchdog:
+    """Decides when a Mapping goal has stopped paying off. No ROS, so it can be tested.
+
+    Two kinds of progress count: new ground seen by the camera (the point of
+    Mapping mode) and getting closer to the goal (on the way to new ground,
+    crossing ground already mapped). A goal with neither for stall_time has
+    stalled: stuck, or at a frontier it cannot see into.
+    """
+
+    def __init__(self, stall_time: float, min_gain_area: float, min_progress: float,
+                 timeout: float):
+        self.stall_time = stall_time          # s with no progress of either kind
+        self.min_gain_area = min_gain_area    # m2 of new ground that counts as progress
+        self.min_progress = min_progress      # m closer to the goal that counts
+        self.timeout = timeout                # s, backstop whatever happens
+        self.start_time = self.start_area = 0.0
+        self.last_useful = self.last_area = 0.0
+        self.best_distance = math.inf
+
+    def start(self, now: float, observed_area: float, distance: float):
+        self.start_time = self.last_useful = now
+        self.start_area = self.last_area = observed_area
+        self.best_distance = distance
+
+    def gain(self, observed_area: float) -> float:
+        """New ground seen since the goal was sent (m2)."""
+        return observed_area - self.start_area
+
+    def update(self, now: float, observed_area: float, distance: float) -> Optional[str]:
+        """Why the goal should be given up, or None to keep going."""
+        if observed_area - self.last_area >= self.min_gain_area:
+            self.last_area = observed_area
+            self.last_useful = now
+        if distance <= self.best_distance - self.min_progress:
+            self.best_distance = distance
+            self.last_useful = now
+        if now - self.start_time >= self.timeout:
+            return f'timed out after {now - self.start_time:.0f} s'
+        if now - self.last_useful >= self.stall_time:
+            return (f'no new ground and no closer for {now - self.last_useful:.0f} s '
+                    f'({self.gain(observed_area):.1f} m2 seen)')
+        return None
+
+
 class MappingMode:
     name = 'MAPPING'
 
@@ -42,8 +97,11 @@ class MappingMode:
 
         params = manager.mapping_params
         self.altitude = params['mapping_altitude']
-        self.goal_timeout = params['goal_timeout']
         self.no_goal_limit = params['no_goal_limit']
+        self.min_goal_gain = params['min_goal_gain']
+        self.no_gain_blacklist_radius = params['no_gain_blacklist_radius']
+        self.watchdog = GoalWatchdog(params['stall_time'], params['min_gain_area'],
+                                     params['min_progress'], params['goal_timeout'])
 
         self.no_goal_count = 0
         self.grid_stamp = None            # stamp of the map frontiers were last found on
@@ -83,7 +141,7 @@ class MappingMode:
         coverage = 100 * self.explorer.exploration_stats()['coverage']
 
         if self.waiting_for_result:
-            self.check_goal_timeout()
+            self.check_goal_progress()
             return f'{coverage:.0f}% observed, {self.status}'
 
         pose = manager.get_pose()
@@ -123,6 +181,7 @@ class MappingMode:
         seq = self.goal_seq
         self.active_seq = seq
         self.goal_start = self.manager.get_clock().now()
+        self.watchdog.start(self.now(), self.observed_area(), self.distance_to(pose2d))
         self.waiting_for_result = True
         future = self.manager.nav_client.send_goal_async(goal)
         future.add_done_callback(lambda f, seq=seq: self.goal_response(f, seq))
@@ -151,12 +210,24 @@ class MappingMode:
                 f'Goal did not succeed (status {future.result().status})')
         self.goal_finished(success)
 
-    def goal_finished(self, success: bool):
-        elapsed = (self.manager.get_clock().now() - self.goal_start).nanoseconds * 1e-9
-        instant = success and elapsed < 1.0
-        if (not success or instant) and self.explorer.goal_cell_xy_ is not None:
+    def goal_finished(self, success: bool, radius: Optional[float] = None):
+        """Clear the goal; blacklist its frontier if it failed or brought nothing.
+
+        Reached with less than min_goal_gain of new ground seen on the way:
+        nothing to see there from where Nav2 stops (this also covers AT3's
+        goal reached instantly, which sees nothing new). Blacklisted over
+        no_gain_blacklist_radius, so the next goal is not the frontier cell
+        beside it, with the same view blocked.
+        """
+        gain = self.watchdog.gain(self.observed_area())
+        if success and gain < self.min_goal_gain:
+            success = False
+            radius = self.no_gain_blacklist_radius
+            self.manager.get_logger().info(
+                f'Goal reached but only {gain:.1f} m2 of new ground seen')
+        if not success and self.explorer.goal_cell_xy_ is not None:
             x, y = self.explorer.goal_cell_xy_
-            self.explorer.blacklist(x, y)
+            self.explorer.blacklist(x, y, radius)
             self.manager.get_logger().warn(
                 f'Blacklisted goal [{x:.1f}, {y:.1f}] ({len(self.explorer.blacklist_)} total)')
         self.goal_handle = None
@@ -174,15 +245,29 @@ class MappingMode:
             f'Frontier at [{goal.x:.1f}, {goal.y:.1f}] already seen, picking a new goal')
         self.cancel_goal()
 
-    def check_goal_timeout(self):
-        if self.goal_start is None:
+    def check_goal_progress(self):
+        """Give up on a goal that has stopped paying off (GoalWatchdog)."""
+        goal = self.explorer.goal_pose_
+        if self.goal_start is None or goal is None:
             return
-        elapsed = (self.manager.get_clock().now() - self.goal_start).nanoseconds * 1e-9
-        if elapsed < self.goal_timeout:
+        reason = self.watchdog.update(self.now(), self.observed_area(), self.distance_to(goal))
+        if reason is None:
             return
-        self.manager.get_logger().warn(f'Goal timed out after {elapsed:.0f} s, abandoning')
+        self.manager.get_logger().warn(f'Goal {reason}, abandoning')
         self.cancel_goal()
-        self.goal_finished(success=False)
+        self.goal_finished(success=False, radius=self.no_gain_blacklist_radius)
+
+    def now(self) -> float:
+        return self.manager.get_clock().now().nanoseconds * 1e-9
+
+    def observed_area(self) -> float:
+        return self.explorer.exploration_stats()['observed_area_m2']
+
+    def distance_to(self, goal: Pose2D) -> float:
+        pose = self.manager.get_pose()
+        if pose is None:
+            return math.inf
+        return math.hypot(goal.x - pose.x, goal.y - pose.y)
 
     def cancel_goal(self):
         """Stop the running goal without counting it as a failure."""

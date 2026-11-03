@@ -137,6 +137,8 @@ class CoverageExplorer:
         self.weight_turn = weight_turn
 
         # Frontiers within this distance of a failed goal are skipped (AT3).
+        # A goal can be blacklisted with a wider radius of its own
+        # (mapping_mode.py does for goals that brought no new ground).
         self.blacklist_radius = blacklist_radius
 
         # A goal is abandoned once no frontier remains within this distance of
@@ -179,7 +181,7 @@ class CoverageExplorer:
         self.clearance_: Optional[np.ndarray] = None
 
         self.scan_count_ = 0
-        self.blacklist_: List[Tuple[float, float]] = []
+        self.blacklist_: List[Tuple[float, float, Optional[float]]] = []   # x, y, radius
         self.selected_: Optional[Frontier] = None
         self.goal_pose_: Optional[Pose2D] = None
         self.goal_cell_xy_: Optional[Tuple[float, float]] = None
@@ -348,9 +350,13 @@ class CoverageExplorer:
                         return r, c
         return None
 
-    def blacklist(self, x: float, y: float):
-        """Record a goal the drone failed to reach, so it is not retried."""
-        self.blacklist_.append((float(x), float(y)))
+    def blacklist(self, x: float, y: float, radius: Optional[float] = None):
+        """Record a goal the drone failed to reach, so it is not retried.
+
+        Frontier cells within radius of it are skipped; None means
+        blacklist_radius.
+        """
+        self.blacklist_.append((float(x), float(y), None if radius is None else float(radius)))
 
     def goal_still_useful(self, goal: Optional[Pose2D]) -> bool:
         """Whether a goal being flown to still has unexplored ground at it (AT3)."""
@@ -443,8 +449,9 @@ class CoverageExplorer:
         xs = self.map_.origin_x + (cols + 0.5) * self.map_.resolution
         ys = self.map_.origin_y + (rows + 0.5) * self.map_.resolution
         usable &= np.hypot(xs - robot_pose.x, ys - robot_pose.y) <= self.max_goal_distance
-        for bx, by in self.blacklist_:
-            usable &= np.hypot(xs - bx, ys - by) > self.blacklist_radius
+        for bx, by, radius in self.blacklist_:
+            radius = self.blacklist_radius if radius is None else radius
+            usable &= np.hypot(xs - bx, ys - by) > radius
         if not usable.any():
             return None
 
@@ -559,7 +566,7 @@ class CoverageExplorer:
             arrow.scale.x, arrow.scale.y, arrow.scale.z = 1.5, 0.2, 0.2
             markers.markers.append(arrow)
 
-        for index, (bx, by) in enumerate(self.blacklist_):
+        for index, (bx, by, _) in enumerate(self.blacklist_):
             cube = self._marker('frontier_blacklist', index, Marker.CUBE, (1.0, 0.1, 0.1, 0.8))
             cube.pose.position = self._point(bx, by, 0.2)
             cube.scale.x = cube.scale.y = cube.scale.z = 0.4

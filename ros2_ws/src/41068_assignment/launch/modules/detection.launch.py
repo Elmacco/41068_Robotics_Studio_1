@@ -29,9 +29,11 @@ def generate_launch_description():
 
     namespace = LaunchConfiguration('namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    colour_enabled = LaunchConfiguration('colour_enabled')
     ld.add_action(DeclareLaunchArgument('namespace', default_value='parrot1'))
     ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='True'))
     ld.add_action(DeclareLaunchArgument('world', default_value=''))
+    ld.add_action(DeclareLaunchArgument('colour_enabled', default_value='True'))
 
     if importlib.util.find_spec('ultralytics') is None:
         ld.add_action(LogInfo(
@@ -64,6 +66,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'use_sim_time': use_sim_time,
+            'colour_enabled': colour_enabled,
             # Bundled copy, so it doesn't need to download on first run.
             'model': PathJoinSubstitution([assignment_path, 'weights', 'yolo26n.pt']),
         }],

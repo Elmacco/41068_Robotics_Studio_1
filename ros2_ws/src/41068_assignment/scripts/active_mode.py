@@ -4,17 +4,29 @@ from geometry_msgs.msg import Pose2D, Twist
 
 THERMAL_PERSON_THRESHOLD_K = 303.15
 MIN_HOT_PIXELS = 20
+TARGET_COLOUR = 'red'
 
 
 def thermal_confirms_person(
     thermal: np.ndarray,
     threshold_k: float = THERMAL_PERSON_THRESHOLD_K,
     min_hot_pixels: int = MIN_HOT_PIXELS,
+    box=None,
 ) -> bool:
-    """Return whether a thermal frame contains enough hot pixels."""
+    """Return whether a frame or person box contains enough hot pixels."""
     temperatures = np.asarray(thermal)
     if temperatures.size == 0:
         return False
+    if box is not None:
+        height, width = temperatures.shape[:2]
+        center_x, center_y, box_width, box_height = box[:4]
+        x1 = max(0, int(round(center_x - box_width / 2.0)))
+        x2 = min(width, int(round(center_x + box_width / 2.0)))
+        y1 = max(0, int(round(center_y - box_height / 2.0)))
+        y2 = min(height, int(round(center_y + box_height / 2.0)))
+        if x1 >= x2 or y1 >= y2:
+            return False
+        temperatures = temperatures[y1:y2, x1:x2]
     hot_pixels = np.isfinite(temperatures) & (temperatures >= threshold_k)
     return int(np.count_nonzero(hot_pixels)) >= min_hot_pixels
 
@@ -43,34 +55,63 @@ class ActiveMode:
         if self.last_person_confirmed and self.person_pose is not None:
             return (
                 f'person confirmed at '
-                f'({self.person_pose.x:.2f}, {self.person_pose.y:.2f}); holding position'
+                f'({self.person_pose.x:.2f}, {self.person_pose.y:.2f}); holding position\n\n\n\n\n\n'
             )
-        return 'hovering and checking thermal detections'
+        return 'hovering and checking YOLO colour targets, then thermal presence'
 
-    def person_detected(self, pose: Pose2D) -> bool:
-        """Confirm a map-frame person detection against the latest thermal frame."""
+    def person_detected(self, pose: Pose2D, colour: str | None = None) -> bool:
+        """Confirm a YOLO person with the requested colour and thermal presence."""
+        if colour != TARGET_COLOUR:
+            self.manager.get_logger().info(
+                f'Ignoring person detection with colour "{colour or "unknown"}"'
+            )
+            self.last_person_confirmed = False
+            self.person_pose = None
+            return False
+
         thermal = self.manager.latest_thermal
+        person_box = self.manager.latest_person_bbox
 
         if thermal is None or not self.manager.thermal_is_current():
-            self.manager.get_logger().warning('Person detected, but no thermal image is available yet')
+            self.manager.get_logger().warning(
+                'Coloured person detected, but no current thermal image is available'
+            )
             self.last_person_confirmed = False
             self.person_pose = None
             return False
 
-        hot_pixels = np.isfinite(thermal) & (thermal >= THERMAL_PERSON_THRESHOLD_K)
+        if person_box is None:
+            self.manager.get_logger().warning(
+                'Coloured person detected, but no YOLO bounding box is available'
+            )
+            self.last_person_confirmed = False
+            self.person_pose = None
+            return False
+
+        if not thermal_confirms_person(thermal, box=person_box):
+            self.manager.get_logger().info(
+                'Coloured person detection has no sufficient thermal presence'
+            )
+            self.last_person_confirmed = False
+            self.person_pose = None
+            return False
+
+        center_x, center_y, box_width, box_height = person_box[:4]
+        height, width = thermal.shape[:2]
+        x1 = max(0, int(round(center_x - box_width / 2.0)))
+        x2 = min(width, int(round(center_x + box_width / 2.0)))
+        y1 = max(0, int(round(center_y - box_height / 2.0)))
+        y2 = min(height, int(round(center_y + box_height / 2.0)))
+        thermal_person = thermal[y1:y2, x1:x2]
+        hot_pixels = np.isfinite(thermal_person) & (
+            thermal_person >= THERMAL_PERSON_THRESHOLD_K
+        )
         hot_pixel_count = int(np.count_nonzero(hot_pixels))
-
-        if not thermal_confirms_person(thermal):
-            self.manager.get_logger().info('Person detection has no sufficient thermal confirmation')
-            self.last_person_confirmed = False
-            self.person_pose = None
-            return False
-
-        hottest_kelvin = float(np.nanmax(thermal))
+        hottest_kelvin = float(np.nanmax(thermal_person))
         hottest_celsius = hottest_kelvin - 273.15
 
         self.manager.get_logger().info(
-            f'Thermal person confirmation: '
+            f'YOLO person confirmed as {colour}; thermal presence: '
             f'{hot_pixel_count} hot pixels, '
             f'hottest temperature {hottest_celsius:.1f} C'
         )

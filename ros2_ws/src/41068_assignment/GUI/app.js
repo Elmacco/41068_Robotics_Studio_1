@@ -65,7 +65,46 @@ const cameraStreamsUrl = {
 	thermal: `${bridgeBaseUrl}/stream/thermal.mjpg`
 };
 
+// Top-down map: the terrain mapper's picture of the map, with the drone,
+// trails, points of interest and the last ranger route drawn over it.
+const mapElements = {
+	frame: document.getElementById('map'),
+	canvas: document.getElementById('map-canvas'),
+	summary: document.getElementById('map-route-summary'),
+	graphToggle: document.getElementById('btn-map-graph')
+};
+
+const mapUrls = {
+	image: `${bridgeBaseUrl}/api/map.png`,
+	state: `${bridgeBaseUrl}/api/map/state`,
+	graph: `${bridgeBaseUrl}/api/map/graph`,
+	route: `${bridgeBaseUrl}/api/route`
+};
+
+const mapColours = {
+	trail: '#f08c1a',
+	route: '#1f6fd6',
+	graph: 'rgba(33, 61, 46, 0.22)',
+	station: '#1f4fa0',
+	drone: '#213d2e',
+	poi: { red: '#d64545', green: '#3c9d4e', person: '#ffffff' }
+};
+
+const mapState = {
+	image: null,
+	info: null,
+	trails: [],
+	pois: [],
+	route: null,
+	graph: null,
+	showGraph: false,
+	pending: null,
+	view: null
+};
+
 const localState = {
+	x: null,
+	y: null,
 	heading: 0,
 	altitude: 0,
 	speed: 0,
@@ -229,8 +268,11 @@ function applyTelemetry(payload) {
 	localState.speed = payload.speed ?? localState.speed;
 	localState.battery = payload.battery ?? localState.battery;
 	localState.mode = payload.mode ?? localState.mode;
+	localState.x = payload.x ?? localState.x;
+	localState.y = payload.y ?? localState.y;
 	syncAltitudeFromTelemetry(localState.altitude);
 	renderTelemetry(localState);
+	drawMap();
 }
 
 function tickFallbackTelemetry() {
@@ -427,9 +469,314 @@ function bindMomentaryManualButton(button, vector) {
 	button.addEventListener('touchcancel', release);
 }
 
+// ------------------------------------------------------------ top-down map
+
+// Where the map picture sits on the canvas: scale (canvas px per map cell)
+// and offset, fitted to the frame keeping its aspect ratio.
+function updateMapView() {
+	const canvas = mapElements.canvas;
+	const info = mapState.info;
+	if (!canvas || !info) {
+		mapState.view = null;
+		return;
+	}
+	const ratio = window.devicePixelRatio || 1;
+	const width = Math.round(canvas.clientWidth * ratio);
+	const height = Math.round(canvas.clientHeight * ratio);
+	if (canvas.width !== width || canvas.height !== height) {
+		canvas.width = width;
+		canvas.height = height;
+	}
+	const scale = Math.min(width / info.width, height / info.height);
+	mapState.view = {
+		scale,
+		offsetX: (width - scale * info.width) / 2,
+		offsetY: (height - scale * info.height) / 2,
+		ratio
+	};
+}
+
+// World metres -> canvas pixels. The picture has +y up, so row 0 is y_max.
+function worldToCanvas(x, y) {
+	const { info, view } = mapState;
+	const col = (x - info.origin[0]) / info.resolution;
+	const row = info.height - (y - info.origin[1]) / info.resolution;
+	return [view.offsetX + col * view.scale, view.offsetY + row * view.scale];
+}
+
+function canvasToWorld(px, py) {
+	const { info, view } = mapState;
+	const col = (px - view.offsetX) / view.scale;
+	const row = (py - view.offsetY) / view.scale;
+	return [info.origin[0] + col * info.resolution, info.origin[1] + (info.height - row) * info.resolution];
+}
+
+function drawPolyline(ctx, points, colour, width) {
+	if (!points || points.length < 2) {
+		return;
+	}
+	ctx.beginPath();
+	points.forEach(([x, y], i) => {
+		const [px, py] = worldToCanvas(x, y);
+		if (i === 0) {
+			ctx.moveTo(px, py);
+		} else {
+			ctx.lineTo(px, py);
+		}
+	});
+	ctx.strokeStyle = colour;
+	ctx.lineWidth = width;
+	ctx.lineJoin = 'round';
+	ctx.lineCap = 'round';
+	ctx.stroke();
+}
+
+function drawLabel(ctx, text, px, py, ratio) {
+	ctx.font = `${Math.round(11 * ratio)}px "Segoe UI", sans-serif`;
+	ctx.lineWidth = 3 * ratio;
+	ctx.strokeStyle = 'rgba(250, 247, 240, 0.9)';
+	ctx.strokeText(text, px, py);
+	ctx.fillStyle = '#213d2e';
+	ctx.fillText(text, px, py);
+}
+
+function drawMap() {
+	const canvas = mapElements.canvas;
+	if (!canvas || !mapState.image || !mapState.info) {
+		return;
+	}
+	mapElements.frame.classList.add('terrain-active');
+	updateMapView();
+	const { view, info } = mapState;
+	const ratio = view.ratio;
+	const ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.imageSmoothingEnabled = false;
+	ctx.drawImage(mapState.image, view.offsetX, view.offsetY, info.width * view.scale, info.height * view.scale);
+
+	if (mapState.showGraph && mapState.graph) {
+		ctx.beginPath();
+		mapState.graph.edges.forEach(([i, j]) => {
+			const [x0, y0] = worldToCanvas(mapState.graph.nodes[i][0], mapState.graph.nodes[i][1]);
+			const [x1, y1] = worldToCanvas(mapState.graph.nodes[j][0], mapState.graph.nodes[j][1]);
+			ctx.moveTo(x0, y0);
+			ctx.lineTo(x1, y1);
+		});
+		ctx.strokeStyle = mapColours.graph;
+		ctx.lineWidth = ratio;
+		ctx.stroke();
+	}
+
+	mapState.trails.forEach((trail) => {
+		drawPolyline(ctx, trail.points, mapColours.trail, 2 * ratio);
+		if (trail.points.length) {
+			const [x, y] = trail.points[Math.floor(trail.points.length / 2)];
+			const [px, py] = worldToCanvas(x, y);
+			drawLabel(ctx, trail.network ? `${trail.name} (${trail.network})` : trail.name, px + 6 * ratio, py - 6 * ratio, ratio);
+		}
+	});
+
+	if (mapState.route && mapState.route.points.length) {
+		drawPolyline(ctx, mapState.route.points, mapColours.route, 4 * ratio);
+	}
+
+	if (info.ranger_station) {
+		const [px, py] = worldToCanvas(info.ranger_station[0], info.ranger_station[1]);
+		const half = 6 * ratio;
+		ctx.fillStyle = mapColours.station;
+		ctx.fillRect(px - half, py - half, 2 * half, 2 * half);
+		drawLabel(ctx, 'Station', px + 9 * ratio, py + 4 * ratio, ratio);
+	}
+
+	mapState.pois.forEach((poi) => {
+		const [px, py] = worldToCanvas(poi.x, poi.y);
+		ctx.beginPath();
+		ctx.arc(px, py, 7 * ratio, 0, 2 * Math.PI);
+		ctx.fillStyle = mapColours.poi[poi.type] || mapColours.poi.person;
+		ctx.fill();
+		ctx.lineWidth = 2 * ratio;
+		ctx.strokeStyle = '#213d2e';
+		ctx.stroke();
+		drawLabel(ctx, poi.id, px + 10 * ratio, py + 4 * ratio, ratio);
+	});
+
+	if (mapState.pending) {
+		const [px, py] = worldToCanvas(mapState.pending[0], mapState.pending[1]);
+		ctx.beginPath();
+		ctx.arc(px, py, 9 * ratio, 0, 2 * Math.PI);
+		ctx.setLineDash([4 * ratio, 3 * ratio]);
+		ctx.strokeStyle = mapColours.route;
+		ctx.lineWidth = 2 * ratio;
+		ctx.stroke();
+		ctx.setLineDash([]);
+	}
+
+	// Drone: an arrow along its heading (degrees anticlockwise from +x)
+	if (Number.isFinite(localState.x) && Number.isFinite(localState.y)) {
+		const [px, py] = worldToCanvas(localState.x, localState.y);
+		const yaw = toNumber(localState.heading, 0) * Math.PI / 180;
+		ctx.save();
+		ctx.translate(px, py);
+		ctx.rotate(-yaw);
+		ctx.beginPath();
+		ctx.moveTo(12 * ratio, 0);
+		ctx.lineTo(-8 * ratio, 7 * ratio);
+		ctx.lineTo(-4 * ratio, 0);
+		ctx.lineTo(-8 * ratio, -7 * ratio);
+		ctx.closePath();
+		ctx.fillStyle = mapColours.drone;
+		ctx.fill();
+		ctx.lineWidth = 1.5 * ratio;
+		ctx.strokeStyle = '#ffffff';
+		ctx.stroke();
+		ctx.restore();
+	}
+}
+
+function setMapSummary(text) {
+	if (mapElements.summary) {
+		mapElements.summary.textContent = text;
+	}
+}
+
+function describeRoute(route) {
+	const info = route && route.info;
+	if (!info) {
+		return null;
+	}
+	const goal = `(${info.goal[0].toFixed(1)}, ${info.goal[1].toFixed(1)})`;
+	if (!info.found) {
+		return `No walking route from the station to ${goal}.`;
+	}
+	return `Route to ${goal}: ${info.length.toFixed(1)} m, ${(info.energy / 1000).toFixed(1)} kJ, `
+		+ `${Math.round(100 * info.trail_share)}% on trail (${info.planner}, ${info.time_ms.toFixed(0)} ms).`;
+}
+
+async function refreshMapState() {
+	try {
+		const response = await fetch(mapUrls.state, { cache: 'no-store' });
+		if (!response.ok) {
+			return;
+		}
+		const payload = await response.json();
+		mapState.info = payload.info;
+		mapState.trails = payload.trails || [];
+		mapState.pois = payload.points_of_interest || [];
+		const previous = mapState.route && mapState.route.info;
+		mapState.route = payload.route;
+		const current = mapState.route && mapState.route.info;
+		if (current && JSON.stringify(current) !== JSON.stringify(previous) && !mapState.pending) {
+			setMapSummary(describeRoute(mapState.route));
+		}
+		drawMap();
+	} catch (error) {
+		console.warn('Map state unavailable.', error);
+	}
+}
+
+function refreshMapImage() {
+	const image = new Image();
+	image.onload = () => {
+		mapState.image = image;
+		drawMap();
+	};
+	image.src = `${mapUrls.image}?t=${Date.now()}`;
+}
+
+async function refreshMapGraph() {
+	try {
+		const response = await fetch(mapUrls.graph, { cache: 'no-store' });
+		if (response.ok) {
+			mapState.graph = await response.json();
+			drawMap();
+		}
+	} catch (error) {
+		console.warn('Route roadmap unavailable.', error);
+	}
+}
+
+// A click on (or near) a point of interest plans a route to it; anywhere
+// else plans a route to the clicked ground.
+async function handleMapClick(event) {
+	if (!mapState.view || !mapState.info || mapState.pending) {
+		return;
+	}
+	const rect = mapElements.canvas.getBoundingClientRect();
+	const ratio = mapState.view.ratio;
+	const px = (event.clientX - rect.left) * ratio;
+	const py = (event.clientY - rect.top) * ratio;
+
+	let goal = canvasToWorld(px, py);
+	let label = `(${goal[0].toFixed(1)}, ${goal[1].toFixed(1)})`;
+	let nearest = 14 * ratio;
+	mapState.pois.forEach((poi) => {
+		const [qx, qy] = worldToCanvas(poi.x, poi.y);
+		const distance = Math.hypot(qx - px, qy - py);
+		if (distance < nearest) {
+			nearest = distance;
+			goal = [poi.x, poi.y];
+			label = poi.id;
+		}
+	});
+
+	mapState.pending = goal;
+	setMapSummary(`Planning a route to ${label}...`);
+	drawMap();
+	try {
+		const response = await fetch(mapUrls.route, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ x: goal[0], y: goal[1] })
+		});
+		const result = await response.json();
+		mapState.pending = null;
+		if (!result.ok) {
+			setMapSummary(`No route to ${label}: ${result.error}.`);
+		}
+		await refreshMapState();
+		if (result.ok) {
+			setMapSummary(describeRoute(mapState.route));
+		}
+	} catch (error) {
+		mapState.pending = null;
+		setMapSummary('Route planner unavailable (is the bridge running?).');
+		console.warn('Route request failed.', error);
+	}
+	drawMap();
+}
+
+function connectMap() {
+	if (!mapElements.canvas) {
+		return;
+	}
+	mapElements.canvas.addEventListener('click', handleMapClick);
+	if (mapElements.graphToggle) {
+		mapElements.graphToggle.addEventListener('click', () => {
+			mapState.showGraph = !mapState.showGraph;
+			mapElements.graphToggle.setAttribute('aria-pressed', String(mapState.showGraph));
+			mapElements.graphToggle.textContent = mapState.showGraph ? 'Hide Roadmap' : 'Show Roadmap';
+			if (mapState.showGraph) {
+				refreshMapGraph();
+			}
+			drawMap();
+		});
+	}
+	window.addEventListener('resize', drawMap);
+	refreshMapState();
+	refreshMapImage();
+	setInterval(refreshMapState, 1000);
+	setInterval(refreshMapImage, 2000);
+	setInterval(() => {
+		if (mapState.showGraph) {
+			refreshMapGraph();
+		}
+	}, 5000);
+}
+
 initMapView();
 renderTelemetry(localState);
 connectBridge();
+connectMap();
 bindCommandButtons();
 
 manualControls.altitude.addEventListener('pointerdown', () => {

@@ -8,7 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Drone Ground Control Station</title>
-    <link rel="stylesheet" href="style.css?v=20261102d">
+    <link rel="stylesheet" href="style.css?v=20261103b">
 </head>
 
 <body>
@@ -30,9 +30,13 @@
                         <p class="panel-kicker">Navigation</p>
                         <h2>Top Down Map</h2>
                     </div>
-                    <span class="panel-tag">Live position overlay</span>
+                    <div class="map-header-actions">
+                        <button class="btn btn-ghost map-toggle" id="btn-map-graph" type="button" aria-pressed="false">Show Roadmap</button>
+                        <span class="panel-tag">Live position overlay</span>
+                    </div>
                 </div>
                 <div class="map-frame" id="map">
+                    <!-- Shown until the terrain map arrives, then covered by the canvas -->
                     <img
                         id="map-image"
                         class="map-image"
@@ -40,10 +44,22 @@
                         alt="Top down terrain map"
                     />
                     <div id="drone-marker" class="drone-marker" aria-label="Drone location"></div>
-                    <div class="placeholder-copy">
+                    <canvas id="map-canvas" class="map-canvas"></canvas>
+                    <div class="placeholder-copy" id="map-placeholder">
                         <span class="placeholder-title">Map Space</span>
+                        <p>Waiting for the terrain map</p>
+                    </div>
+                    <div class="map-legend" aria-hidden="true">
+                        <span><i class="legend-swatch legend-trail"></i>Trail</span>
+                        <span><i class="legend-swatch legend-grass"></i>Grass</span>
+                        <span><i class="legend-swatch legend-unseen"></i>Unmapped</span>
+                        <span><i class="legend-dot legend-red"></i>Red</span>
+                        <span><i class="legend-dot legend-green"></i>Green</span>
+                        <span><i class="legend-dot legend-person"></i>Person</span>
+                        <span><i class="legend-line"></i>Route</span>
                     </div>
                 </div>
+                <p class="map-summary" id="map-route-summary">Click a marker, or any point on the map, to plan the least-effort walking route from the ranger station.</p>
             </section>
 
             <section class="panel feeds-panel">
@@ -167,7 +183,7 @@
         </main>
     </div>
 
-    <script src="app.js?v=20261102d"></script>
+    <script src="app.js?v=20261103b"></script>
 </body>
 
 </html>

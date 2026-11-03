@@ -36,6 +36,8 @@ worlds/
 models/                    grass_plane, trail_plane, elevated_trail, launch_pad,
                            rescue_randy_base/_red/_green (Ethan's)
 weights/yolo26n.pt         YOLO weights for target_detector.py (offline use)
+maps/<world>/terrain.npz   Preloaded terrain map the demo starts from (see
+                           maps/README.md for recording it)
 requirements.txt           pip-only dependencies (ultralytics)
 urdf_parrot/               Parrot + thermal camera (copies of bringup's xacros
                            and meshes, with tunable camera FOV/tilt and 3D
@@ -54,7 +56,9 @@ scripts/                   Nodes (executables):
                            Library modules (imported by the nodes):
   terrain_map.py           The terrain map itself (numpy, no ROS)
   trail_detector.py        Trails from the map (distance transform + gradient)
-  route_planner.py         Ranger routes (A2 grid search with energy costs)
+  trail_graph.py           Ranger routes over a roadmap (A2 PRM + Dijkstra)
+  route_planner.py         Walking costs, and the A2 grid search to compare
+  map_overview.py          Top-down picture of the map for the dashboard
   coverage_explorer.py     Frontier selection for Mapping mode (AT3 explorer)
   mapping_mode.py          Mapping mode's Nav2 goal handling (AT3)
   mission_modes.py         Path following (pure pursuit) and hovering modes
@@ -103,6 +107,15 @@ Nav2, RViz and mapping mode. It then adds each team member's part from
 `launch/modules/` and skips any part that hasn't been merged yet. Turn a part
 off with its flag, e.g. `detection:=False`. See
 [launch/modules/README.md](launch/modules/README.md) to add your part.
+
+The terrain map starts from the world's preloaded map,
+`maps/<world>/terrain.npz`, so trails, routes and the dashboard map work
+straight away (see [maps/README.md](maps/README.md); without the file it
+starts blank). To show Mapping mode building the map, start blank:
+
+```bash
+ros2 launch 41068_assignment demo.launch.py terrain_map:=''
+```
 
 ## Running it
 
@@ -224,9 +237,32 @@ ros2 service call /parrot1/plan_ranger_route nav_msgs/srv/GetPlan \
       goal: {pose: {position: {x: 10.0, y: -10.0}}}}"
 ```
 
-The route prefers trails, walks around hills and low branches when the detour
-is cheaper, and never squeezes through a gap narrower than 0.6 m.
-`terrain_mapper` logs its length, energy and how much of it is on trail.
+The route keeps to the trails (walking on grass costs ten times as much),
+leaves them only for the last stretch to a point off the trail or to cross
+between separate trail systems, walks around hills and low branches when the
+detour is cheaper, and never squeezes through a gap narrower than 0.6 m.
+`terrain_mapper` logs its length, energy and how much of it is on trail, and
+publishes the same on `/parrot1/ranger_route/info`.
+
+### Dashboard map
+
+The dashboard's Top Down Map panel shows the terrain map from above (grey
+unmapped, green grass, brown trail shaded by its distance transform, black
+obstacles), the detected trails with their names and networks, the ranger
+station, the drone and its heading, and points of interest. Click a point of
+interest, or anywhere on the map, to plan the least-effort walking route from
+the station to it; the route and its length, energy and share on trail appear
+under the map. Show Roadmap overlays the route graph.
+
+Points of interest come from `/parrot1/points_of_interest` (`std_msgs/String`,
+JSON), drawn red, green or white by `type`. Nothing publishes it yet: it is
+the slot for the people found by the detection part. To try it by hand:
+
+```bash
+ros2 topic pub --once /parrot1/points_of_interest std_msgs/msg/String \
+    "{data: '{\"points\": [{\"id\": \"P1\", \"x\": -15, \"y\": 12, \"type\": \"red\"}]}'}" \
+    --qos-durability transient_local
+```
 
 ### Saving and loading maps
 
@@ -238,7 +274,9 @@ ros2 service call /parrot1/terrain/save std_srvs/srv/Trigger
 
 This writes `~/41068_maps/<world>_<date>_<time>/` with `terrain.npz` (the map),
 `trails.json` and `terrain.png` (a preview: white free, black obstacle, brown
-trail, grey unseen). To start a later run from it:
+trail, grey unseen). Copy a good one into `maps/<world>/` to make it the
+demo's preloaded map ([maps/README.md](maps/README.md)). To start a later run
+from it:
 
 ```bash
 ros2 launch 41068_assignment spawn_parrot.launch.py nav2:=True \
@@ -291,10 +329,14 @@ Add these displays (all under `/parrot1/`):
   a 0.1 m grid cell. The lowest point in a cell is its ground height. Points
   0.3–1.2 m above the surrounding ground are obstacles a person can't get
   past (trunks, rocks, bushes). Points 1.2–2.0 m up are low branches, passable
-  but slow. Ground points' colour (brown vs green) votes on whether the cell
-  is trail. Terrain steeper than 35° is an obstacle (the A2 "large gradient"
-  rule). Above 3 m the camera sees tree tops instead of the ground, so it
-  then only adds trail colour to ground already mapped.
+  but slow. A cell is trail by colour (its ground points are mostly brown,
+  `hiking_trail_1`) or by height (its ground is 0.1–0.3 m above the grass
+  within 1.5 m, `simple_trees`, whose trail is a raised path and whose grass
+  is tinted brown), set per world by `terrain.trail_source`. Terrain steeper
+  than 35° is an obstacle (the A2 "large gradient" rule) if it also rises at
+  least 0.3 m within 1 m, so the raised path's 0.23 m edge is a step, not a
+  wall. Above 3 m the camera sees tree tops instead of the ground, so it then
+  only adds trail colour to ground already mapped.
 - **Mapping mode** (`coverage_explorer.py`, `mapping_mode.py`). This is the AT3
   frontier explorer and its Nav2 goal handling, run on the terrain map: a
   frontier is the edge between ground the camera has seen and ground it
@@ -306,15 +348,25 @@ Add these displays (all under `/parrot1/`):
   (|∇d| < 0.6, as in AT3's `cave_geometry.py`), is the trail centreline. The
   trail mask is thinned to a skeleton and split at junctions. Sections that
   mostly lie on the ridge are kept as trails; spurs into the trail edges
-  don't. Each is smoothed with the A2 smoother.
-- **Ranger route** (`route_planner.py`). This is A2's planner on the terrain
-  grid: Dijkstra (A2's A* with heuristic weight 0, as A2 recommends for
-  energy costs) with the A2 energy cost `|(μmg cos θ + mg sin θ) dx|`. θ is
-  the slope from the terrain map, and μ depends on the terrain: trail 0.05,
-  grass 0.10, low branches 0.25, unseen ground 0.30. Obstacles are grown by a
-  person's half-width (0.3 m) with the distance transform, so narrow gaps
-  aren't used. The path comes from parent back-pointers and is smoothed with
-  A2's smoother.
+  don't. Each is smoothed with the A2 smoother. Trails on the same connected
+  piece of trail share a network (N1, N2, ...): `simple_trees` has two,
+  either side of the launch pad.
+- **Ranger route** (`trail_graph.py`, `route_planner.py`). This is A2's PRM
+  with Dijkstra (A2's A* with heuristic weight 0, as A2 recommends for energy
+  costs). Nodes go every 1 m along each trail's centreline, the ridge of its
+  distance transform (A2 Task 10's idea), plus 300 randomly sampled free
+  cells (A2 Task 7) so a route can leave the trail; edges join nodes within
+  4 m whose straight line is clear. The edge cost is A2's energy
+  `|(μmg cos θ + mg sin θ) dx|`, with θ from the terrain map and μ averaged
+  over the cells the edge crosses: trail 0.05, grass 0.5, low branches 1.25,
+  unseen ground 1.5. Obstacles are grown by a person's half-width (0.3 m)
+  with the distance transform, so narrow gaps aren't used. The route comes
+  from parent back-pointers. On `simple_trees` the roadmap has ~500 nodes,
+  is built in ~0.3 s whenever the map changes and answers a route in 3–5 ms;
+  A2's grid search over every cell (`route.planner: grid`) takes 0.5–1.4 s
+  for routes of the same cost, and is still used if the roadmap finds no
+  route. Uniform sampling alone gave routes costing 1.5–2× more, as random
+  nodes rarely land on a 1.5 m trail.
 - **Passive mode / Return Home** (`mission_modes.py`). The drone climbs on the
   spot to 8 m, which clears the tallest tree (oak, 6.5 m). It then steers along
   the trail by pure pursuit, aiming at a point 2 m ahead on the path. Nav2
@@ -338,9 +390,10 @@ Add these displays (all under `/parrot1/`):
 ### Tuning
 
 Each module's settings are in a dataclass at the top of its file
-(`TerrainConfig`, `TrailConfig`, `RouteConfig`, `FollowConfig`), with a
-comment on each. They are also ROS parameters, e.g. `terrain.max_slope_deg`,
-`trails.min_trail_length`, `route.mu_trail`, `follow.lookahead`. Override
+(`TerrainConfig`, `TrailConfig`, `RouteConfig`, `GraphConfig`,
+`FollowConfig`), with a comment on each. They are also ROS parameters, e.g.
+`terrain.trail_source`, `trails.min_trail_length`, `route.mu_trail`,
+`graph.grass_nodes`, `follow.lookahead`. Override
 them in `config/worlds/<world>.yaml` or with `--ros-args -p`, writing floats
 as floats (`1.0`, not `1`). The mission manager's altitudes and timeouts
 are ROS parameters declared at the top of `mission_manager.py`.
@@ -352,8 +405,9 @@ cd ros2_ws/src/41068_assignment
 python3 -m pytest test
 ```
 
-They cover the terrain map, trail detection, routing, frontier selection and
-path following on small synthetic maps, in under a second.
+They cover the terrain map, trail detection, the route roadmap and grid
+search, the dashboard map picture, frontier selection and path following on
+small synthetic maps, in a few seconds.
 
 ### Known limits
 
@@ -368,6 +422,12 @@ path following on small synthetic maps, in under a second.
   section; following a route through the trail network is not done yet.
 - **Passive flights at 8 m don't improve the walking map under trees**: the
   camera only sees the canopy from up there.
+- **Trails by height need flat ground.** The height rule compares each cell
+  with the lowest ground within 1.5 m, which on a slope is downhill ground:
+  4° is already 0.1 m. It suits `simple_trees` (flat, raised path); worlds
+  with hills should use `trail_source: colour`.
+- **The lidar never sees the raised path**: it scans at ~1 m. Only the depth
+  camera does, so the trail is only in the terrain map, not SLAM's map.
 
 ## Changing the route
 

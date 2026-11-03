@@ -18,7 +18,8 @@ Publishes:
   target_detections (vision_msgs/Detection2DArray) - one entry per person
     detected, bbox in pixel coordinates, one frame's detections per message.
   target_detections/debug_image (sensor_msgs/Image) - annotated frame,
-    only published if debug:=true (handy for rqt_image_view while tuning).
+    only published if debug:=true and something subscribes (handy for
+    rqt_image_view while tuning).
   target_colour (std_msgs/String) - "red" or "none", every frame a person is
     seen. With several people visible, "red" if any of them is red.
 
@@ -35,6 +36,7 @@ from typing import List, Tuple
 import cv2
 import numpy as np
 import rclpy
+import torch
 from cv_bridge import CvBridge
 from rclpy.node import Node
 from sensor_msgs.msg import Image
@@ -63,9 +65,12 @@ class TargetDetector(Node):
         self.declare_parameter('person_class_id', 0)
         self.declare_parameter('confidence', 0.4)
         self.declare_parameter('imgsz', 640)
-        # 'cpu', 'cuda', or 'cuda:0' etc. Falls back to CPU everywhere unless
-        # you know a GPU is passed through to this environment.
-        self.declare_parameter('device', 'cpu')
+        # 'auto' (CUDA if PyTorch can see a GPU, else CPU), 'cpu', 'cuda',
+        # 'cuda:0' etc. WSL2 passes NVIDIA GPUs through to CUDA.
+        self.declare_parameter('device', 'auto')
+        # CPU threads for inference on the CPU. PyTorch otherwise takes every
+        # core, and competes with Gazebo, which renders the cameras on the CPU.
+        self.declare_parameter('threads', 4)
         self.declare_parameter('debug', True)
 
         # Red flagging. The torso_* values pick the slice of each person box
@@ -95,19 +100,26 @@ class TargetDetector(Node):
         self.colour_enabled = bool(self.get_parameter('colour_enabled').value)
         self.last_flag = None
 
+        torch.set_num_threads(int(self.get_parameter('threads').value))
+        self.device = str(self.get_parameter('device').value)
+        if self.device == 'auto':
+            self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         model_name = str(self.get_parameter('model').value)
         self.get_logger().info(f'Loading {model_name} (downloads on first use if not cached)...')
         self.model = YOLO(model_name)
         self.person_class_id = int(self.get_parameter('person_class_id').value)
 
         self.bridge = CvBridge()
-        self.image_sub = self.create_subscription(Image, 'camera/image', self._on_image, 10)
+        # Depth 1: if inference falls behind, skip to the newest frame rather
+        # than working through a backlog of old ones.
+        self.image_sub = self.create_subscription(Image, 'camera/image', self._on_image, 1)
         self.detections_pub = self.create_publisher(Detection2DArray, 'target_detections', 10)
         self.debug_pub = self.create_publisher(Image, 'target_detections/debug_image', 1)
         self.colour_pub = self.create_publisher(String, 'target_colour', 10)
 
         self.get_logger().info(
-            f'target_detector started, subscribed to camera/image '
+            f'target_detector started on {self.device}, subscribed to camera/image '
             f'(colour flagging {"on" if self.colour_enabled else "off"})'
         )
 
@@ -145,7 +157,7 @@ class TargetDetector(Node):
         if colour_info:
             self._publish_colour(colour_info)
 
-        if self.get_parameter('debug').value:
+        if self.get_parameter('debug').value and self.debug_pub.get_subscription_count() > 0:
             self._publish_debug(frame, boxes, msg.header, colour_info)
 
     def _publish_colour(self, colour_info) -> None:
@@ -169,14 +181,13 @@ class TargetDetector(Node):
         """
         confidence = float(self.get_parameter('confidence').value)
         imgsz = int(self.get_parameter('imgsz').value)
-        device = str(self.get_parameter('device').value)
 
         results = self.model.predict(
             frame,
             classes=[self.person_class_id],
             conf=confidence,
             imgsz=imgsz,
-            device=device,
+            device=self.device,
             verbose=False,
         )[0]
 

@@ -228,8 +228,10 @@ class MissionManager(Node):
     def publish_cmd(self, cmd: Twist):
         self.cmd_pub.publish(cmd)
 
-    def publish_exploration_markers(self, markers: MarkerArray):
-        self.marker_pub.publish(markers)
+    def publish_exploration_markers(self, explorer: CoverageExplorer):
+        # Built only for RViz: one point per frontier cell, in a Python loop
+        if self.marker_pub.get_subscription_count() > 0:
+            self.marker_pub.publish(explorer.create_marker_array())
 
     def save_map(self):
         if not self.save_client.service_is_ready():

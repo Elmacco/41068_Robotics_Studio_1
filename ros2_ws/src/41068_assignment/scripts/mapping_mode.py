@@ -135,7 +135,7 @@ class MappingMode:
             self.grid_stamp = grid_msg.header.stamp
             self.explorer.update_map(MapGrid.from_msg(grid_msg))
             self.explorer.find_frontiers()
-            manager.publish_exploration_markers(self.explorer.create_marker_array())
+            manager.publish_exploration_markers(self.explorer)
             self.abandon_stale_goal()
 
         coverage = 100 * self.explorer.exploration_stats()['coverage']

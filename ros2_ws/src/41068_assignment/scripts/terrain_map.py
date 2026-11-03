@@ -143,6 +143,10 @@ class TerrainMap:
         self.ground_hits = np.zeros(shape, dtype=np.int32)
         self.trail_hits = np.zeros(shape, dtype=np.int32)
 
+        # obstacles() until the totals next change. It is the costly layer
+        # (slope and relief over the whole grid) and most others use it.
+        self._obstacles = None
+
     # ------------------------------------------------------------ coordinates
 
     @property
@@ -179,6 +183,7 @@ class TerrainMap:
         """
         if len(xyz) == 0:
             return
+        self._obstacles = None
         x, y, z = xyz[:, 0], xyz[:, 1], xyz[:, 2]
         row, col, inside = self.world_to_cell(x, y)
         row, col, z, rgb = row[inside], col[inside], z[inside], rgb[inside]
@@ -280,12 +285,14 @@ class TerrainMap:
         over anything lower than obstacle_min_height; without the second test
         the raised path in simple_trees was walled off along both edges.
         """
-        cfg = self.config
-        hit = self.obstacle_hits >= cfg.min_obstacle_points
-        with np.errstate(invalid='ignore'):
-            steep = ((self.slope_deg() > cfg.max_slope_deg)
-                     & (self.ground_relief() >= cfg.obstacle_min_height))
-        return hit | steep
+        if self._obstacles is None:
+            cfg = self.config
+            hit = self.obstacle_hits >= cfg.min_obstacle_points
+            with np.errstate(invalid='ignore'):
+                steep = ((self.slope_deg() > cfg.max_slope_deg)
+                         & (self.ground_relief() >= cfg.obstacle_min_height))
+            self._obstacles = hit | steep
+        return self._obstacles
 
     def overhead(self) -> np.ndarray:
         """Cells with low branches (and nothing lower in the way)."""
@@ -359,3 +366,4 @@ class TerrainMap:
         self.overhead_hits = data['overhead_hits']
         self.ground_hits = data['ground_hits']
         self.trail_hits = data['trail_hits']
+        self._obstacles = None

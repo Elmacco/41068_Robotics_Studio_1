@@ -38,6 +38,7 @@ TF is 2D in this stack (see spawn_parrot.launch.py), so a cloud is placed with
 TF for x, y and heading and with the odometry for altitude.
 """
 
+import array
 import json
 import math
 import os
@@ -248,10 +249,13 @@ class TerrainMapper(Node):
         grid.info.origin.position.x = terrain.origin_x
         grid.info.origin.position.y = terrain.origin_y
         grid.info.origin.orientation.w = 1.0
-        grid.data = terrain.occupancy().ravel().tolist()
+        # From bytes: a 250k-item list takes ~35 ms to check and convert
+        grid.data = array.array('b', terrain.occupancy().tobytes())
         self.occupancy_pub.publish(grid)
 
-        self.cloud_pub.publish(self.terrain_cloud(stamp))
+        # Only RViz shows it, so skip building it when RViz isn't running
+        if self.cloud_pub.get_subscription_count() > 0:
+            self.cloud_pub.publish(self.terrain_cloud(stamp))
         self.publish_overview(stamp)
 
         self.get_logger().info(

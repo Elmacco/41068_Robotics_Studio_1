@@ -29,7 +29,7 @@ import math
 import numpy as np
 
 import rclpy
-from geometry_msgs.msg import Pose2D, Twist
+from geometry_msgs.msg import Pose2D, PoseStamped, Twist
 from nav2_msgs.action import NavigateToPose
 from nav_msgs.msg import OccupancyGrid, Odometry
 from rclpy.action import ActionClient
@@ -42,6 +42,7 @@ from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformException, TransformListener
 from visualization_msgs.msg import MarkerArray
 from sensor_msgs.msg import Image
+from vision_msgs.msg import Detection2DArray
 
 from coverage_explorer import CoverageExplorer
 from active_mode import ActiveMode
@@ -110,6 +111,8 @@ class MissionManager(Node):
         self.trails = {}
         self.latest_thermal = None
         self.latest_thermal_time = None
+        self.latest_target_colour = None
+        self.latest_person_bbox = None
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
@@ -119,8 +122,14 @@ class MissionManager(Node):
         self.create_subscription(Odometry, 'odometry', self.odom_callback, 10)
         self.create_subscription(OccupancyGrid, 'terrain/occupancy', self.grid_callback, latched)
         self.create_subscription(String, 'trails', self.trails_callback, latched)
-        # A person detector should publish a map-frame Pose2D here.
+        # Keep the Pose2D topic for compatible detectors. The bundled
+        # target_projector publishes the same map-frame detection as PoseStamped.
         self.create_subscription(Pose2D, 'person_detection', self.person_detection_callback, 10)
+        self.create_subscription(PoseStamped, 'target_pose', self.target_pose_callback, 10)
+        self.create_subscription(
+            Detection2DArray, 'target_detections', self.target_detections_callback, 10
+        )
+        self.create_subscription(String, 'target_colour', self.target_colour_callback, 10)
         self.create_subscription(Image, 'thermal_camera/image', self.thermal_callback, 10)
 
         self.state_pub = self.create_publisher(String, 'mission_state', latched)
@@ -257,14 +266,51 @@ class MissionManager(Node):
         if isinstance(self.mode, ActiveMode):
             if self.mode.last_person_confirmed:
                 return
-            self.mode.person_detected(pose)
+            self.mode.person_detected(pose, self.latest_target_colour)
         elif isinstance(self.mode, MappingMode):
             active_mode = ActiveMode(self)
-            if active_mode.person_detected(pose):
+            if active_mode.person_detected(pose, self.latest_target_colour):
                 self.get_logger().warning(
                     'Person confirmed during Mapping; interrupting mapping and hovering'
                 )
                 self.switch_to(active_mode)
+
+    def target_pose_callback(self, msg: PoseStamped):
+        """Adapt the bundled projector's map-frame output to the mode API."""
+        q = msg.pose.orientation
+        pose = Pose2D()
+        pose.x = msg.pose.position.x
+        pose.y = msg.pose.position.y
+        pose.theta = math.atan2(
+            2.0 * (q.w * q.z + q.x * q.y),
+            1.0 - 2.0 * (q.y * q.y + q.z * q.z),
+        )
+        self.person_detection_callback(pose)
+
+    def target_colour_callback(self, msg: String):
+        self.latest_target_colour = msg.data.strip().lower()
+
+    def target_detections_callback(self, msg: Detection2DArray):
+        """Store the highest-confidence YOLO box used for thermal checking.
+
+        The RGB and thermal cameras are configured with the same resolution
+        and field of view, so the detector pixel box can be applied directly.
+        """
+        if not msg.detections:
+            self.latest_person_bbox = None
+            return
+        best = max(
+            msg.detections,
+            key=lambda detection: (
+                detection.results[0].hypothesis.score if detection.results else 0.0
+            ),
+        )
+        self.latest_person_bbox = (
+            best.bbox.center.position.x,
+            best.bbox.center.position.y,
+            best.bbox.size_x,
+            best.bbox.size_y,
+        )
 
     def thermal_callback(self, msg: Image):
         if msg.encoding not in ('16UC1', 'mono16'):

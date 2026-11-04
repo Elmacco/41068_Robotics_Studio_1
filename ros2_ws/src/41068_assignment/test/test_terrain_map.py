@@ -115,6 +115,50 @@ def test_low_branches_are_overhead_not_obstacles():
     assert (terrain.occupancy()[21:29, 21:29] == 0).all()                 # the drone flies under
 
 
+def low_canopy_map(drone_ceiling):
+    """Grass with a canopy at 1.4 m over x, y 2-3 m, as simple_trees' larger oaks."""
+    terrain = TerrainMap(TerrainConfig(x_min=0.0, x_max=5.0, y_min=0.0, y_max=5.0,
+                                       drone_ceiling=drone_ceiling))
+    terrain.add_points(*ground_points(0, 5, 0, 5, GRASS))
+    terrain.add_points(*ground_points(2.0, 3.0, 2.0, 3.0, GRASS, z=1.4))
+    return terrain
+
+
+def test_canopy_under_the_drone_ceiling_blocks_the_drone_not_a_person():
+    terrain = low_canopy_map(drone_ceiling=1.6)
+    assert terrain.drone_obstacles()[21:29, 21:29].all()
+    assert (terrain.occupancy()[21:29, 21:29] == 100).all()
+    assert not terrain.obstacles().any()                    # a person ducks under
+    assert terrain.overhead()[21:29, 21:29].all()
+
+
+def test_canopy_over_the_drone_ceiling_is_free_for_the_drone():
+    terrain = low_canopy_map(drone_ceiling=1.2)
+    assert not terrain.drone_obstacles().any()
+    assert (terrain.occupancy() == 0).all()
+
+
+def test_drone_band_survives_save_and_load(tmp_path):
+    terrain = low_canopy_map(drone_ceiling=1.6)
+    path = str(tmp_path / 'terrain.npz')
+    terrain.save(path)
+    loaded = TerrainMap(terrain.config)
+    loaded.load(path)
+    assert (loaded.occupancy() == terrain.occupancy()).all()
+
+
+def test_a_map_saved_before_the_drone_band_still_loads(tmp_path):
+    terrain = low_canopy_map(drone_ceiling=1.6)
+    path = str(tmp_path / 'terrain.npz')
+    terrain.save(path)
+    data = dict(np.load(path))
+    del data['drone_hits']
+    np.savez_compressed(path, **data)
+    loaded = TerrainMap(terrain.config)
+    loaded.load(path)
+    assert not loaded.drone_obstacles().any()
+
+
 def raised_path_map(trail_source='height'):
     """Grass with a solid 1.5 m wide path 0.23 m high along y = 1.75-3.25, as
     simple_trees' boxes: the camera sees its top, never the grass under it."""

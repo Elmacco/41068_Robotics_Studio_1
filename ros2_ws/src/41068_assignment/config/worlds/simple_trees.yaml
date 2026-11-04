@@ -11,5 +11,9 @@
       # the grass plane is tinted brown, so trails are found by height, not
       # colour (see terrain_map.py).
       trail_source: height
+      # The oak canopy starts 1.04-1.40 m up (the Fuel oak's 1.22 m, scaled
+      # 0.85-1.15), just over the drone's top at 0.9 m. 1.6 m reaches the
+      # highest of those with a few camera points to spare.
+      drone_ceiling: 1.6
     # The launch pad, which is also where demo.launch.py spawns the drone.
     ranger_station: [2.0, 0.0]

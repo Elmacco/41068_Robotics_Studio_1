@@ -194,8 +194,19 @@ local_costmap:
       # 1 m from anything, e.g. the person beside the launch pad.
       footprint: '[ [0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3] ]'
       plugins:
+      - terrain_layer
       - obstacle_layer
       - inflation_layer
+      terrain_layer:
+        # Drone obstacles from the depth camera (terrain_mapper.py): tree
+        # canopy and anything else the 2D lidar slice at 1.0 m misses or keeps
+        # clearing through gaps in the leaves. 0/100 only, so use_maximum
+        # just adds obstacles. Absolute topic: Humble's costmap layers resolve
+        # relative names inside the costmap's own namespace.
+        plugin: nav2_costmap_2d::StaticLayer
+        map_topic: /parrot1/terrain/drone_obstacles
+        map_subscribe_transient_local: true
+        use_maximum: true
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
@@ -205,7 +216,10 @@ local_costmap:
         enabled: true
         observation_sources: scan
         scan:
-          topic: scan
+          # Absolute: Humble resolves layer topics inside the costmap's own
+          # namespace, and plain 'scan' was /parrot1/<costmap>/scan, which
+          # nothing publishes, so Nav2 never saw the lidar.
+          topic: /parrot1/scan
           max_obstacle_height: 2.0
           clearing: true
           marking: true
@@ -237,14 +251,28 @@ global_costmap:
       track_unknown_space: true
       plugins:
       - static_layer
+      - terrain_layer
       - obstacle_layer
       - inflation_layer
+      terrain_layer:
+        # Drone obstacles from the depth camera (terrain_mapper.py): tree
+        # canopy and anything else the 2D lidar slice at 1.0 m misses or keeps
+        # clearing through gaps in the leaves. 0/100 only, so use_maximum
+        # just adds obstacles. Absolute topic: Humble's costmap layers resolve
+        # relative names inside the costmap's own namespace.
+        plugin: nav2_costmap_2d::StaticLayer
+        map_topic: /parrot1/terrain/drone_obstacles
+        map_subscribe_transient_local: true
+        use_maximum: true
       obstacle_layer:
         plugin: nav2_costmap_2d::ObstacleLayer
         enabled: true
         observation_sources: scan
         scan:
-          topic: scan
+          # Absolute: Humble resolves layer topics inside the costmap's own
+          # namespace, and plain 'scan' was /parrot1/<costmap>/scan, which
+          # nothing publishes, so Nav2 never saw the lidar.
+          topic: /parrot1/scan
           max_obstacle_height: 2.0
           clearing: true
           marking: true

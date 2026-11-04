@@ -17,13 +17,15 @@ Each grid cell keeps running totals over every camera point that landed in it:
                  above local ground      past: trunks, rocks, bushes, people
   overhead_hits  points 1.2-2.0 m     -> low branches: a person can duck
                  above local ground      under or push through, but slowly
+  drone_hits     points 1.2 m to      -> canopy low enough to catch the
+                 drone_ceiling           drone, which maps at 0.8 m
   ground_hits    points on the ground
   trail_hits     ... that are trail-coloured (brown) -> trail fraction
 
 From those it derives the layers the rest of the system uses: observed,
 obstacles (including terrain too steep to walk, the A2 rule that a large
-terrain gradient is an obstacle), overhead branches, elevation, slope and
-trail cells.
+terrain gradient is an obstacle), drone obstacles, overhead branches,
+elevation, slope and trail cells.
 
 Trail cells come from one of two kinds of evidence, chosen per world
 (trail_source):
@@ -38,6 +40,12 @@ Why two height bands: with a single 0.3-2.0 m band, the canopies of the oak
 rows in hiking_trail_1 (which start 1.23 m up and are up to 12 m across)
 merged into a solid wall that sealed off a quarter of the world, although
 the trails run straight under them.
+
+Why a drone band as well: the person's bands are not the drone's. In
+simple_trees the oak canopy starts 1.04-1.40 m up (1.22 m scaled 0.85-1.15),
+a person's overhead branches but only 0.15 m over the drone's top, so the
+drone flew into it and stuck. Canopy below drone_ceiling is an obstacle
+for the drone (drone_obstacles, terrain/occupancy) but not for a person.
 
 Like AT3's explorer.py, this is plain numpy with no ROS dependencies, so it
 can be unit tested without the simulator.
@@ -85,6 +93,13 @@ class TerrainConfig:
     overhead_min_height: float = 1.2
     head_height: float = 2.0
     min_obstacle_points: int = 3
+
+    # Anything from obstacle_min_height up to this height above local ground
+    # is in the drone's way (m). The drone maps at 0.8 m and its body is
+    # 0.2 m tall, so its top is at 0.9 m; the default keeps the person's
+    # obstacle band, which stops 0.3 m above that. Set per world in
+    # config/worlds/<world>.yaml where the canopy hangs lower.
+    drone_ceiling: float = 1.2
 
     # Points within this height of the local ground are ground, and their
     # colour is used for trail detection (m).
@@ -140,6 +155,7 @@ class TerrainMap:
         self.ground_z = np.full(shape, np.inf, dtype=np.float32)
         self.obstacle_hits = np.zeros(shape, dtype=np.int32)
         self.overhead_hits = np.zeros(shape, dtype=np.int32)
+        self.drone_hits = np.zeros(shape, dtype=np.int32)
         self.ground_hits = np.zeros(shape, dtype=np.int32)
         self.trail_hits = np.zeros(shape, dtype=np.int32)
 
@@ -208,6 +224,9 @@ class TerrainMap:
                         & (height_above <= cfg.head_height))
             np.add.at(self.obstacle_hits, (row[obstacle], col[obstacle]), 1)
             np.add.at(self.overhead_hits, (row[overhead], col[overhead]), 1)
+            drone = ((height_above >= cfg.overhead_min_height)
+                     & (height_above < cfg.drone_ceiling))
+            np.add.at(self.drone_hits, (row[drone], col[drone]), 1)
 
         # A point is ground, and its colour counts, if it is close to its own
         # cell's lowest point, and that lowest point is no more than a step
@@ -294,6 +313,16 @@ class TerrainMap:
             self._obstacles = hit | steep
         return self._obstacles
 
+    def drone_obstacles(self) -> np.ndarray:
+        """Cells the drone cannot fly through at its mapping height.
+
+        A person's obstacles, plus canopy between their band and
+        drone_ceiling. Steep ground stays in: it rises into the drone's
+        band, and a goal on it would put the drone beside a bank.
+        """
+        canopy = self.drone_hits >= self.config.min_obstacle_points
+        return self.obstacles() | canopy
+
     def overhead(self) -> np.ndarray:
         """Cells with low branches (and nothing lower in the way)."""
         return (self.overhead_hits >= self.config.min_obstacle_points) & ~self.obstacles()
@@ -325,13 +354,15 @@ class TerrainMap:
                          f"not {cfg.trail_source!r}")
 
     def occupancy(self) -> np.ndarray:
-        """OccupancyGrid-style int8: -1 unobserved, 0 free, 100 obstacle.
+        """The drone's map, OccupancyGrid-style int8: -1 unobserved, 0 free,
+        100 drone obstacle.
 
-        Overhead branches count as free: the drone maps at 0.8 m, below them.
+        Overhead branches above drone_ceiling count as free: the drone maps
+        at 0.8 m, below them.
         """
         grid = np.full((self.height, self.width), -1, dtype=np.int8)
         grid[self.observed()] = 0
-        grid[self.obstacles()] = 100
+        grid[self.drone_obstacles()] = 100
         return grid
 
     def coverage(self) -> float:
@@ -349,7 +380,7 @@ class TerrainMap:
             resolution=cfg.resolution,
             point_count=self.point_count, ground_z=self.ground_z,
             obstacle_hits=self.obstacle_hits, overhead_hits=self.overhead_hits,
-            ground_hits=self.ground_hits, trail_hits=self.trail_hits)
+            drone_hits=self.drone_hits, ground_hits=self.ground_hits, trail_hits=self.trail_hits)
 
     def load(self, path: str):
         """Restore totals saved by save(). The grid must match this map's."""
@@ -364,6 +395,10 @@ class TerrainMap:
         self.ground_z = data['ground_z']
         self.obstacle_hits = data['obstacle_hits']
         self.overhead_hits = data['overhead_hits']
+        # Maps saved before the drone band have none: it fills in as the
+        # drone flies.
+        self.drone_hits = (data['drone_hits'] if 'drone_hits' in data
+                           else np.zeros_like(self.obstacle_hits))
         self.ground_hits = data['ground_hits']
         self.trail_hits = data['trail_hits']
         self._obstacles = None

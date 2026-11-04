@@ -13,6 +13,23 @@
 
 <body>
     <div class="page-shell">
+        <div id="person-alert-overlay" class="person-alert-overlay hidden" aria-live="polite" aria-hidden="true">
+            <div class="person-alert-dialog" role="alertdialog" aria-modal="true" aria-labelledby="person-alert-title">
+                <button id="person-alert-close" class="person-alert-close" type="button" aria-label="Close person alert">×</button>
+                <div class="person-alert-header">
+                    <span class="person-alert-badge">Alert</span>
+                    <h3 id="person-alert-title">Person found</h3>
+                </div>
+                <div class="person-alert-content">
+                    <img id="person-alert-photo" class="person-alert-photo" src="" alt="Detected person" />
+                    <div class="person-alert-meta">
+                        <p class="person-alert-copy">A person was detected near the drone.</p>
+                        <p id="person-alert-location">Location: N/A</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <header class="status-bar">
             <div>
                 <p class="eyebrow">Drone Ground Control Station</p>
@@ -150,7 +167,6 @@
                         <button class="btn btn-accent" id="btn-mapping" data-command="mapping">Mapping</button>
                         <button class="btn btn-accent-soft" id="btn-passive" data-command="passive" disabled title="No trails detected yet: run Mapping first">Passive</button>
                         <button class="btn btn-ghost" id="btn-active" data-command="active">Active</button>
-                        <button class="btn btn-ghost" id="btn-save-map" data-command="save_map">Save Map</button>
                         <button class="btn btn-ghost" id="btn-rtl" data-command="return_home">Return Home</button>
                         <button class="btn btn-warning" id="btn-stop" data-command="stop">Stop</button>
                     </div>

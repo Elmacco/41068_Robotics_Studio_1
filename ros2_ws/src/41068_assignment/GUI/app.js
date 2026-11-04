@@ -46,6 +46,13 @@ const manualControls = {
 	yawRight: document.getElementById('btn-yaw-right')
 };
 
+const personAlert = {
+	overlay: document.getElementById('person-alert-overlay'),
+	close: document.getElementById('person-alert-close'),
+	photo: document.getElementById('person-alert-photo'),
+	location: document.getElementById('person-alert-location')
+};
+
 const mapView = {
 	frame: document.getElementById('map'),
 	image: document.getElementById('map-image'),
@@ -269,10 +276,25 @@ function applyTelemetry(payload) {
 	localState.altitude = payload.altitude ?? localState.altitude;
 	localState.heading = payload.heading ?? localState.heading;
 	localState.speed = payload.speed ?? localState.speed;
-	localState.battery = payload.battery ?? localState.battery;
 	localState.mode = payload.mode ?? localState.mode;
 	localState.x = payload.x ?? localState.x;
 	localState.y = payload.y ?? localState.y;
+	if (Number.isFinite(Number(payload.battery))) {
+		localState.battery = Number(payload.battery);
+	}
+
+	const distanceFromHome = Math.hypot(
+		Number(localState.x ?? localState.latitude ?? 0),
+		Number(localState.y ?? localState.longitude ?? 0)
+	);
+	if (distanceFromHome <= 0.5) {
+		localState.battery = 100;
+	} else {
+		const currentBattery = Number.isFinite(localState.battery) ? Number(localState.battery) : 100;
+		const drain = clamp(Number(localState.speed ?? 0) * 0.03, 0.02, 1.1);
+		localState.battery = clamp(currentBattery - drain, 0, 100);
+	}
+
 	syncAltitudeFromTelemetry(localState.altitude);
 	renderTelemetry(localState);
 	drawMap();
@@ -646,6 +668,55 @@ function setMapSummary(text) {
 	}
 }
 
+function showPersonAlert(poi) {
+	if (!personAlert.overlay || !personAlert.location || !personAlert.photo) {
+		return;
+	}
+
+	const rgbFeed = document.getElementById('rgb-feed');
+	const fallbackImage = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+		<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+			<rect width="200" height="200" fill="#dfe7e2"/>
+			<circle cx="100" cy="78" r="32" fill="#aebdb4"/>
+			<path d="M62 166c8-30 28-44 38-44s30 14 38 44" fill="#8aa58e"/>
+			<rect x="16" y="16" width="168" height="168" rx="18" fill="none" stroke="#7a9783" stroke-width="4"/>
+		</svg>
+	`);
+
+	const x = Number(poi?.x ?? 0);
+	const y = Number(poi?.y ?? 0);
+	personAlert.location.textContent = `Location: (${x.toFixed(1)}, ${y.toFixed(1)})`;
+	personAlert.photo.src = rgbFeed && rgbFeed.currentSrc ? rgbFeed.currentSrc : fallbackImage;
+	personAlert.overlay.classList.remove('hidden');
+	personAlert.overlay.setAttribute('aria-hidden', 'false');
+}
+
+function hidePersonAlert() {
+	if (!personAlert.overlay) {
+		return;
+	}
+	personAlert.overlay.classList.add('hidden');
+	personAlert.overlay.setAttribute('aria-hidden', 'true');
+}
+
+function handleDetectedPeople() {
+	const people = (mapState.pois || []).filter((poi) => {
+		const type = String(poi?.type || '').toLowerCase();
+		const id = String(poi?.id || '').toLowerCase();
+		return type.includes('person') || id.includes('person');
+	});
+	if (!people.length) {
+		return;
+	}
+
+	const personKey = people.map((poi) => `${poi.id || 'person'}:${Number(poi.x).toFixed(1)}:${Number(poi.y).toFixed(1)}`).join('|');
+	if (personAlert.lastSignature === personKey) {
+		return;
+	}
+	personAlert.lastSignature = personKey;
+	showPersonAlert(people[0]);
+}
+
 function describeRoute(route) {
 	const info = route && route.info;
 	if (!info) {
@@ -697,6 +768,7 @@ async function refreshMapState() {
 		mapState.trails = payload.trails || [];
 		updateTrailPicker();
 		mapState.pois = payload.points_of_interest || [];
+		handleDetectedPeople();
 		const previous = mapState.route && mapState.route.info;
 		mapState.route = payload.route;
 		const current = mapState.route && mapState.route.info;
@@ -794,6 +866,16 @@ function connectMap() {
 				refreshMapGraph();
 			}
 			drawMap();
+		});
+	}
+	if (personAlert.close) {
+		personAlert.close.addEventListener('click', hidePersonAlert);
+	}
+	if (personAlert.overlay) {
+		personAlert.overlay.addEventListener('click', (event) => {
+			if (event.target === personAlert.overlay) {
+				hidePersonAlert();
+			}
 		});
 	}
 	window.addEventListener('resize', drawMap);

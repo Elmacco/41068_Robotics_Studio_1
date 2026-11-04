@@ -166,65 +166,6 @@ body {
 	align-self: stretch;
 }
 
-.map-image {
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-	z-index: 1;
-	display: block;
-}
-
-.drone-marker {
-	--marker-rotation: 0deg;
-	position: absolute;
-	width: 26px;
-	height: 26px;
-	margin-left: -13px;
-	margin-top: -13px;
-	transform: rotate(var(--marker-rotation));
-	transform-origin: center;
-	transition: transform 0.18s linear;
-	z-index: 2;
-	pointer-events: none;
-	left: 50%;
-	top: 50%;
-}
-
-.drone-marker::before {
-	content: "";
-	position: absolute;
-	left: 50%;
-	top: 1px;
-	transform: translateX(-50%);
-	width: 0;
-	height: 0;
-	border-left: 7px solid transparent;
-	border-right: 7px solid transparent;
-	border-bottom: 15px solid #df2b2b;
-	filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.28));
-}
-
-.drone-marker::after {
-	content: "";
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	background: #ffffff;
-	border: 2px solid #df2b2b;
-	box-shadow: 0 0 0 4px rgba(223, 43, 43, 0.2);
-}
-
-.map-frame.map-active .placeholder-copy {
-	opacity: 0;
-	pointer-events: none;
-}
-
 .feed-frame {
 	aspect-ratio: 1 / 1;
 	height: min(220px, 30vw);
@@ -287,8 +228,8 @@ body {
 }
 
 /* Top-down map: canvas drawn by app.js, legend and route summary. Once the
-   terrain map arrives (terrain-active) the canvas covers the static grass
-   image and its drone marker, and draws the drone itself. */
+   terrain map arrives (terrain-active) the canvas replaces the waiting
+   caption and draws the drone itself. */
 .map-canvas {
 	position: absolute;
 	inset: 0;
@@ -303,8 +244,6 @@ body {
 	display: block;
 }
 
-.map-frame.terrain-active .map-image,
-.map-frame.terrain-active .drone-marker,
 .map-frame.terrain-active .placeholder-copy,
 .map-frame.terrain-active::before,
 .map-frame.terrain-active::after {

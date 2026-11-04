@@ -42,6 +42,7 @@ install(
         scripts/active_mode.py scripts/colour_classifier.py
         scripts/trail_graph.py scripts/map_overview.py scripts/person_registry.py
         scripts/thermal_check.py scripts/person_approach.py
+        scripts/nav_goal.py scripts/passive_mode.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

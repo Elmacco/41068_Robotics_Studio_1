@@ -487,6 +487,29 @@ body {
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.btn:disabled {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+.trail-picker {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.trail-picker select {
+	flex: 1;
+	padding: 8px 10px;
+	border: 1px solid var(--panel-border);
+	border-radius: 10px;
+	background: var(--panel);
+	color: var(--text);
+	font: inherit;
+}
+
 .manual-block {
 	display: flex;
 	flex-direction: column;

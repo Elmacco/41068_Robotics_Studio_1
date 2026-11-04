@@ -1,18 +1,17 @@
-"""The flying modes other than Mapping and Active: fly a path (Passive, Return Home) and hover (Idle).
+"""The flying modes other than Mapping, Passive and Active: fly a path (Return Home) and hover (Idle).
 
 Not an executable node: mission_manager.py runs them. Each mode has the same
 small interface - start(), step() -> status text, stop(), and a finished
 flag - so a new mode (e.g. the next stage of Active mode) slots in the same
 way.
 
-Passive mode and Return Home fly above the trees, so they do not use Nav2:
+Return Home flies above the trees, so it does not use Nav2:
 at cruise altitude the lidar sees nothing (0 of 360 beams return at 7.8 m),
 so there is nothing to avoid, and the tree footprints Nav2 learned at
-mapping altitude would only push the drone off the trail. A pure-pursuit
+mapping altitude would only push the drone off course. A pure-pursuit
 follower steers along the path instead: aim at the point a fixed lookahead
 distance ahead on the path, turn towards it, and slow down when the heading
-is far off. The drone turns to face where it is going, so the forward,
-downward-tilted cameras look along the trail ahead - where a hiker would be.
+is far off. The drone turns to face where it is going.
 """
 
 import math

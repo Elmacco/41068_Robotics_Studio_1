@@ -148,12 +148,19 @@
                         <button class="btn btn-primary" id="btn-takeoff" data-command="takeoff">Take Off</button>
                         <button class="btn btn-secondary" id="btn-takeover" data-command="take_over">Take Over</button>
                         <button class="btn btn-accent" id="btn-mapping" data-command="mapping">Mapping</button>
-                        <button class="btn btn-accent-soft" id="btn-passive" data-command="passive_t3">Passive T3</button>
+                        <button class="btn btn-accent-soft" id="btn-passive" data-command="passive" disabled title="No trails detected yet: run Mapping first">Passive</button>
                         <button class="btn btn-ghost" id="btn-active" data-command="active">Active</button>
                         <button class="btn btn-ghost" id="btn-save-map" data-command="save_map">Save Map</button>
                         <button class="btn btn-ghost" id="btn-rtl" data-command="return_home">Return Home</button>
                         <button class="btn btn-warning" id="btn-stop" data-command="stop">Stop</button>
                     </div>
+
+                    <label class="trail-picker">
+                        <span>Passive trail</span>
+                        <select id="passive-trail" disabled>
+                            <option value="">No trails detected yet</option>
+                        </select>
+                    </label>
 
                     <div class="manual-controls-layout">
                         <div class="slider-row altitude-row">

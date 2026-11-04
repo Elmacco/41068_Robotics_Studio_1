@@ -6,10 +6,10 @@ one of three mission modes:
 - **Mapping**: explores the world on its own until the camera has seen all of
   it, building a terrain map (ground height, obstacles, trails), then saves
   the map and flies home.
-- **Passive**: flies along a trail the ranger picks, at a fixed altitude above
-  the trees.
-- **Active**: drops lower over the current spot, then reports when a
-  person-detection message is confirmed by the thermal camera.
+- **Passive**: once Mapping has found trails, patrols one the ranger picks,
+  low (0.8 m) with Nav2, watching for people.
+- **Active**: when Passive sees a red-shirted person, flies to a standoff
+  facing them and confirms them close up, then Passive carries on.
 
 From the terrain map it can also plan the least-effort walking route for a
 ranger to any point, e.g. to a person who needs help. The older fixed
@@ -63,7 +63,9 @@ scripts/                   Nodes (executables):
   coverage_explorer.py     Frontier selection for Mapping mode (AT3 explorer)
   mapping_mode.py          Mapping mode's Nav2 goal handling (AT3)
   mission_modes.py         Path following (pure pursuit) and hovering modes
+  passive_mode.py          Passive mode: patrol a trail low with Nav2
   active_mode.py           Active mode: fly to a found red-shirted person
+  nav_goal.py              One Nav2 goal at a time, for Passive and Active
   person_approach.py       Its standoff goal and state machine (AT3 Planning 2/3)
   person_registry.py       People list: merges repeat sightings, stable ids
   thermal_check.py         Body-heat check inside a YOLO person box
@@ -224,7 +226,7 @@ ros2 topic echo /parrot1/mission_state        # e.g. "MAPPING: 42% observed, fly
 | Command | What happens |
 |---|---|
 | `mapping` | Settle at 0.8 m, then fly to frontiers (the edge of the ground the camera has seen) until none are left. Then save the terrain map and Return Home |
-| `passive T3` | Climb on the spot to 8 m, fly to the nearer end of trail T3 and along it, then hover at its end |
+| `passive T3` | At 0.8 m, fly with Nav2 to the nearer end of trail T3 and along it, then hover at its end. A red-shirted person seen on the way starts Active mode, then the patrol carries on. `passive` alone takes the trail nearest the drone |
 | `active` | Hover where it is (dropping to 3 m if higher; it never climbs) until a red-shirted person is on the people list, fly to a standoff facing them and confirm them close up, then go Idle |
 | `return_home` | Climb to 8 m, fly straight home, descend to the spawn height |
 | `stop` / `take_over` | Stop all autonomy and hover where it is; the dashboard's manual sliders keep working |
@@ -238,15 +240,18 @@ ros2 topic echo --once /parrot1/trails --field data
 ```
 
 Trails are only detected where the camera has seen them, so run Mapping mode
-(or load a saved map) before Passive mode. Names are re-assigned by length each
-time detection runs (every 5 s), so check the list right before sending a
+(or load a saved map) before Passive mode. The dashboard's Passive button
+stays greyed out until there are trails; pick one under the buttons (or
+*Nearest trail*). Names are re-assigned by length each time detection runs
+(every 5 s), so from a terminal check the list right before sending a
 `passive` command.
 
-While Mapping is active, a red-shirted person on the people list who was
-seen in the last 2 s (`person_recent`) interrupts it: Mapping cancels its Nav2
-goal and Active mode approaches the person, then Mapping resumes. Each person
-(P1, P2, ...) interrupts Mapping once, so they do not stop it again while
-still in view.
+While Passive is patrolling, a red-shirted person on the people list who was
+seen in the last 2 s (`person_recent`) interrupts it: Passive cancels its Nav2
+goal and Active mode approaches the person, then Passive resumes from the
+trail waypoint it was heading to. Each person (P1, P2, ...) interrupts once,
+so they do not stop it again while still in view. Mapping does not stop for
+people: it only maps, and the patrol afterwards finds them.
 
 Active mode is the close-range inspection from 49274 AT3 (Planning 2 and 3),
 in `person_approach.py`:
@@ -363,9 +368,9 @@ Add these displays (all under `/parrot1/`):
 ### How it works
 
 ```
- depth camera ──► terrain_mapper ──► terrain/occupancy ──► mission_manager ──► Nav2 (Mapping)
+ depth camera ──► terrain_mapper ──► terrain/occupancy ──► mission_manager ──► Nav2 (Mapping, Passive, Active)
  (RGB-D cloud)      │   │    │                              │    │
-                    │   │    └─► trails ───────────────────►┘    ├─► cmd_vel (Passive / Return Home)
+                    │   │    └─► trails ───────────────────►┘    ├─► cmd_vel (Return Home)
                     │   └─► plan_ranger_route service             └─► target_altitude
                     └─► terrain/save
  dashboard ─► mission_command ─► mission_manager
@@ -423,11 +428,22 @@ Add these displays (all under `/parrot1/`):
   for routes of the same cost, and is still used if the roadmap finds no
   route. Uniform sampling alone gave routes costing 1.5–2× more, as random
   nodes rarely land on a 1.5 m trail.
-- **Passive mode / Return Home** (`mission_modes.py`). The drone climbs on the
-  spot to 8 m, which clears the tallest tree (oak, 6.5 m). It then steers along
-  the trail by pure pursuit, aiming at a point 2 m ahead on the path. Nav2
-  isn't used up there: the lidar sees nothing at that height, and Nav2's tree
-  outlines from the low-altitude map would push the drone off the trail.
+- **Passive mode** (`passive_mode.py`). The trail is cut into waypoints every
+  2 m from its end nearer the drone, and Nav2 is sent to one at a time, each
+  facing along the trail so the camera looks where a hiker would be. Within
+  1 m of a waypoint the next goal goes out (Nav2 preempts the running one), so
+  the drone does not stop at each. A waypoint Nav2 cannot reach is skipped;
+  more than 3 in a row ends the patrol. A trail end beyond Nav2's 20 m costmap
+  is reached in 9 m hops, as Active mode does. It flies at 0.8 m, not above
+  the trees: the depth camera reaches 10 m, so from 8 m (camera tilted 45°
+  down) the projector could only place people within about 6 m, and Active
+  mode would then have to descend near the oaks, whose canopy starts at
+  1.04 m. Settings are `passive.*` parameters (`PassiveConfig`).
+- **Return Home** (`mission_modes.py`). The drone climbs on the spot to 8 m,
+  which clears the tallest tree (oak, 6.5 m). It then steers home by pure
+  pursuit, aiming at a point 2 m ahead on the path. Nav2 isn't used up there:
+  the lidar sees nothing at that height, and Nav2's tree outlines from the
+  low-altitude map would push the drone off course.
 - **Flight controller** (`flight_controller.py`). Nav2 only commands forward
   speed and turn rate, so this node adds the vertical speed that holds
   `target_altitude` (a proportional controller). It is the only publisher to
@@ -447,9 +463,10 @@ Add these displays (all under `/parrot1/`):
 
 Each module's settings are in a dataclass at the top of its file
 (`TerrainConfig`, `TrailConfig`, `RouteConfig`, `GraphConfig`,
-`FollowConfig`), with a comment on each. They are also ROS parameters, e.g.
-`terrain.trail_source`, `trails.min_trail_length`, `route.mu_trail`,
-`graph.grass_nodes`, `follow.lookahead`. Override
+`FollowConfig`, `PassiveConfig`), with a comment on each. They are also ROS
+parameters, e.g. `terrain.trail_source`, `trails.min_trail_length`,
+`route.mu_trail`, `graph.grass_nodes`, `follow.lookahead`,
+`passive.spacing`. Override
 them in `config/worlds/<world>.yaml` or with `--ros-args -p`, writing floats
 as floats (`1.0`, not `1`). The mission manager's altitudes and timeouts
 are ROS parameters declared at the top of `mission_manager.py`.
@@ -476,8 +493,6 @@ small synthetic maps, in a few seconds.
   and lidar filtering, not done yet.
 - **Trails are junction-to-junction sections.** Passive mode flies one
   section; following a route through the trail network is not done yet.
-- **Passive flights at 8 m don't improve the walking map under trees**: the
-  camera only sees the canopy from up there.
 - **Trails by height need flat ground.** The height rule compares each cell
   with the lowest ground within 1.5 m, which on a slope is downhill ground:
   4° is already 0.1 m. It suits `simple_trees` (flat, raised path); worlds

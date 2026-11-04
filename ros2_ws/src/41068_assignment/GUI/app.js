@@ -32,6 +32,9 @@ const commandButtons = {
 	stop: document.getElementById('btn-stop')
 };
 
+// Passive mode patrols a trail, so it is offered once the map has some.
+const passiveTrailSelect = document.getElementById('passive-trail');
+
 const manualControls = {
 	altitude: document.getElementById('altitude-slider'),
 	altitudeValue: document.getElementById('altitude-value'),
@@ -371,7 +374,6 @@ async function publishCommand(command) {
 		stop: 'STOP',
 		save_map: 'SAVE MAP',
 		mapping: 'MAPPING',
-		passive_t3: 'PASSIVE T3',
 		active: 'ACTIVE'
 	};
 	localState.mode = labels[command] || command.toUpperCase();
@@ -426,6 +428,11 @@ function bindCommandButtons() {
 			}
 			if (key === 'rtl') {
 				publishCommand('return_home');
+				return;
+			}
+			if (key === 'passive') {
+				const trail = passiveTrailSelect ? passiveTrailSelect.value : '';
+				publishCommand(trail ? `passive ${trail}` : 'passive');
 				return;
 			}
 			const commandName = button.dataset.command || key;
@@ -652,6 +659,33 @@ function describeRoute(route) {
 		+ `${Math.round(100 * info.trail_share)}% on trail (${info.planner}, ${info.time_ms.toFixed(0)} ms).`;
 }
 
+// Trail names (T1 = longest) are re-assigned each time the trails are
+// detected, so the list is rebuilt when they change, keeping the choice.
+function updateTrailPicker() {
+	if (!passiveTrailSelect) {
+		return;
+	}
+	const trails = mapState.trails.filter((trail) => trail.name);
+	const options = trails.length
+		? [['', 'Nearest trail'], ...trails.map((trail) => [trail.name,
+			`${trail.name}${trail.network ? ` (${trail.network})` : ''}, ${Number(trail.length).toFixed(1)} m`])]
+		: [['', 'No trails detected yet']];
+	const signature = JSON.stringify(options);
+	if (passiveTrailSelect.dataset.signature !== signature) {
+		const chosen = passiveTrailSelect.value;
+		passiveTrailSelect.replaceChildren(...options.map(([value, label]) => new Option(label, value)));
+		if (options.some(([value]) => value === chosen)) {
+			passiveTrailSelect.value = chosen;
+		}
+		passiveTrailSelect.dataset.signature = signature;
+	}
+	passiveTrailSelect.disabled = !trails.length;
+	if (commandButtons.passive) {
+		commandButtons.passive.disabled = !trails.length;
+		commandButtons.passive.title = trails.length ? 'Patrol the chosen trail at 0.8 m' : 'No trails detected yet: run Mapping first';
+	}
+}
+
 async function refreshMapState() {
 	try {
 		const response = await fetch(mapUrls.state, { cache: 'no-store' });
@@ -661,6 +695,7 @@ async function refreshMapState() {
 		const payload = await response.json();
 		mapState.info = payload.info;
 		mapState.trails = payload.trails || [];
+		updateTrailPicker();
 		mapState.pois = payload.points_of_interest || [];
 		const previous = mapState.route && mapState.route.info;
 		mapState.route = payload.route;

@@ -19,7 +19,7 @@ Planning 3, the state machine (ApproachPlanner): PLANNING -> APPROACHING ->
 VERIFYING -> DONE. Arriving is not enough: success needs the person seen again
 from the standoff. A failure (Nav2 abort, timeout, not seen) retries once from
 a different standoff, then abandons. Either way Active mode then finishes and
-Mapping resumes.
+Passive mode resumes its trail.
 
 No ROS node dependencies, so the tests run it on synthetic grids.
 """

@@ -7,6 +7,7 @@ from coverage_explorer import CoverageExplorer
 from mapping_mode import MappingMode
 from mission_manager import MissionManager
 from mission_modes import FollowConfig, HoverMode
+from passive_mode import PassiveConfig, PassiveMode
 from person_approach import ApproachConfig, Phase
 from thermal_check import hot_pixels, thermal_confirms_person
 
@@ -31,7 +32,9 @@ class FakeManager:
     """Just enough of MissionManager for check_people and ActiveMode."""
 
     def __init__(self, mode=None, people=(), altitude=0.8, now=100.0):
-        self.mode = mode if mode is not None else MappingMode.__new__(MappingMode)
+        self.passive_config = PassiveConfig()
+        self.mode = mode if mode is not None else PassiveMode(
+            self, 'T1', [(0.0, 0.0), (2.0, 0.0), (4.0, 0.0)], 0.8)
         self.people = list(people)
         self.handled_people = set()
         self.altitude = altitude
@@ -90,30 +93,34 @@ def test_thermal_confirmation_is_limited_to_person_box():
     assert thermal_confirms_person(thermal, box=(1, 1, 2, 2), min_hot_pixels=4)
 
 
-def test_red_person_interrupts_mapping_once():
+def test_red_person_interrupts_passive_once():
     manager = FakeManager(people=[person()])
+    manager.mode.index = 1
     manager.check_people()
 
     assert isinstance(manager.switched_mode, ActiveMode)
     assert manager.switched_mode.person['id'] == 'P1'
-    assert manager.switched_mode.resume_mapping
+    resume = manager.switched_mode.resume
+    assert isinstance(resume, PassiveMode) and resume.name == 'PASSIVE T1'
+    assert resume.waypoints == [(2.0, 0.0), (4.0, 0.0)]
 
-    # Back in Mapping with P1 still in view: no second interruption.
-    manager.mode, manager.switched_mode = MappingMode.__new__(MappingMode), None
+    # Back on the trail with P1 still in view: no second interruption.
+    manager.mode, manager.switched_mode = resume, None
     manager.check_people()
     assert manager.switched_mode is None
 
 
-def test_non_red_or_out_of_view_person_does_not_interrupt_mapping():
+def test_non_red_or_out_of_view_person_does_not_interrupt_passive():
     manager = FakeManager(people=[person(kind='person'), person('P2', last_seen=90.0)])
     manager.check_people()
     assert manager.switched_mode is None
 
 
-def test_person_is_ignored_outside_mapping_and_active():
-    manager = FakeManager(mode=HoverMode(None, 'IDLE'), people=[person()])
-    manager.check_people()
-    assert manager.switched_mode is None and not manager.handled_people
+def test_person_is_ignored_outside_passive_and_active():
+    for mode in (HoverMode(None, 'IDLE'), MappingMode.__new__(MappingMode)):
+        manager = FakeManager(mode=mode, people=[person()])
+        manager.check_people()
+        assert manager.switched_mode is None and not manager.handled_people
 
 
 def test_waiting_active_mode_takes_the_person():
@@ -121,12 +128,12 @@ def test_waiting_active_mode_takes_the_person():
     manager.mode = ActiveMode(manager)
     manager.check_people()
     assert manager.switched_mode is None
-    assert manager.mode.person['id'] == 'P1' and not manager.mode.resume_mapping
+    assert manager.mode.person['id'] == 'P1' and manager.mode.resume is None
 
 
-def test_active_mode_does_not_climb_from_mapping_altitude():
+def test_active_mode_does_not_climb_from_passive_altitude():
     manager = FakeManager(altitude=0.8)
-    mode = ActiveMode(manager, person(), resume_mapping=True)
+    mode = ActiveMode(manager, person(), resume=manager.mode.remaining())
     mode.start()
     assert manager.altitude_target == 0.8
 
@@ -139,7 +146,7 @@ def test_active_mode_still_descends_from_cruise_altitude():
 
 
 class FakeNav:
-    """Stands in for active_mode.NavGoal: records goals, results set by the test."""
+    """Stands in for nav_goal.NavGoal: records goals, results set by the test."""
 
     def __init__(self):
         self.goals = []
@@ -176,7 +183,7 @@ def open_field(person_xy=(2.0, 3.0)):
 def test_active_mode_approaches_verifies_and_finishes():
     manager = FakeManager(altitude=0.8, people=[person(last_seen=99.5)])
     manager.terrain_grid = open_field()
-    mode = ActiveMode(manager, person(), resume_mapping=True)
+    mode = ActiveMode(manager, person(), resume=manager.mode.remaining())
     mode.nav = FakeNav()
     mode.start()
 

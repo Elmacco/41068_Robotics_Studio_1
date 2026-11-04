@@ -6,8 +6,9 @@ already publishes there):
 
   mapping          explore the world until the camera has seen all of it,
                    save the terrain map, then return home
-  passive <trail>  fly along a detected trail at cruise altitude, e.g.
-                   'passive T3' (trail names are on the trails topic)
+  passive [trail]  patrol a detected trail at mapping altitude with Nav2,
+                   e.g. 'passive T3' (names are on the trails topic); with
+                   no name, the trail nearest the drone
   active           hover (dropping to active_altitude if higher) until a
                    red-shirted person is found, fly to a standoff facing
                    them and confirm them close up, then idle
@@ -22,13 +23,14 @@ std_msgs/String on mission_state, e.g. "MAPPING: 42% observed, flying to F7".
 
 People come from target_projector's list (points_of_interest), which only
 holds people that YOLO, depth and thermal all agreed on. A red-shirted person
-still in view and not handled before interrupts Mapping with Active mode,
-which flies to a standoff facing them (active.* parameters, see
-person_approach.py), confirms them close up, and then resumes Mapping.
+still in view and not handled before interrupts Passive mode with Active
+mode, which flies to a standoff facing them (active.* parameters, see
+person_approach.py), confirms them close up, and then resumes the trail.
+Mapping only maps: people it passes are left for a later Passive patrol.
 
 Altitude is set through the flight controller's target_altitude topic;
-horizontal motion comes from Nav2 (Mapping mode) or is published here on
-cmd_vel (path following). Pose comes from TF (2D: x, y, heading) and
+horizontal motion comes from Nav2 (Mapping, Passive, Active) or is published
+here on cmd_vel (Return Home's path following). Pose comes from TF (2D: x, y, heading) and
 altitude from the Gazebo odometry, as everywhere else in this stack.
 """
 
@@ -53,8 +55,10 @@ from coverage_explorer import CoverageExplorer
 from active_mode import ActiveMode
 from mapping_mode import MappingMode
 from mission_modes import FlyPathMode, FollowConfig, HoverMode
+from passive_mode import PassiveConfig, PassiveMode
 from person_approach import ApproachConfig
 from node_params import declare_config
+from grid_tools import resample
 from trail_detector import nearest_end_first
 
 
@@ -73,8 +77,8 @@ class MissionManager(Node):
         # about chest height, seeing trunks and the obstacles a walking
         # person meets, and the camera sees the ground under the canopy.
         self.declare_parameter('mapping_altitude', 0.8)
-        # Cruise altitude for Passive mode and Return Home: clear of the
-        # tallest tree (oak, 6.5 m) with a 1.5 m margin.
+        # Cruise altitude for Return Home: clear of the tallest tree (oak,
+        # 6.5 m) with a 1.5 m margin. Passive flies at mapping_altitude.
         self.declare_parameter('cruise_altitude', 8.0)
         # Active mode drops to this height for a closer look (m); it never
         # climbs to it (see active_mode.py).
@@ -114,6 +118,7 @@ class MissionManager(Node):
             'min_goal_gain', 'no_gain_blacklist_radius', 'goal_timeout', 'no_goal_limit')}
         self.follow_config = declare_config(self, FollowConfig(), 'follow.')
         self.approach_config = declare_config(self, ApproachConfig(), 'active.')
+        self.passive_config = declare_config(self, PassiveConfig(), 'passive.')
         self.explorer = CoverageExplorer(frame_id=self.frame_id)
 
         self.altitude = None
@@ -157,18 +162,7 @@ class MissionManager(Node):
         if command == 'mapping':
             self.switch_to(MappingMode(self, self.explorer))
         elif command == 'passive':
-            if not args or args[0].upper() not in self.trails:
-                known = ', '.join(sorted(self.trails, key=lambda n: int(n[1:]))) or 'none yet'
-                self.get_logger().warn(f'passive needs a trail name; detected trails: {known}')
-                return
-            pose = self.get_pose()
-            if pose is None:
-                self.get_logger().warn('No drone pose yet')
-                return
-            trail = self.trails[args[0].upper()]
-            path = nearest_end_first(trail['points'], pose.x, pose.y)
-            self.switch_to(FlyPathMode(self, f'PASSIVE {trail["name"]}', path,
-                                       self.cruise_altitude))
+            self.start_passive(args[0] if args else None)
         elif command == 'active':
             self.switch_to(ActiveMode(self))
         elif command == 'return_home':
@@ -182,6 +176,29 @@ class MissionManager(Node):
             self.save_map()
         else:
             self.get_logger().warn(f'Unknown command "{msg.data}"')
+
+    def start_passive(self, name):
+        """Patrol a trail from its end nearer the drone: the named one, or the nearest."""
+        if not self.trails:
+            self.get_logger().warn('passive needs trails: none detected yet, run Mapping first')
+            return
+        pose = self.get_pose()
+        if pose is None:
+            self.get_logger().warn('No drone pose yet')
+            return
+        if name is None:
+            trail = min(self.trails.values(), key=lambda t: min(
+                math.hypot(x - pose.x, y - pose.y) for x, y in t['points']))
+        elif name.upper() in self.trails:
+            trail = self.trails[name.upper()]
+        else:
+            known = ', '.join(sorted(self.trails, key=lambda n: int(n[1:])))
+            self.get_logger().warn(f'No trail "{name}"; detected trails: {known}')
+            return
+        path = nearest_end_first(trail['points'], pose.x, pose.y)
+        waypoints = resample(path, self.passive_config.spacing)
+        self.switch_to(PassiveMode(self, trail['name'], waypoints,
+                                   self.mapping_params['mapping_altitude']))
 
     def switch_to(self, mode):
         self.mode.stop()
@@ -200,8 +217,8 @@ class MissionManager(Node):
         if not self.mode.finished:
             return
         self.get_logger().info(f'{self.mode.name} finished: {self.status}')
-        if isinstance(self.mode, ActiveMode) and self.mode.resume_mapping:
-            self.switch_to(MappingMode(self, self.explorer))
+        if isinstance(self.mode, ActiveMode) and self.mode.resume is not None:
+            self.switch_to(self.mode.resume)
         elif isinstance(self.mode, MappingMode):
             self.save_map()
             home_x, home_y, home_z = self.home
@@ -213,13 +230,14 @@ class MissionManager(Node):
     def check_people(self):
         """Hand a newly found red-shirted person to Active mode.
 
-        Only from Mapping (interrupting it) or an Active mode still waiting
-        for one. Each person is handled once: target_projector keeps their id
-        stable, so seeing them again on resuming Mapping does not interrupt it.
+        Only from Passive (interrupting the patrol) or an Active mode still
+        waiting for one. Each person is handled once: target_projector keeps
+        their id stable, so seeing them again on resuming the trail does not
+        interrupt it.
         """
-        mapping = isinstance(self.mode, MappingMode)
+        passive = isinstance(self.mode, PassiveMode)
         waiting = isinstance(self.mode, ActiveMode) and self.mode.wants_person()
-        if not (mapping or waiting):
+        if not (passive or waiting):
             return
         now = self.now()
         recent = self.get_parameter('person_recent').value
@@ -229,10 +247,11 @@ class MissionManager(Node):
         if person is None:
             return
         self.handled_people.add(person['id'])
-        if mapping:
+        if passive:
             self.get_logger().warning(
-                f'Red-shirted person {person["id"]} found during Mapping; approaching them')
-            self.switch_to(ActiveMode(self, person, resume_mapping=True))
+                f'Red-shirted person {person["id"]} found during {self.mode.name}; '
+                f'approaching them')
+            self.switch_to(ActiveMode(self, person, resume=self.mode.remaining()))
         else:
             self.mode.take(person)
 

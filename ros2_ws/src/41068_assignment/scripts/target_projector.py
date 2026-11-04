@@ -317,7 +317,8 @@ class TargetProjector(Node):
         if [(p.id, p.colour) for p in people] != self.last_logged:
             self.last_logged = [(p.id, p.colour) for p in people]
             self.get_logger().info(
-                'People: ' + ', '.join(f'{p.id} ({p.x:.1f}, {p.y:.1f}) {p.colour}' for p in people))
+                'People: ' + (', '.join(f'{p.id} ({p.x:.1f}, {p.y:.1f}) {p.colour}' for p in people)
+                              or 'none'))
 
     def _sample_depth(self, depth_frame: np.ndarray, px: int, py: int, patch: int = 2):
         """Median depth over a small patch around (px, py) - more robust than

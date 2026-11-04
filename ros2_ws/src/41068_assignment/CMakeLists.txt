@@ -41,7 +41,7 @@ install(
         scripts/node_params.py scripts/mapping_mode.py scripts/mission_modes.py
         scripts/active_mode.py scripts/colour_classifier.py
         scripts/trail_graph.py scripts/map_overview.py scripts/person_registry.py
-        scripts/thermal_check.py
+        scripts/thermal_check.py scripts/person_approach.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

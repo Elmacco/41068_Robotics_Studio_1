@@ -1,9 +1,13 @@
 import numpy as np
+from geometry_msgs.msg import Pose2D
+from nav_msgs.msg import OccupancyGrid
 
 from active_mode import ActiveMode
+from coverage_explorer import CoverageExplorer
 from mapping_mode import MappingMode
 from mission_manager import MissionManager
-from mission_modes import HoverMode
+from mission_modes import FollowConfig, HoverMode
+from person_approach import ApproachConfig, Phase
 from thermal_check import hot_pixels, thermal_confirms_person
 
 
@@ -20,7 +24,7 @@ class FakeLogger:
         pass
 
 
-PARAMS = {'active_altitude': 3.0, 'active_dwell': 5.0, 'person_recent': 2.0}
+PARAMS = {'active_altitude': 3.0, 'person_recent': 2.0}
 
 
 class FakeManager:
@@ -34,6 +38,12 @@ class FakeManager:
         self.time = now
         self.altitude_target = None
         self.switched_mode = None
+        self.approach_config = ApproachConfig()
+        self.follow_config = FollowConfig()
+        self.explorer = CoverageExplorer()
+        self.terrain_grid = None
+        self.pose = Pose2D()
+        self.cmds = []
 
     def get_parameter(self, name):
         return FakeParameter(PARAMS[name])
@@ -49,7 +59,10 @@ class FakeManager:
         self.mode = mode
 
     def publish_cmd(self, cmd):
-        pass
+        self.cmds.append(cmd)
+
+    def get_pose(self):
+        return self.pose
 
     def set_altitude(self, altitude):
         self.altitude_target = altitude
@@ -125,14 +138,62 @@ def test_active_mode_still_descends_from_cruise_altitude():
     assert manager.altitude_target == 3.0
 
 
-def test_active_mode_finishes_after_dwell_at_altitude():
-    manager = FakeManager(altitude=0.8)
+class FakeNav:
+    """Stands in for active_mode.NavGoal: records goals, results set by the test."""
+
+    def __init__(self):
+        self.goals = []
+        self.result = None
+        self.running = False
+
+    def send(self, goal):
+        self.goals.append(goal)
+        self.running = True
+
+    def take_result(self):
+        result, self.result = self.result, None
+        if result is not None:
+            self.running = False
+        return result
+
+    def cancel(self):
+        self.running = False
+
+
+def open_field(person_xy=(2.0, 3.0)):
+    """20 x 20 m of free ground at 0.1 m with the person as a 0.4 m obstacle."""
+    msg = OccupancyGrid()
+    msg.info.resolution = 0.1
+    msg.info.width = msg.info.height = 200
+    msg.info.origin.position.x = msg.info.origin.position.y = -10.0
+    data = np.zeros((200, 200), dtype=np.int8)
+    col, row = int((person_xy[0] + 10) / 0.1), int((person_xy[1] + 10) / 0.1)
+    data[row - 2:row + 3, col - 2:col + 3] = 100
+    msg.data = data.flatten().tolist()
+    return msg
+
+
+def test_active_mode_approaches_verifies_and_finishes():
+    manager = FakeManager(altitude=0.8, people=[person(last_seen=99.5)])
+    manager.terrain_grid = open_field()
     mode = ActiveMode(manager, person(), resume_mapping=True)
+    mode.nav = FakeNav()
     mode.start()
+
     mode.step()
-    manager.time += 4.0
+    assert len(mode.nav.goals) == 1 and mode.planner.phase == Phase.APPROACHING
+    goal = mode.nav.goals[0]
+    assert abs(np.hypot(goal.x - 2.0, goal.y - 3.0) - 1.5) < 1e-6
+
+    manager.time = 110.0
+    # Nav2 ends with any yaw: here 1 rad left of the person.
+    manager.pose = Pose2D(x=goal.x, y=goal.y, theta=goal.theta + 1.0)
+    mode.nav.result = True
     mode.step()
-    assert not mode.finished
-    manager.time += 1.5
+    assert mode.planner.phase == Phase.VERIFYING
+    assert manager.cmds[-1].angular.z < 0.0                    # turning right to face them
+
+    manager.time = 112.0
+    manager.people = [person(last_seen=111.8)]
     mode.step()
-    assert mode.finished
+    assert mode.finished and mode.planner.visited

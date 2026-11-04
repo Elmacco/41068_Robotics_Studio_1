@@ -63,7 +63,8 @@ scripts/                   Nodes (executables):
   coverage_explorer.py     Frontier selection for Mapping mode (AT3 explorer)
   mapping_mode.py          Mapping mode's Nav2 goal handling (AT3)
   mission_modes.py         Path following (pure pursuit) and hovering modes
-  active_mode.py           Active mode: hover over a found red-shirted person
+  active_mode.py           Active mode: fly to a found red-shirted person
+  person_approach.py       Its standoff goal and state machine (AT3 Planning 2/3)
   person_registry.py       People list: merges repeat sightings, stable ids
   thermal_check.py         Body-heat check inside a YOLO person box
   grid_tools.py            Distance transform, A2 smoother, small helpers
@@ -218,7 +219,7 @@ ros2 topic echo /parrot1/mission_state        # e.g. "MAPPING: 42% observed, fly
 |---|---|
 | `mapping` | Settle at 0.8 m, then fly to frontiers (the edge of the ground the camera has seen) until none are left. Then save the terrain map and Return Home |
 | `passive T3` | Climb on the spot to 8 m, fly to the nearer end of trail T3 and along it, then hover at its end |
-| `active` | Hover where it is (dropping to 3 m if higher; it never climbs) until a red-shirted person is on the people list, hold over them for 5 s, then go Idle |
+| `active` | Hover where it is (dropping to 3 m if higher; it never climbs) until a red-shirted person is on the people list, fly to a standoff facing them and confirm them close up, then go Idle |
 | `return_home` | Climb to 8 m, fly straight home, descend to the spawn height |
 | `stop` / `take_over` | Stop all autonomy and hover where it is; the dashboard's manual sliders keep working |
 | `takeoff` | Hover at 0.8 m |
@@ -237,9 +238,30 @@ time detection runs (every 5 s), so check the list right before sending a
 
 While Mapping is active, a red-shirted person on the people list who was
 seen in the last 2 s (`person_recent`) interrupts it: Mapping cancels its Nav2
-goal, Active mode holds over the person for `active_dwell` (5 s) at the
-current height, then Mapping resumes. Each person (P1, P2, ...) interrupts
-Mapping once, so they do not stop it again while still in view.
+goal and Active mode approaches the person, then Mapping resumes. Each person
+(P1, P2, ...) interrupts Mapping once, so they do not stop it again while
+still in view.
+
+Active mode is the close-range inspection from 49274 AT3 (Planning 2 and 3),
+in `person_approach.py`:
+
+- **Standoff goal.** Candidates on rings 1.5, 2.0, 2.5 and 3.0 m round the
+  person, 24 each. A candidate must be observed free ground with 1.0 m of
+  clearance from obstacles and unknown ground (0.5 m as a fallback), reachable
+  on Mapping's wavefront, and in line of sight of the person (A2's
+  `is_occluded`, ignoring the last metre, which is the person). All rings
+  are compared on travel + 2 m per metre further out, and the goal faces the
+  person. A goal beyond Nav2's rolling costmap is reached in 9 m hops.
+- **State machine.** PLANNING -> APPROACHING -> VERIFYING -> DONE. On arrival
+  the drone turns to face the person (Nav2 ends with any yaw), and the person
+  counts as *visited* only if the people list sees them again within 5 s
+  (after at least 1.5 s there). A Nav2 failure, the 40 s approach timeout or
+  not seeing them retries once from a different standoff, then *abandons*.
+  The goal is re-planned if the person's estimate moves more than 0.75 m.
+  With no valid standoff for 5 s (ground round them not mapped yet) it
+  abandons too.
+
+Every threshold is an `active.*` parameter of `mission_manager`.
 
 ### Ranger route
 

@@ -9,7 +9,8 @@ already publishes there):
   passive <trail>  fly along a detected trail at cruise altitude, e.g.
                    'passive T3' (trail names are on the trails topic)
   active           hover (dropping to active_altitude if higher) until a
-                   red-shirted person is found, hold over them, then idle
+                   red-shirted person is found, fly to a standoff facing
+                   them and confirm them close up, then idle
   return_home      climb to cruise altitude, fly home, descend
   stop, take_over  stop all autonomy and hover; the dashboard's manual
                    control keeps working (it publishes cmd_vel directly)
@@ -22,7 +23,8 @@ std_msgs/String on mission_state, e.g. "MAPPING: 42% observed, flying to F7".
 People come from target_projector's list (points_of_interest), which only
 holds people that YOLO, depth and thermal all agreed on. A red-shirted person
 still in view and not handled before interrupts Mapping with Active mode,
-which holds over them for active_dwell seconds and then resumes Mapping.
+which flies to a standoff facing them (active.* parameters, see
+person_approach.py), confirms them close up, and then resumes Mapping.
 
 Altitude is set through the flight controller's target_altitude topic;
 horizontal motion comes from Nav2 (Mapping mode) or is published here on
@@ -51,6 +53,7 @@ from coverage_explorer import CoverageExplorer
 from active_mode import ActiveMode
 from mapping_mode import MappingMode
 from mission_modes import FlyPathMode, FollowConfig, HoverMode
+from person_approach import ApproachConfig
 from node_params import declare_config
 from trail_detector import nearest_end_first
 
@@ -76,8 +79,6 @@ class MissionManager(Node):
         # Active mode drops to this height for a closer look (m); it never
         # climbs to it (see active_mode.py).
         self.declare_parameter('active_altitude', 3.0)
-        # Active mode holds over a found person this long, then finishes (s).
-        self.declare_parameter('active_dwell', 5.0)
         # A person starts Active mode only if target_projector saw them this
         # recently (s): it refreshes last_seen about once a second in view.
         self.declare_parameter('person_recent', 2.0)
@@ -112,6 +113,7 @@ class MissionManager(Node):
             'mapping_altitude', 'stall_time', 'min_gain_area', 'min_progress',
             'min_goal_gain', 'no_gain_blacklist_radius', 'goal_timeout', 'no_goal_limit')}
         self.follow_config = declare_config(self, FollowConfig(), 'follow.')
+        self.approach_config = declare_config(self, ApproachConfig(), 'active.')
         self.explorer = CoverageExplorer(frame_id=self.frame_id)
 
         self.altitude = None
@@ -229,7 +231,7 @@ class MissionManager(Node):
         self.handled_people.add(person['id'])
         if mapping:
             self.get_logger().warning(
-                f'Red-shirted person {person["id"]} found during Mapping; hovering over them')
+                f'Red-shirted person {person["id"]} found during Mapping; approaching them')
             self.switch_to(ActiveMode(self, person, resume_mapping=True))
         else:
             self.mode.take(person)

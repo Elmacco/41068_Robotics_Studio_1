@@ -228,9 +228,6 @@ local_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 10.0
           obstacle_min_range: 0.0
-      static_layer:
-        plugin: nav2_costmap_2d::StaticLayer
-        map_subscribe_transient_local: true
       always_send_full_costmap: true
 global_costmap:
   global_costmap:
@@ -249,8 +246,11 @@ global_costmap:
       width: 20
       height: 20
       track_unknown_space: true
+      # No static_layer (SLAM's lidar map): localisation is GPS + odometry
+      # and SLAM is off by default (navigation.launch.py). The terrain layer
+      # remembers obstacles the camera has mapped, the obstacle layer adds
+      # the live lidar.
       plugins:
-      - static_layer
       - terrain_layer
       - obstacle_layer
       - inflation_layer
@@ -281,9 +281,6 @@ global_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 10.0
           obstacle_min_range: 0.0
-      static_layer:
-        plugin: nav2_costmap_2d::StaticLayer
-        map_subscribe_transient_local: true
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0

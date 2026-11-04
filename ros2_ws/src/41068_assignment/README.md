@@ -1,6 +1,6 @@
 # 41068 Assignment Package
 
-Spawns the Parrot drone in a world, runs SLAM + Nav2 for it, and flies it in
+Spawns the Parrot drone in a world, runs Nav2 for it, and flies it in
 one of three mission modes:
 
 - **Mapping**: explores the world on its own until the camera has seen all of
@@ -24,7 +24,7 @@ launch/
   spawn_parrot.launch.py   Spawns the drone + SLAM/Nav2/RViz + mission nodes
   demo.launch.py           Presentation launch: spawn_parrot + each team part
   modules/                 One launch file per team part (see its README)
-  navigation.launch.py     SLAM Toolbox + Nav2 (copy of bringup's)
+  navigation.launch.py     Localisation (map -> odom) + Nav2 (copy of bringup's)
 config/
   <world>.yaml in worlds/  Per-world mapping bounds and ranger station
   *.yaml, *.rviz, ...      Bridge, EKF, SLAM, Nav2, RViz and Gazebo server
@@ -143,13 +143,19 @@ ros2 launch 41068_assignment demo.launch.py terrain_map:=''
 
 ## Running it
 
-1. Launch the sim with SLAM + Nav2:
+1. Launch the sim with Nav2:
 
    ```bash
   ros2 launch 41068_assignment spawn_parrot.launch.py rviz:=True nav2:=True web_dashboard:=True
    ```
 
-   (`nav2:=True` starts SLAM Toolbox automatically as well.)
+   The drone localises from odometry + GPS: the EKF fuses Gazebo's odometry
+   pose as a GPS + compass stand-in, so `parrot1_map` is the world frame and
+   `parrot1_map -> parrot1_odom` is the identity. The map is built live from
+   the depth camera (terrain_mapper). `slam:=True` runs SLAM Toolbox for
+   `map -> odom` instead, as the course package did; on top of GPS it only
+   added error (in simple_trees it rotated the map 40 degrees while the drone
+   sat still).
 
   The `web_dashboard:=True` flag starts the local HTTP bridge that feeds the browser page live telemetry and camera streams.
 
@@ -328,7 +334,7 @@ ros2 launch 41068_assignment spawn_parrot.launch.py nav2:=True \
     terrain_map:=$HOME/41068_maps/<folder>/terrain.npz
 ```
 
-The SLAM map (the lidar map Nav2 uses) is separate:
+With `slam:=True`, SLAM Toolbox's lidar map is separate (nothing uses it):
 
 ```bash
 # Occupancy image + yaml (for map_server / viewing)

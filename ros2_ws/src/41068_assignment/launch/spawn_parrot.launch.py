@@ -80,13 +80,14 @@ def generate_launch_description():
     ld.add_action(DeclareLaunchArgument(
         'slam',
         default_value='False',
-        description='Flag to launch SLAM Toolbox',
+        description='Flag to launch SLAM Toolbox for map -> odom (default: identity, '
+                    'localisation from odometry + GPS; see navigation.launch.py)',
     ))
 
     ld.add_action(DeclareLaunchArgument(
         'nav2',
         default_value='False',
-        description='Flag to launch Nav2. Nav2 also starts SLAM.',
+        description='Flag to launch Nav2',
     ))
 
     ld.add_action(DeclareLaunchArgument(
@@ -239,12 +240,12 @@ def generate_launch_description():
                 # can be used directly as map coordinates.
                 #
                 # z is deliberately left out, so TF stays 2D like the rest of
-                # the course stack. SLAM Toolbox is 2D and sets map -> odom so
-                # that base_link sits at z = 0 in the map; with z fused, map
-                # -> odom carried -altitude, refreshed only once per processed
-                # scan, and Nav2 ignored lidar hits above 2 m in odom (its
-                # max_obstacle_height). Nodes that need the altitude read it
-                # from the 3D Gazebo odometry topic instead.
+                # the course stack. With slam:=True, SLAM Toolbox (2D) sets
+                # map -> odom so that base_link sits at z = 0 in the map;
+                # with z fused, map -> odom carried -altitude, refreshed only
+                # once per processed scan, and Nav2 ignored lidar hits above
+                # 2 m in odom (its max_obstacle_height). Nodes that need the
+                # altitude read it from the 3D Gazebo odometry topic instead.
                 #
                 # Order: x y z, roll pitch yaw, vx vy vz, vroll vpitch vyaw,
                 # ax ay az.
@@ -359,7 +360,7 @@ def generate_launch_description():
         }],
     ))
 
-    # SLAM/Nav2, using our copy of bringup's navigation launch file with the
+    # Localisation + Nav2, using our copy of bringup's navigation launch file with the
     # slam_params_parrot1.yaml / nav2_params_parrot1.yaml configs in config/.
     ld.add_action(TimerAction(
         period=7.0,

@@ -1,6 +1,6 @@
 """One-command launch for the interactive demo / presentation.
 
-Starts the sim, drone, SLAM/Nav2, RViz and the mission nodes (mapping mode)
+Starts the sim, drone, Nav2, RViz and the mission nodes (mapping mode)
 through spawn_parrot.launch.py, then adds each team member's part from
 launch/modules/<file>. A part whose launch file isn't there yet is skipped
 with a log line instead of failing the launch, so every part can be listed
@@ -61,7 +61,7 @@ def generate_launch_description():
         ('y', '0.0', 'Spawn y (m), the launch pad in simple_trees'),
         ('z', '0.8', 'Spawn height (m)'),
         ('rviz', 'True', 'Flag to launch RViz'),
-        ('nav2', 'True', 'Flag to launch Nav2 (and SLAM). Mapping mode needs it.'),
+        ('nav2', 'True', 'Flag to launch Nav2. Mapping mode needs it.'),
         ('terrain_map',
          PathJoinSubstitution([os.path.join(share_dir, 'maps'), LaunchConfiguration('world'),
                                'terrain.npz']),

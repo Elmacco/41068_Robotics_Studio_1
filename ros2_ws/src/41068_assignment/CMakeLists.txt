@@ -40,7 +40,7 @@ install(
         scripts/trail_detector.py scripts/route_planner.py scripts/coverage_explorer.py
         scripts/node_params.py scripts/mapping_mode.py scripts/mission_modes.py
         scripts/active_mode.py scripts/colour_classifier.py
-        scripts/trail_graph.py scripts/map_overview.py
+        scripts/trail_graph.py scripts/map_overview.py scripts/person_registry.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

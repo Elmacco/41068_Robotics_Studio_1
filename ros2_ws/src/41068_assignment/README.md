@@ -461,6 +461,13 @@ Add these displays (all under `/parrot1/`):
 
 ### Tuning
 
+- `terrain_mapper` places each camera cloud at the odometry altitude from
+  the moment the cloud was taken, not the latest one, and skips clouds taken
+  while the drone was climbing, descending (`max_climb_rate`) or tilted
+  (`max_tilt`). Using the latest odometry, which also queued behind the
+  cloud processing, put the ground 1-2 m too low wherever the drone climbed
+  (the corner where Mapping ended, as Return Home climbed on the spot), and
+  since a cell's ground is the lowest point seen there, it stayed wrong.
 Each module's settings are in a dataclass at the top of its file
 (`TerrainConfig`, `TrailConfig`, `RouteConfig`, `GraphConfig`,
 `FollowConfig`, `PassiveConfig`), with a comment on each. They are also ROS

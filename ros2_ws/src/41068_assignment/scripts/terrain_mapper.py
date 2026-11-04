@@ -39,14 +39,18 @@ Services
                                                 the ranger station"
 
 TF is 2D in this stack (see spawn_parrot.launch.py), so a cloud is placed with
-TF for x, y and heading and with the odometry for altitude.
+TF for x, y and heading and with the odometry for altitude: the odometry from
+the moment the cloud was taken (OdomHistory). A cloud is skipped if the drone
+was climbing, descending or tilted then.
 """
 
 import array
 import json
 import math
 import os
+import threading
 import time
+from collections import deque
 
 import cv2
 import numpy as np
@@ -89,6 +93,59 @@ def quaternion_to_matrix(q) -> np.ndarray:
         [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
 
 
+def tilt_deg(q) -> float:
+    """Angle between the body's up axis and the world's (deg): roll and pitch together."""
+    return math.degrees(math.acos(max(-1.0, min(1.0, 1 - 2 * (q.x * q.x + q.y * q.y)))))
+
+
+class OdomHistory:
+    """The drone's recent odometry, looked up at the time a cloud was taken.
+
+    TF is 2D, so a cloud's altitude and tilt come from the odometry instead,
+    and must be the odometry from when the camera took the cloud. The latest
+    message is not that: the cloud is a few tenths of a second old by the
+    time it is processed, and the drone may have started climbing since.
+    Placing a cloud at the wrong altitude moves the ground by the difference,
+    and the ground height is the lowest point ever seen in a cell, so a cloud
+    placed too low spoils those cells for good.
+
+    Samples are (time, x, y, z, tilt). Kept for `keep` s; the odometry
+    callback adds them on its own thread, hence the lock.
+    """
+
+    def __init__(self, keep: float = 3.0):
+        self.keep = keep
+        self.samples = deque()
+        self.lock = threading.Lock()
+
+    def add(self, t: float, x: float, y: float, z: float, tilt: float):
+        with self.lock:
+            self.samples.append((t, x, y, z, tilt))
+            while self.samples and t - self.samples[0][0] > self.keep:
+                self.samples.popleft()
+
+    def at(self, t: float, window: float, max_gap: float):
+        """The drone at time t, and how steady it was within window s of t.
+
+        Returns (x, y, z, climb_rate, tilt) from the sample nearest t, with
+        climb_rate the altitude span over the window's samples divided by
+        their time span (m/s) and tilt the largest in the window (deg).
+        None if no sample is within max_gap of t.
+        """
+        with self.lock:
+            near = [s for s in self.samples if abs(s[0] - t) <= window]
+        if not near:
+            return None
+        nearest = min(near, key=lambda s: abs(s[0] - t))
+        if abs(nearest[0] - t) > max_gap:
+            return None
+        heights = [s[3] for s in near]
+        duration = near[-1][0] - near[0][0]
+        climb_rate = (max(heights) - min(heights)) / duration if duration > 0 else 0.0
+        _, x, y, z, _ = nearest
+        return x, y, z, climb_rate, max(s[4] for s in near)
+
+
 class TerrainMapper(Node):
 
     def __init__(self):
@@ -111,10 +168,19 @@ class TerrainMapper(Node):
         # high above the ground under it (m): from above the canopy the
         # camera sees tree tops, not the ground (see TerrainMap.add_points).
         self.declare_parameter('max_mapping_height', 3.0)
-        # Skip clouds while climbing or descending faster than this (m/s).
-        # Altitude comes from the latest odometry, which only matches the
-        # moment the cloud was taken while the height is steady.
+        # Skip clouds taken while climbing or descending faster than this
+        # (m/s), measured over odom_window (s) either side of the cloud's
+        # time. Moving 0.1 m/s, a 50 ms error in that time is 5 mm of height.
         self.declare_parameter('max_climb_rate', 0.1)
+        self.declare_parameter('odom_window', 0.25)
+        # Skip clouds taken while the drone was tilted more than this (deg),
+        # e.g. pushed over by a branch: TF only has its heading, so a tilted
+        # camera's points would be placed along the wrong rays, 0.14 m off
+        # per degree at 8 m (max_range). Level flight is well under 0.1 deg.
+        self.declare_parameter('max_tilt', 1.0)
+        # Skip a cloud with no odometry within this of its time (s); the
+        # odometry comes at 20 Hz.
+        self.declare_parameter('max_odom_gap', 0.1)
         self.declare_parameter('publish_period', 1.0)   # map layers (s)
         self.declare_parameter('trail_period', 5.0)     # trail detection (s)
         self.declare_parameter('map_save_dir', '~/41068_maps')
@@ -139,7 +205,7 @@ class TerrainMapper(Node):
             self.get_logger().info(f'Loaded terrain map {load_file} '
                                    f'({100 * self.terrain.coverage():.0f}% observed)')
 
-        self.odom = None
+        self.odom_history = OdomHistory()
         self.trail_result = None
         self.clouds_used = 0
         # Route roadmap, rebuilt with the trails when the map has changed
@@ -148,7 +214,10 @@ class TerrainMapper(Node):
 
         # TF callbacks run in their own reentrant group (inside
         # TransformListener) on the multi-threaded executor, so the cloud
-        # callback can wait for a transform. Everything else shares one
+        # callback can wait for a transform. Odometry has its own group too:
+        # sharing the cloud callback's, it waited behind every cloud, so the
+        # altitude used was up to seconds old (the climbs at the end of
+        # Mapping put the ground 1-2 m too low). Everything else shares one
         # mutually exclusive group so it never touches the map concurrently.
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
@@ -156,8 +225,8 @@ class TerrainMapper(Node):
 
         self.create_subscription(PointCloud2, 'camera/depth/points', self.cloud_callback, 2,
                                  callback_group=group)
-        self.create_subscription(Odometry, 'odometry', self.odom_callback, 10,
-                                 callback_group=group)
+        self.create_subscription(Odometry, 'odometry', self.odom_callback, 50,
+                                 callback_group=MutuallyExclusiveCallbackGroup())
 
         latched = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.occupancy_pub = self.create_publisher(OccupancyGrid, 'terrain/occupancy', latched)
@@ -189,12 +258,25 @@ class TerrainMapper(Node):
     # ------------------------------------------------------------------ input
 
     def odom_callback(self, msg: Odometry):
-        self.odom = msg
+        pose = msg.pose.pose
+        self.odom_history.add(Time.from_msg(msg.header.stamp).nanoseconds * 1e-9,
+                              pose.position.x, pose.position.y, pose.position.z,
+                              tilt_deg(pose.orientation))
 
     def cloud_callback(self, msg: PointCloud2):
-        if self.odom is None:
+        drone = self.odom_history.at(Time.from_msg(msg.header.stamp).nanoseconds * 1e-9,
+                                     self.get_parameter('odom_window').value,
+                                     self.get_parameter('max_odom_gap').value)
+        if drone is None:
+            self.get_logger().warn('No odometry from when the cloud was taken, skipping it',
+                                   throttle_duration_sec=5.0)
             return
-        if abs(self.odom.twist.twist.linear.z) > self.get_parameter('max_climb_rate').value:
+        drone_x, drone_y, altitude, climb_rate, tilt = drone
+        if climb_rate > self.get_parameter('max_climb_rate').value:
+            return
+        if tilt > self.get_parameter('max_tilt').value:
+            self.get_logger().warn(f'Drone tilted {tilt:.1f} deg, not mapping until it is level',
+                                   throttle_duration_sec=5.0)
             return
 
         # Camera pose in the map at the moment the cloud was taken. SLAM only
@@ -215,13 +297,10 @@ class TerrainMapper(Node):
 
         rotation = quaternion_to_matrix(transform.transform.rotation)
         t = transform.transform.translation
-        altitude = self.odom.pose.pose.position.z
         world = xyz @ rotation.T + np.array([t.x, t.y, t.z + altitude])
 
         # Height above the ground under the drone, if that ground is mapped
-        position = self.odom.pose.pose.position
-        row, col, inside = self.terrain.world_to_cell(np.array([position.x]),
-                                                      np.array([position.y]))
+        row, col, inside = self.terrain.world_to_cell(np.array([drone_x]), np.array([drone_y]))
         ground = self.terrain.local_ground()[row[0], col[0]] if inside[0] else np.inf
         height = altitude - (ground if np.isfinite(ground) else 0.0)
         update_geometry = height <= self.get_parameter('max_mapping_height').value
@@ -486,6 +565,7 @@ class TerrainMapper(Node):
 def main():
     rclpy.init()
     node = TerrainMapper()
+    # One thread each for clouds (and the rest of the map work), TF and odometry.
     executor = MultiThreadedExecutor(num_threads=3)
     executor.add_node(node)
     try:

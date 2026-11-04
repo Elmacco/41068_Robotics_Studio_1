@@ -10,8 +10,8 @@ already publishes there):
                    e.g. 'passive T3' (names are on the trails topic); with
                    no name, the trail nearest the drone
   active           hover (dropping to active_altitude if higher) until a
-                   red-shirted person is found, fly to a standoff facing
-                   them and confirm them close up, then idle
+                   person is found, fly to a standoff facing them, confirm
+                   them and check their shirt colour close up, then idle
   return_home      climb to cruise altitude, fly home, descend
   stop, take_over  stop all autonomy and hover; the dashboard's manual
                    control keeps working (it publishes cmd_vel directly)
@@ -22,10 +22,11 @@ The current mode and what it is doing are published once a second as
 std_msgs/String on mission_state, e.g. "MAPPING: 42% observed, flying to F7".
 
 People come from target_projector's list (points_of_interest), which only
-holds people that YOLO, depth and thermal all agreed on. A red-shirted person
-still in view and not handled before interrupts Passive mode with Active
-mode, which flies to a standoff facing them (active.* parameters, see
-person_approach.py), confirms them close up, and then resumes the trail.
+holds people that YOLO, depth and thermal all agreed on. Any person still in
+view and not handled before interrupts Passive mode with Active mode, which
+flies to a standoff facing them (active.* parameters, see
+person_approach.py), confirms them and checks their shirt colour close up,
+and then resumes the trail. Each result is published on checked_people.
 Mapping only maps: people it passes are left for a later Passive patrol.
 
 Altitude is set through the flight controller's target_altitude topic;
@@ -49,6 +50,7 @@ from rclpy.time import Time
 from std_msgs.msg import Bool, Float64, String
 from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformException, TransformListener
+from vision_msgs.msg import Detection2DArray
 from visualization_msgs.msg import MarkerArray
 
 from coverage_explorer import CoverageExplorer
@@ -126,6 +128,7 @@ class MissionManager(Node):
         self.trails = {}
         self.people = []                  # points_of_interest entries
         self.handled_people = set()       # ids Active mode has already held over
+        self.checked_people = {}          # id -> Active mode's close-up shirt check
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
@@ -136,9 +139,11 @@ class MissionManager(Node):
         self.create_subscription(OccupancyGrid, 'terrain/occupancy', self.grid_callback, latched)
         self.create_subscription(String, 'trails', self.trails_callback, latched)
         self.create_subscription(String, 'points_of_interest', self.people_callback, latched)
+        self.create_subscription(Detection2DArray, 'target_detections', self.detections_callback, 10)
 
         self.state_pub = self.create_publisher(String, 'mission_state', latched)
         self.active_mode_pub = self.create_publisher(Bool, 'active_mode', latched)
+        self.checked_pub = self.create_publisher(String, 'checked_people', latched)
         self.altitude_pub = self.create_publisher(Float64, 'target_altitude', 10)
         self.cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.marker_pub = self.create_publisher(MarkerArray, 'exploration_markers', 1)
@@ -234,7 +239,7 @@ class MissionManager(Node):
             self.switch_to(HoverMode(self, 'IDLE'))
 
     def check_people(self):
-        """Hand a newly found red-shirted person to Active mode.
+        """Hand a newly found person to Active mode to check their shirt.
 
         Only from Passive (interrupting the patrol) or an Active mode still
         waiting for one. Each person is handled once: target_projector keeps
@@ -248,21 +253,28 @@ class MissionManager(Node):
         now = self.now()
         recent = self.get_parameter('person_recent').value
         person = next((p for p in self.people
-                       if p.get('type') == 'red' and p['id'] not in self.handled_people
+                       if p['id'] not in self.handled_people
                        and now - p.get('last_seen', 0.0) <= recent), None)
         if person is None:
             return
         self.handled_people.add(person['id'])
         if passive:
             self.get_logger().warning(
-                f'Red-shirted person {person["id"]} found during {self.mode.name}; '
-                f'approaching them')
+                f'Person {person["id"]} found during {self.mode.name}; '
+                f'approaching them to check their shirt')
             self.switch_to(ActiveMode(self, person, resume=self.mode.remaining()))
         else:
             self.mode.take(person)
 
     def publish_state(self):
         self.state_pub.publish(String(data=f'{self.mode.name}: {self.status}'))
+
+    def report_shirt(self, check: dict):
+        """Publish Active mode's shirt check of one person with the earlier ones."""
+        self.checked_people[check['id']] = check
+        people = [self.checked_people[i] for i in sorted(self.checked_people,
+                                                          key=lambda i: int(i[1:]))]
+        self.checked_pub.publish(String(data=json.dumps({'people': people})))
 
     # --------------------------------------------------- helpers for modes
 
@@ -319,6 +331,11 @@ class MissionManager(Node):
     def trails_callback(self, msg: String):
         data = json.loads(msg.data)
         self.trails = {trail['name']: trail for trail in data['trails']}
+
+    def detections_callback(self, msg: Detection2DArray):
+        # Active mode reads the shirt colour off the frames at the standoff.
+        if isinstance(self.mode, ActiveMode):
+            self.mode.on_detections(msg)
 
     def people_callback(self, msg: String):
         try:

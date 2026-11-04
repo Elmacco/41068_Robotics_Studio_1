@@ -8,8 +8,9 @@ one of three mission modes:
   the map and flies home.
 - **Passive**: once Mapping has found trails, patrols one the ranger picks,
   low (0.8 m) with Nav2, watching for people.
-- **Active**: when Passive sees a red-shirted person, flies to a standoff
-  facing them and confirms them close up, then Passive carries on.
+- **Active**: when Passive sees a person, flies to a standoff facing them,
+  confirms them and checks whether their shirt is red close up, then Passive
+  carries on.
 
 From the terrain map it can also plan the least-effort walking route for a
 ranger to any point, e.g. to a person who needs help. The older fixed
@@ -94,7 +95,8 @@ The detector publishes `target_detections`, each person flagged `red` or
 `none`. The projector adds a person to its list (`points_of_interest`) only
 when the thermal frame within 1 s of the detection has at least 20 pixels at
 or above 30 C inside that person's own box, in at least 3 frames. Active mode
-works from that list.
+works from that list, and checks each person's shirt from the detector's
+flags at its standoff.
 
 ## Prerequisites
 
@@ -231,8 +233,8 @@ as a direct mode flag without parsing `mission_state`.
 | Command | What happens |
 |---|---|
 | `mapping` | Settle at 0.8 m, then fly to frontiers (the edge of the ground the camera has seen) until none are left. Then save the terrain map and Return Home |
-| `passive T3` | At 0.8 m, fly with Nav2 to the nearer end of trail T3 and along it, then hover at its end. A red-shirted person seen on the way starts Active mode, then the patrol carries on. `passive` alone takes the trail nearest the drone |
-| `active` | Hover where it is (dropping to 3 m if higher; it never climbs) until a red-shirted person is on the people list, fly to a standoff facing them and confirm them close up, then go Idle |
+| `passive T3` | At 0.8 m, fly with Nav2 to the nearer end of trail T3 and along it, then hover at its end. A person seen on the way starts Active mode to check their shirt, then the patrol carries on. `passive` alone takes the trail nearest the drone |
+| `active` | Hover where it is (dropping to 3 m if higher; it never climbs) until a person is on the people list, fly to a standoff facing them, confirm them and check their shirt close up, then go Idle |
 | `return_home` | Climb to 8 m, fly straight home, descend to the spawn height |
 | `stop` / `take_over` | Stop all autonomy and hover where it is; the dashboard's manual sliders keep working |
 | `takeoff` | Hover at 0.8 m |
@@ -251,7 +253,7 @@ stays greyed out until there are trails; pick one under the buttons (or
 (every 5 s), so from a terminal check the list right before sending a
 `passive` command.
 
-While Passive is patrolling, a red-shirted person on the people list who was
+While Passive is patrolling, any person on the people list who was
 seen in the last 2 s (`person_recent`) interrupts it: Passive cancels its Nav2
 goal and Active mode approaches the person, then Passive resumes from the
 trail waypoint it was heading to. Each person (P1, P2, ...) interrupts once,
@@ -261,7 +263,7 @@ people: it only maps, and the patrol afterwards finds them.
 Active mode is the close-range inspection from 49274 AT3 (Planning 2 and 3),
 in `person_approach.py`:
 
-- **Standoff goal.** Candidates on rings 1.5, 2.0, 2.5 and 3.0 m round the
+- **Standoff goal.** Candidates on rings 3.0, 3.5, 4.0, 4.5 and 5.0 m round the
   person, 24 each. A candidate must be observed free ground with 1.0 m of
   clearance from obstacles and unknown ground (0.5 m as a fallback), reachable
   on Mapping's wavefront, and in line of sight of the person (A2's
@@ -276,6 +278,20 @@ in `person_approach.py`:
   The goal is re-planned if the person's estimate moves more than 0.75 m.
   With no valid standoff for 5 s (ground round them not mapped yet) it
   abandons too.
+- **Shirt check.** From afar the torso is a few pixels wide and the
+  detector's red flag is unreliable, so every person is approached, not only
+  red ones. Each detector frame at the standoff is a vote from the largest
+  box in view (the person, 3-5 m away and being faced), and the shirt is
+  red with half the votes or more (`active.shirt_red_fraction`). With no
+  frames there (an abandoned approach) it falls back to the people list's
+  type. The result is logged and published, latched, on `checked_people`:
+
+  ```bash
+  ros2 topic echo /parrot1/checked_people
+  # {"people": [{"id": "P3", "x": -15.0, "y": 12.0, "shirt": "red",
+  #   "how": "7/9 close-up frames red", "close_up": true, "red_frames": 7,
+  #   "frames": 9, "visited": true}]}
+  ```
 
 Every threshold is an `active.*` parameter of `mission_manager`.
 

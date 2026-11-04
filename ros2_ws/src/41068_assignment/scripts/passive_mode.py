@@ -23,9 +23,10 @@ each one. A waypoint Nav2 cannot reach (a person standing on it, say) is
 skipped; max_skips in a row ends the patrol. A first waypoint beyond Nav2's
 rolling costmap is reached in hops (hop_towards), as Active mode does.
 
-A red-shirted person seen on the way starts Active mode (mission_manager's
-check_people), which then resumes with remaining(): the rest of the trail
-from the waypoint the drone was heading to.
+A person seen on the way starts Active mode (mission_manager's
+check_people), which checks their shirt colour close up and then resumes
+with remaining(): the rest of the trail from the waypoint the drone was
+heading to.
 """
 
 import math

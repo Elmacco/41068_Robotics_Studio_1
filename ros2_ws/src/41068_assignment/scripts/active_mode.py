@@ -1,4 +1,4 @@
-"""Active mode: fly to a found red-shirted person and confirm them close up.
+"""Active mode: fly to a found person, confirm them and check their shirt close up.
 
 Not an executable node: mission_manager.py runs it. The person comes from
 target_projector's people list (points_of_interest), where YOLO, the depth
@@ -13,6 +13,15 @@ When the approach is visited or abandoned it finishes: mission_manager
 switches to the mode it was given to resume (the rest of the trail) or goes
 Idle. Either way the person's id is handled and does not start Active mode
 again.
+
+Shirt check: every person is approached, red or not. The detector's colour
+flag (red or not, from the torso crop) is unreliable from afar, where the
+torso is a few pixels wide, so at the standoff each frame's flag for the
+person is a vote, and red wins with shirt_red_fraction of the votes. The
+person is then the largest box in view: 3-5 m away and being faced. An
+abandoned approach, or one with no frames at the standoff, falls back to
+the people list's type (every sighting so far), marked as not close up.
+The result goes to mission_manager.report_shirt (the checked_people topic).
 
 It never climbs. Passive flies at 0.8 m, under the oak canopy (from 1.04 m),
 and a climb straight up to active_altitude from there would fly into the
@@ -41,6 +50,7 @@ class ActiveMode:
         self.planner = None               # made once at altitude with a person
         self.nav = NavGoal(manager)
         self.planned_stamp = None         # map the last fruitless plan() ran on
+        self.shirt_votes = []             # one per frame at the standoff: True = red
         if person is not None:
             self.take(person)
 
@@ -60,15 +70,22 @@ class ActiveMode:
     def take(self, person: dict):
         self.person = person
         self.manager.get_logger().info(
-            f'Active: {person["id"]} confirmed (red, body heat) at '
-            f'({person["x"]:.2f}, {person["y"]:.2f}), approaching')
+            f'Active: {person["id"]} confirmed (body heat) at '
+            f'({person["x"]:.2f}, {person["y"]:.2f}), approaching to check their shirt')
+
+    def on_detections(self, msg):
+        """One shirt vote per detector frame (vision_msgs/Detection2DArray) at the standoff."""
+        if self.planner is None or self.planner.phase != Phase.VERIFYING or not msg.detections:
+            return
+        nearest = max(msg.detections, key=lambda d: d.bbox.size_x * d.bbox.size_y)
+        self.shirt_votes.append(nearest.id == 'red')
 
     def step(self) -> str:
         manager = self.manager
         if not manager.at_altitude(self.altitude):
             return f'moving to {self.altitude:.1f} m'
         if self.person is None:
-            return 'hovering, watching for a red-shirted person'
+            return 'hovering, watching for a person'
 
         now = manager.now()
         if self.planner is None:
@@ -89,7 +106,7 @@ class ActiveMode:
             status = f'flying to [{goal.x:.1f}, {goal.y:.1f}]{hop}'
         elif planner.phase == Phase.VERIFYING:
             self.face_person()
-            status = 'at the standoff, looking for them'
+            status = f'at the standoff, checking their shirt ({len(self.shirt_votes)} frames)'
         else:
             status = self.finish()
 
@@ -141,10 +158,27 @@ class ActiveMode:
         self.finished = True
         self.manager.publish_cmd(Twist())
         p = self.person
+        check = self.shirt_check()
+        self.manager.report_shirt(check)
+        shirt = f'shirt {check["shirt"]} ({check["how"]})'
         if planner.visited:
-            self.manager.get_logger().info(
+            self.manager.get_logger().warning(
                 f'Active: {p["id"]} visited from ({planner.standoff.x:.1f}, '
-                f'{planner.standoff.y:.1f})')
-            return 'visited'
-        self.manager.get_logger().warn(f'Active: {p["id"]} abandoned: {planner.reason}')
-        return f'abandoned: {planner.reason}'
+                f'{planner.standoff.y:.1f}): {shirt}')
+            return f'visited, {shirt}'
+        self.manager.get_logger().warning(f'Active: {p["id"]} abandoned: {planner.reason}; {shirt}')
+        return f'abandoned: {planner.reason}; {shirt}'
+
+    def shirt_check(self) -> dict:
+        """The person's shirt, red or not, from the standoff votes or the people list."""
+        p = self.person
+        votes, red = len(self.shirt_votes), sum(self.shirt_votes)
+        if votes:
+            is_red = red / votes >= self.manager.approach_config.shirt_red_fraction
+            how = f'{red}/{votes} close-up frames red'
+        else:
+            is_red = p.get('type') == 'red'
+            how = 'not seen close up, going by the people list'
+        return {'id': p['id'], 'x': p['x'], 'y': p['y'], 'shirt': 'red' if is_red else 'not red',
+                'how': how, 'close_up': votes > 0, 'red_frames': red, 'frames': votes,
+                'visited': self.planner.visited}

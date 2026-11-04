@@ -39,7 +39,7 @@ def person(x=5.0, y=0.0, last_seen=0.0, pid='P1'):
 
 def test_standoff_is_on_the_near_ring_facing_the_person():
     goal = goal_for(make_grid())
-    assert math.isclose(math.hypot(goal.x - 5.0, goal.y), 1.5, abs_tol=1e-6)
+    assert math.isclose(math.hypot(goal.x - 5.0, goal.y), 3.0, abs_tol=1e-6)
     assert goal.x < 5.0                                 # drone side
     assert abs(goal.theta - math.atan2(-goal.y, 5.0 - goal.x)) < 1e-6
 
@@ -54,10 +54,11 @@ def test_line_of_sight_is_blocked_by_a_trunk_but_not_by_the_person():
 
 
 def test_unreachable_person_has_no_standoff():
-    # A closed box of wall 4 m round the person.
-    grid = make_grid(walls=((1.0, -4.0, 9.0, -3.8), (1.0, 3.8, 9.0, 4.0),
-                            (1.0, -4.0, 1.2, 4.0), (8.8, -4.0, 9.0, 4.0)))
-    assert goal_for(grid) is None
+    # A closed box of wall 6 m round the person, past the outer ring.
+    grid = make_grid(person=(8.0, 0.0),
+                     walls=((2.0, -6.0, 14.0, -5.8), (2.0, 5.8, 14.0, 6.0),
+                            (2.0, -6.0, 2.2, 6.0), (13.8, -6.0, 14.0, 6.0)))
+    assert goal_for(grid, person=(8.0, 0.0)) is None
 
 
 def test_retry_avoids_the_failed_standoff():

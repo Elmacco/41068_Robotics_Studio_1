@@ -1,6 +1,7 @@
 import numpy as np
 from geometry_msgs.msg import Pose2D
 from nav_msgs.msg import OccupancyGrid
+from vision_msgs.msg import Detection2D, Detection2DArray
 
 from active_mode import ActiveMode
 from coverage_explorer import CoverageExplorer
@@ -47,6 +48,7 @@ class FakeManager:
         self.terrain_grid = None
         self.pose = Pose2D()
         self.cmds = []
+        self.shirts = []
 
     def get_parameter(self, name):
         return FakeParameter(PARAMS[name])
@@ -76,6 +78,9 @@ class FakeManager:
     def check_people(self):
         MissionManager.check_people(self)
 
+    def report_shirt(self, check):
+        self.shirts.append(check)
+
 
 def person(pid='P1', kind='red', last_seen=99.5):
     return {'id': pid, 'x': 2.0, 'y': 3.0, 'type': kind, 'last_seen': last_seen}
@@ -93,8 +98,19 @@ def test_thermal_confirmation_is_limited_to_person_box():
     assert thermal_confirms_person(thermal, box=(1, 1, 2, 2), min_hot_pixels=4)
 
 
-def test_red_person_interrupts_passive_once():
-    manager = FakeManager(people=[person()])
+def frame(*boxes):
+    """One detector frame: (flag, width, height) per person box."""
+    msg = Detection2DArray()
+    for flag, w, h in boxes:
+        det = Detection2D()
+        det.id = flag
+        det.bbox.size_x, det.bbox.size_y = float(w), float(h)
+        msg.detections.append(det)
+    return msg
+
+
+def test_any_person_interrupts_passive_once():
+    manager = FakeManager(people=[person(kind='person')])
     manager.mode.index = 1
     manager.check_people()
 
@@ -110,8 +126,8 @@ def test_red_person_interrupts_passive_once():
     assert manager.switched_mode is None
 
 
-def test_non_red_or_out_of_view_person_does_not_interrupt_passive():
-    manager = FakeManager(people=[person(kind='person'), person('P2', last_seen=90.0)])
+def test_out_of_view_person_does_not_interrupt_passive():
+    manager = FakeManager(people=[person('P2', last_seen=90.0)])
     manager.check_people()
     assert manager.switched_mode is None
 
@@ -190,7 +206,7 @@ def test_active_mode_approaches_verifies_and_finishes():
     mode.step()
     assert len(mode.nav.goals) == 1 and mode.planner.phase == Phase.APPROACHING
     goal = mode.nav.goals[0]
-    assert abs(np.hypot(goal.x - 2.0, goal.y - 3.0) - 1.5) < 1e-6
+    assert abs(np.hypot(goal.x - 2.0, goal.y - 3.0) - 3.0) < 1e-6
 
     manager.time = 110.0
     # Nav2 ends with any yaw: here 1 rad left of the person.
@@ -204,3 +220,56 @@ def test_active_mode_approaches_verifies_and_finishes():
     manager.people = [person(last_seen=111.8)]
     mode.step()
     assert mode.finished and mode.planner.visited
+
+
+def verifying_active_mode(people_type='person', retry_limit=1):
+    """An Active mode that has flown to its standoff and is facing the person."""
+    manager = FakeManager(altitude=0.8, people=[person(kind=people_type)])
+    manager.approach_config = ApproachConfig(retry_limit=retry_limit)
+    manager.terrain_grid = open_field()
+    mode = ActiveMode(manager, person(kind=people_type), resume=manager.mode.remaining())
+    mode.nav = FakeNav()
+    mode.start()
+    mode.step()
+    goal = mode.nav.goals[0]
+    manager.time = 110.0
+    manager.pose = Pose2D(x=goal.x, y=goal.y, theta=goal.theta)
+    mode.nav.result = True
+    mode.step()
+    assert mode.planner.phase == Phase.VERIFYING
+    return manager, mode
+
+
+def test_shirt_is_read_from_the_largest_box_at_the_standoff():
+    manager, mode = verifying_active_mode(people_type='person')
+    # The person close up (large box) is red; someone far behind is not.
+    for _ in range(3):
+        mode.on_detections(frame(('red', 120, 300), ('none', 20, 50)))
+    mode.on_detections(frame(('none', 120, 300)))
+
+    manager.time = 112.0
+    manager.people = [person(kind='person', last_seen=111.8)]
+    mode.step()
+    assert mode.finished and manager.shirts[-1]['shirt'] == 'red'
+    assert manager.shirts[-1]['red_frames'] == 3 and manager.shirts[-1]['frames'] == 4
+
+
+def test_shirt_votes_only_count_at_the_standoff():
+    manager = FakeManager(altitude=0.8, people=[person()])
+    mode = ActiveMode(manager, person(), resume=manager.mode.remaining())
+    mode.on_detections(frame(('red', 120, 300)))          # no planner yet
+    assert mode.shirt_votes == []
+
+    manager, mode = verifying_active_mode()
+    mode.on_detections(frame())                           # nobody in view
+    mode.on_detections(frame(('none', 120, 300)))
+    assert mode.shirt_votes == [False]
+
+
+def test_shirt_falls_back_to_people_list_when_not_seen_close_up():
+    manager, mode = verifying_active_mode(people_type='red', retry_limit=0)
+    manager.time = 120.0                                  # verify window over, unseen
+    mode.step()
+    assert mode.finished and not mode.planner.visited
+    check = manager.shirts[-1]
+    assert check['shirt'] == 'red' and not check['close_up']

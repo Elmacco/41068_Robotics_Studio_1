@@ -38,11 +38,14 @@ from grid_tools import distance_to_outside, is_occluded, nearest_cell
 
 @dataclass
 class ApproachConfig:
-    # Standoff rings around the person (m), as AT3. The registry's estimate is
-    # the torso surface the depth camera hit, so it sits slightly towards the
-    # drone; 1.5 m still keeps the drone outside the person's costmap
-    # inflation (0.3 m inscribed radius + 0.5 m inflation).
-    standoff_distances: Tuple[float, ...] = (1.5, 2.0, 2.5, 3.0)
+    # Standoff rings around the person (m), as AT3. At 0.8 m altitude the
+    # camera is 1.05 m up, tilted 45 deg down with a 123 deg vertical FOV, so
+    # the top of the frame is only 16 deg above level: a 1.8 m person is in
+    # view head to foot from about 2.6 m. At 1.5 m the camera saw only their
+    # lower half, and the shirt check's torso crop missed the shirt. Rings
+    # out to 5 m leave room when trunks block the nearer ones; all are well
+    # outside the person's costmap inflation (0.3 m inscribed + 0.5 m).
+    standoff_distances: Tuple[float, ...] = (3.0, 3.5, 4.0, 4.5, 5.0)
     ring_samples: int = 24
     # Extra travel (m) accepted per metre closer (AT3). Rings are compared
     # together, so the drone does not fly round the person to stand 0.5 m closer.
@@ -65,6 +68,10 @@ class ApproachConfig:
     verify_window: float = 5.0
     # A sighting this close to the estimate is the same person (AT3).
     verify_radius: float = 3.0
+    # Shirt check at the standoff: red if at least this share of the frames
+    # there flag the person red, as the registry's red_fraction does for
+    # every sighting.
+    shirt_red_fraction: float = 0.5
     retry_limit: int = 1
     # On retry, skip standoff samples this close to the one that failed (AT3).
     retry_avoid_radius: float = 1.0

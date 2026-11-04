@@ -16,6 +16,7 @@ Subscribes (time-synchronised):
   target_detections (vision_msgs/Detection2DArray)
   camera/depth/image (sensor_msgs/Image)
   camera/depth/camera_info (sensor_msgs/CameraInfo)  - latched, read once
+  thermal_camera/image (sensor_msgs/Image)  - latest frame, for the heat check
 
 Publishes:
   target_pose (geometry_msgs/PoseStamped) - highest-confidence detection's
@@ -23,7 +24,11 @@ Publishes:
   target_marker (visualization_msgs/Marker) - same, for RViz
 
 Also keeps a persistent list of every person seen (person_registry.py: repeat
-sightings are merged, one-frame false positives dropped) and publishes it:
+sightings are merged, one-frame false positives dropped) and publishes it.
+A sighting only counts when the thermal frame taken within thermal_max_age of
+the detection has body heat inside that person's own box (thermal_check.py),
+so YOLO, depth and thermal all agree on the same person. mission_manager
+reacts to this list (Active mode), not to target_pose.
   points_of_interest (std_msgs/String, latched) - JSON the dashboard reads:
     {"points": [{"id": "P1", "x": .., "y": .., "type": "red"|"person",
     "first_seen": <ROS/sim time, s>, "detected_at": "<wall clock ISO time>",
@@ -57,6 +62,7 @@ from vision_msgs.msg import Detection2DArray
 from visualization_msgs.msg import Marker, MarkerArray
 
 from person_registry import PersonRegistry, RegistryConfig
+from thermal_check import MIN_HOT_PIXELS, decode_thermal, hot_pixels
 
 
 class TargetProjector(Node):
@@ -73,6 +79,11 @@ class TargetProjector(Node):
         self.declare_parameter('min_observations', 3)
         self.declare_parameter('waypoint_standoff', 1.5)
         self.declare_parameter('base_frame', '')  # defaults to '<robot_name>_base_link'
+        # Heat check (see thermal_check.py). The thermal camera runs at 5 Hz,
+        # so a detection is checked against a frame at most 1 s from it.
+        self.declare_parameter('require_thermal', True)
+        self.declare_parameter('thermal_max_age', 1.0)
+        self.declare_parameter('min_hot_pixels', MIN_HOT_PIXELS)
 
         robot_name = self.get_parameter('robot_name').value
         configured_map_frame = self.get_parameter('map_frame').value
@@ -82,8 +93,12 @@ class TargetProjector(Node):
             merge_radius=float(self.get_parameter('merge_radius').value),
             min_observations=int(self.get_parameter('min_observations').value),
             standoff=float(self.get_parameter('waypoint_standoff').value),
-            max_range=float(self.get_parameter('max_valid_depth').value),
         ))
+        self.require_thermal = bool(self.get_parameter('require_thermal').value)
+        self.thermal_max_age = float(self.get_parameter('thermal_max_age').value)
+        self.min_hot_pixels = int(self.get_parameter('min_hot_pixels').value)
+        self.thermal = None         # latest frame, kelvin
+        self.thermal_stamp = None   # its header stamp, s
 
         self.bridge = CvBridge()
         self.camera_info = None  # type: CameraInfo | None
@@ -103,6 +118,8 @@ class TargetProjector(Node):
             [det_sub, depth_sub], queue_size=10, slop=0.1,
         )
         self.sync.registerCallback(self._on_synced)
+        if self.require_thermal:
+            self.create_subscription(Image, 'thermal_camera/image', self._on_thermal, 1)
 
         self.pose_pub = self.create_publisher(PoseStamped, 'target_pose', 10)
         self.marker_pub = self.create_publisher(Marker, 'target_marker', 10)
@@ -111,6 +128,7 @@ class TargetProjector(Node):
         self.people_marker_pub = self.create_publisher(MarkerArray, 'people/markers', latched)
         self.waypoint_pub = self.create_publisher(PoseArray, 'people/waypoints', latched)
         self.last_published = None
+        self.last_logged = None
 
         self.get_logger().info(
             f'target_projector started, publishing target_pose in frame "{self.map_frame}"',
@@ -118,6 +136,23 @@ class TargetProjector(Node):
 
     def _on_camera_info(self, msg: CameraInfo) -> None:
         self.camera_info = msg
+
+    def _on_thermal(self, msg: Image) -> None:
+        try:
+            self.thermal = decode_thermal(msg)
+        except ValueError as exc:
+            self.get_logger().warn(str(exc), throttle_duration_sec=5.0)
+            return
+        self.thermal_stamp = rclpy.time.Time.from_msg(msg.header.stamp).nanoseconds * 1e-9
+
+    def _thermal_for(self, stamp):
+        """The thermal frame to check a detection stamped `stamp` against, or None."""
+        if self.thermal is None:
+            return None
+        t = rclpy.time.Time.from_msg(stamp).nanoseconds * 1e-9
+        if abs(t - self.thermal_stamp) > self.thermal_max_age:
+            return None
+        return self.thermal
 
     def _on_synced(self, detections: Detection2DArray, depth_msg: Image) -> None:
         if self.camera_info is None:
@@ -134,6 +169,12 @@ class TargetProjector(Node):
         depth_frame = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding='32FC1')
         observer = self._drone_xy()
         now = self.get_clock().now().nanoseconds * 1e-9
+        thermal = self._thermal_for(detections.header.stamp) if self.require_thermal else None
+        if self.require_thermal and thermal is None:
+            self.get_logger().warn(
+                'Person detected but no thermal frame within '
+                f'{self.thermal_max_age:.1f} s of it; not adding it to the people list',
+                throttle_duration_sec=5.0)
 
         best_pose, best_score = None, -1.0
         for det in detections.detections:
@@ -145,6 +186,11 @@ class TargetProjector(Node):
                 continue
             if score > best_score:
                 best_pose, best_score = pose_map, score
+            if self.require_thermal:
+                box = (det.bbox.center.position.x, det.bbox.center.position.y,
+                       det.bbox.size_x, det.bbox.size_y)
+                if thermal is None or hot_pixels(thermal, box) < self.min_hot_pixels:
+                    continue
             # Detection2D.id carries the colour flag from target_detector.
             if observer is not None:
                 self.registry.update(pose_map.pose.position.x, pose_map.pose.position.y,
@@ -267,8 +313,11 @@ class TargetProjector(Node):
 
         self.waypoint_pub.publish(waypoints)
         self.people_marker_pub.publish(markers)
-        self.get_logger().info(
-            'People: ' + (', '.join(f'{p.id} ({p.x:.1f}, {p.y:.1f}) {p.colour}' for p in people) or 'none'))
+        # Log when someone is added or changes colour, not every refresh.
+        if [(p.id, p.colour) for p in people] != self.last_logged:
+            self.last_logged = [(p.id, p.colour) for p in people]
+            self.get_logger().info(
+                'People: ' + ', '.join(f'{p.id} ({p.x:.1f}, {p.y:.1f}) {p.colour}' for p in people))
 
     def _sample_depth(self, depth_frame: np.ndarray, px: int, py: int, patch: int = 2):
         """Median depth over a small patch around (px, py) - more robust than

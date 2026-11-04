@@ -6,3 +6,9 @@
 # before an offline demo:
 #   python3 -c "from ultralytics import YOLO; YOLO('yolo26n.pt')"
 ultralytics
+# ROS Humble's cv_bridge is built against numpy 1.x and OpenCV 4. Ultralytics
+# would otherwise pull in numpy 2 / opencv-python 5, which break
+# imgmsg_to_cv2 ("_ARRAY_API not found") and kill target_detector on its
+# first frame.
+numpy<2
+opencv-python<4.11

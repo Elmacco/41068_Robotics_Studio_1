@@ -36,7 +36,6 @@ class RegistryConfig:
     max_average_weight: int = 20   # position average becomes an EMA after this many sightings
     red_fraction: float = 0.5      # share of sightings flagged red for the person to count as red
     standoff: float = 1.5          # waypoint distance from the person (m)
-    max_range: float = 15.0        # ignore sightings further from the drone than this (m)
 
 
 @dataclass
@@ -46,6 +45,7 @@ class Person:
     y: float
     observations: int = 0
     red_observations: int = 0
+    colour: str = NONE             # RED once red_fraction of the sightings were flagged red
     score: float = 0.0
     observer: Tuple[float, float] = (0.0, 0.0)   # drone x, y at the first sighting
     first_seen: float = 0.0                      # ROS time (sim time in the demo), s
@@ -53,10 +53,6 @@ class Person:
     last_seen: float = 0.0                       # ROS time of the latest sighting, s
     wall_last_seen: float = 0.0                  # unix time of the latest sighting, s
     history: List[Tuple[float, float]] = field(default_factory=list, repr=False)
-
-    @property
-    def colour(self) -> str:
-        return RED if self.observations and self.red_observations / self.observations >= 0.5 else NONE
 
 
 class PersonRegistry:
@@ -82,6 +78,8 @@ class PersonRegistry:
             person.y = (person.y * n + y) / (n + 1)
         person.observations += 1
         person.red_observations += 1 if colour == RED else 0
+        person.colour = (RED if person.red_observations / person.observations >= cfg.red_fraction
+                         else NONE)
         person.score = max(person.score, score)
         person.last_seen = now
         person.wall_last_seen = time.time()

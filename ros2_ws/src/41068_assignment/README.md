@@ -52,7 +52,8 @@ scripts/                   Nodes (executables):
   publish_waypoints.py     Preview the fixed route in RViz (no Nav2 calls)
   web_dashboard_bridge.py  HTTP bridge for the GUI
   target_detector.py       People in the RGB image (YOLO), flagged red or not
-  target_projector.py      Detection + depth -> map-frame target_pose
+  target_projector.py      Detection + depth + thermal -> map-frame people
+                           list (points_of_interest) and target_pose
                            Library modules (imported by the nodes):
   terrain_map.py           The terrain map itself (numpy, no ROS)
   trail_detector.py        Trails from the map (distance transform + gradient)
@@ -62,12 +63,13 @@ scripts/                   Nodes (executables):
   coverage_explorer.py     Frontier selection for Mapping mode (AT3 explorer)
   mapping_mode.py          Mapping mode's Nav2 goal handling (AT3)
   mission_modes.py         Path following (pure pursuit) and hovering modes
+  active_mode.py           Active mode: hover over a found red-shirted person
+  person_registry.py       People list: merges repeat sightings, stable ids
+  thermal_check.py         Body-heat check inside a YOLO person box
   grid_tools.py            Distance transform, A2 smoother, small helpers
   node_params.py           Exposes the modules' settings as ROS parameters
   mission_waypoints.py     Shared fixed route + RViz marker builder
-  colour_classifier.py     Red-shirt check for target_detector.py; Active mode
-                           uses this YOLO/colour result first, then requires a
-                           current thermal presence check inside the YOLO box
+  colour_classifier.py     Red-shirt check for target_detector.py
   test_colour_classifier.py  Standalone test for it (python3 <file>)
 test/                      Unit tests for the library modules (no simulator)
 ```
@@ -85,9 +87,11 @@ To run only the detection module and explicitly enable colour classification:
 ros2 launch 41068_assignment launch/modules/detection.launch.py colour_enabled:=true
 ```
 
-The detector publishes `target_colour` (`red` or `none`) and
-`target_detections`; Active mode uses the highest-confidence YOLO box to
-restrict its thermal presence check to that person.
+The detector publishes `target_detections`, each person flagged `red` or
+`none`. The projector adds a person to its list (`points_of_interest`) only
+when the thermal frame within 1 s of the detection has at least 20 pixels at
+or above 30 C inside that person's own box, in at least 3 frames. Active mode
+works from that list.
 
 ## Prerequisites
 
@@ -214,7 +218,7 @@ ros2 topic echo /parrot1/mission_state        # e.g. "MAPPING: 42% observed, fly
 |---|---|
 | `mapping` | Settle at 0.8 m, then fly to frontiers (the edge of the ground the camera has seen) until none are left. Then save the terrain map and Return Home |
 | `passive T3` | Climb on the spot to 8 m, fly to the nearer end of trail T3 and along it, then hover at its end |
-| `active` | Drop to 3 m over the current spot and hover; when a `person_detection` Pose2D is received, confirm it when the latest thermal frame contains at least 20 pixels at or above 30 C and report the confirmed position |
+| `active` | Hover where it is (dropping to 3 m if higher; it never climbs) until a red-shirted person is on the people list, hold over them for 5 s, then go Idle |
 | `return_home` | Climb to 8 m, fly straight home, descend to the spawn height |
 | `stop` / `take_over` | Stop all autonomy and hover where it is; the dashboard's manual sliders keep working |
 | `takeoff` | Hover at 0.8 m |
@@ -231,12 +235,11 @@ Trails are only detected where the camera has seen them, so run Mapping mode
 time detection runs (every 5 s), so check the list right before sending a
 `passive` command.
 
-While Mapping is active, a recent thermal frame is used as the coarse person
-cue and a `person_detection` Pose2D supplies the precise map-frame location.
-When both are available, Mapping cancels its current Nav2 goal, the mission
-switches to Active mode, and the terminal logs the confirmed position. A
-thermal frame older than the `thermal_max_age` parameter (default 1 second) is
-not used for confirmation.
+While Mapping is active, a red-shirted person on the people list who was
+seen in the last 2 s (`person_recent`) interrupts it: Mapping cancels its Nav2
+goal, Active mode holds over the person for `active_dwell` (5 s) at the
+current height, then Mapping resumes. Each person (P1, P2, ...) interrupts
+Mapping once, so they do not stop it again while still in view.
 
 ### Ranger route
 

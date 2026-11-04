@@ -1,4 +1,4 @@
-"""The flying modes other than Mapping: fly a path (Passive, Return Home) and hover (Active).
+"""The flying modes other than Mapping and Active: fly a path (Passive, Return Home) and hover (Idle).
 
 Not an executable node: mission_manager.py runs them. Each mode has the same
 small interface - start(), step() -> status text, stop(), and a finished
@@ -119,11 +119,7 @@ class FlyPathMode:
 
 
 class HoverMode:
-    """Hold position at an altitude. Used for Idle and as the first step of Active.
-
-    Active mode's next steps (circling the person, confirming they need help,
-    calling up a ranger route) are still to be designed; they belong here.
-    """
+    """Hold position at an altitude. Used for Idle."""
 
     def __init__(self, manager, name: str, altitude: float = None):
         self.manager = manager

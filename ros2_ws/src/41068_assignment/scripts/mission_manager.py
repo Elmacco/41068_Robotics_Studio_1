@@ -8,7 +8,8 @@ already publishes there):
                    save the terrain map, then return home
   passive <trail>  fly along a detected trail at cruise altitude, e.g.
                    'passive T3' (trail names are on the trails topic)
-  active           drop to active_altitude over the current spot and hover
+  active           hover (dropping to active_altitude if higher) until a
+                   red-shirted person is found, hold over them, then idle
   return_home      climb to cruise altitude, fly home, descend
   stop, take_over  stop all autonomy and hover; the dashboard's manual
                    control keeps working (it publishes cmd_vel directly)
@@ -18,6 +19,11 @@ already publishes there):
 The current mode and what it is doing are published once a second as
 std_msgs/String on mission_state, e.g. "MAPPING: 42% observed, flying to F7".
 
+People come from target_projector's list (points_of_interest), which only
+holds people that YOLO, depth and thermal all agreed on. A red-shirted person
+still in view and not handled before interrupts Mapping with Active mode,
+which holds over them for active_dwell seconds and then resumes Mapping.
+
 Altitude is set through the flight controller's target_altitude topic;
 horizontal motion comes from Nav2 (Mapping mode) or is published here on
 cmd_vel (path following). Pose comes from TF (2D: x, y, heading) and
@@ -26,10 +32,9 @@ altitude from the Gazebo odometry, as everywhere else in this stack.
 
 import json
 import math
-import numpy as np
 
 import rclpy
-from geometry_msgs.msg import Pose2D, PoseStamped, Twist
+from geometry_msgs.msg import Pose2D, Twist
 from nav2_msgs.action import NavigateToPose
 from nav_msgs.msg import OccupancyGrid, Odometry
 from rclpy.action import ActionClient
@@ -41,8 +46,6 @@ from std_msgs.msg import Float64, String
 from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformException, TransformListener
 from visualization_msgs.msg import MarkerArray
-from sensor_msgs.msg import Image
-from vision_msgs.msg import Detection2DArray
 
 from coverage_explorer import CoverageExplorer
 from active_mode import ActiveMode
@@ -70,9 +73,14 @@ class MissionManager(Node):
         # Cruise altitude for Passive mode and Return Home: clear of the
         # tallest tree (oak, 6.5 m) with a 1.5 m margin.
         self.declare_parameter('cruise_altitude', 8.0)
-        # Active mode drops to this height for a closer look (m).
+        # Active mode drops to this height for a closer look (m); it never
+        # climbs to it (see active_mode.py).
         self.declare_parameter('active_altitude', 3.0)
-        self.declare_parameter('thermal_max_age', 1.0)
+        # Active mode holds over a found person this long, then finishes (s).
+        self.declare_parameter('active_dwell', 5.0)
+        # A person starts Active mode only if target_projector saw them this
+        # recently (s): it refreshes last_seen about once a second in view.
+        self.declare_parameter('person_recent', 2.0)
         # The drone counts as at a target altitude within this (m).
         self.declare_parameter('altitude_tolerance', 0.15)
         # Mapping mode goals (see GoalWatchdog in mapping_mode.py). A goal is
@@ -109,10 +117,8 @@ class MissionManager(Node):
         self.altitude = None
         self.terrain_grid = None
         self.trails = {}
-        self.latest_thermal = None
-        self.latest_thermal_time = None
-        self.latest_target_colour = None
-        self.latest_person_bbox = None
+        self.people = []                  # points_of_interest entries
+        self.handled_people = set()       # ids Active mode has already held over
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
@@ -122,15 +128,7 @@ class MissionManager(Node):
         self.create_subscription(Odometry, 'odometry', self.odom_callback, 10)
         self.create_subscription(OccupancyGrid, 'terrain/occupancy', self.grid_callback, latched)
         self.create_subscription(String, 'trails', self.trails_callback, latched)
-        # Keep the Pose2D topic for compatible detectors. The bundled
-        # target_projector publishes the same map-frame detection as PoseStamped.
-        self.create_subscription(Pose2D, 'person_detection', self.person_detection_callback, 10)
-        self.create_subscription(PoseStamped, 'target_pose', self.target_pose_callback, 10)
-        self.create_subscription(
-            Detection2DArray, 'target_detections', self.target_detections_callback, 10
-        )
-        self.create_subscription(String, 'target_colour', self.target_colour_callback, 10)
-        self.create_subscription(Image, 'thermal_camera/image', self.thermal_callback, 10)
+        self.create_subscription(String, 'points_of_interest', self.people_callback, latched)
 
         self.state_pub = self.create_publisher(String, 'mission_state', latched)
         self.altitude_pub = self.create_publisher(Float64, 'target_altitude', 10)
@@ -195,11 +193,14 @@ class MissionManager(Node):
     # ------------------------------------------------------------ main loop
 
     def step(self):
+        self.check_people()
         self.status = self.mode.step()
         if not self.mode.finished:
             return
         self.get_logger().info(f'{self.mode.name} finished: {self.status}')
-        if isinstance(self.mode, MappingMode):
+        if isinstance(self.mode, ActiveMode) and self.mode.resume_mapping:
+            self.switch_to(MappingMode(self, self.explorer))
+        elif isinstance(self.mode, MappingMode):
             self.save_map()
             home_x, home_y, home_z = self.home
             self.switch_to(FlyPathMode(self, 'RETURN HOME', [(home_x, home_y)],
@@ -207,10 +208,40 @@ class MissionManager(Node):
         else:
             self.switch_to(HoverMode(self, 'IDLE'))
 
+    def check_people(self):
+        """Hand a newly found red-shirted person to Active mode.
+
+        Only from Mapping (interrupting it) or an Active mode still waiting
+        for one. Each person is handled once: target_projector keeps their id
+        stable, so seeing them again on resuming Mapping does not interrupt it.
+        """
+        mapping = isinstance(self.mode, MappingMode)
+        waiting = isinstance(self.mode, ActiveMode) and self.mode.wants_person()
+        if not (mapping or waiting):
+            return
+        now = self.now()
+        recent = self.get_parameter('person_recent').value
+        person = next((p for p in self.people
+                       if p.get('type') == 'red' and p['id'] not in self.handled_people
+                       and now - p.get('last_seen', 0.0) <= recent), None)
+        if person is None:
+            return
+        self.handled_people.add(person['id'])
+        if mapping:
+            self.get_logger().warning(
+                f'Red-shirted person {person["id"]} found during Mapping; hovering over them')
+            self.switch_to(ActiveMode(self, person, resume_mapping=True))
+        else:
+            self.mode.take(person)
+
     def publish_state(self):
         self.state_pub.publish(String(data=f'{self.mode.name}: {self.status}'))
 
     # --------------------------------------------------- helpers for modes
+
+    def now(self) -> float:
+        """ROS time (sim time in the demo), s."""
+        return self.get_clock().now().nanoseconds * 1e-9
 
     def get_pose(self):
         """Drone x, y, heading in the map frame, or None if TF is not ready."""
@@ -262,95 +293,11 @@ class MissionManager(Node):
         data = json.loads(msg.data)
         self.trails = {trail['name']: trail for trail in data['trails']}
 
-    def person_detection_callback(self, pose: Pose2D):
-        if isinstance(self.mode, ActiveMode):
-            if self.mode.last_person_confirmed:
-                return
-            self.mode.person_detected(pose, self.latest_target_colour)
-        elif isinstance(self.mode, MappingMode):
-            active_mode = ActiveMode(self)
-            if active_mode.person_detected(pose, self.latest_target_colour):
-                self.get_logger().warning(
-                    'Person confirmed during Mapping; interrupting mapping and hovering'
-                )
-                self.switch_to(active_mode)
-
-    def target_pose_callback(self, msg: PoseStamped):
-        """Adapt the bundled projector's map-frame output to the mode API."""
-        q = msg.pose.orientation
-        pose = Pose2D()
-        pose.x = msg.pose.position.x
-        pose.y = msg.pose.position.y
-        pose.theta = math.atan2(
-            2.0 * (q.w * q.z + q.x * q.y),
-            1.0 - 2.0 * (q.y * q.y + q.z * q.z),
-        )
-        self.person_detection_callback(pose)
-
-    def target_colour_callback(self, msg: String):
-        self.latest_target_colour = msg.data.strip().lower()
-
-    def target_detections_callback(self, msg: Detection2DArray):
-        """Store the highest-confidence YOLO box used for thermal checking.
-
-        The RGB and thermal cameras are configured with the same resolution
-        and field of view, so the detector pixel box can be applied directly.
-        """
-        if not msg.detections:
-            self.latest_person_bbox = None
-            return
-        best = max(
-            msg.detections,
-            key=lambda detection: (
-                detection.results[0].hypothesis.score if detection.results else 0.0
-            ),
-        )
-        self.latest_person_bbox = (
-            best.bbox.center.position.x,
-            best.bbox.center.position.y,
-            best.bbox.size_x,
-            best.bbox.size_y,
-        )
-
-    def thermal_callback(self, msg: Image):
-        if msg.encoding not in ('16UC1', 'mono16'):
-            self.get_logger().warning(
-                f'Unexpected thermal image encoding: {msg.encoding}'
-            )
-            return
-
-        # L16 thermal data contains unsigned 16-bit pixel values.
-        pixels = np.frombuffer(msg.data, dtype=np.uint16)
-
-        # msg.step is bytes per row; uint16 uses two bytes per pixel.
-        row_pixels = msg.step // 2
-        if row_pixels < msg.width:
-            self.get_logger().warning(
-                f'Thermal image step ({msg.step}) is smaller than its width ({msg.width})'
-            )
-            return
-        required_pixels = msg.height * row_pixels
-        if pixels.size < required_pixels:
-            self.get_logger().warning(
-                f'Thermal image data is truncated: expected {required_pixels} pixels, '
-                f'got {pixels.size}'
-            )
-            return
-        pixels = pixels.reshape((msg.height, row_pixels))[:, :msg.width]
-
-        if msg.is_bigendian:
-            pixels = pixels.byteswap()
-
-        # The URDF specifies 0.01 Kelvin per pixel unit.
-        self.latest_thermal = pixels.astype(np.float32) * 0.01
-        self.latest_thermal_time = self.get_clock().now()
-
-    def thermal_is_current(self) -> bool:
-        """Return whether the buffered thermal image is recent enough to use."""
-        if self.latest_thermal is None or self.latest_thermal_time is None:
-            return False
-        age = (self.get_clock().now() - self.latest_thermal_time).nanoseconds * 1e-9
-        return 0.0 <= age <= self.get_parameter('thermal_max_age').value
+    def people_callback(self, msg: String):
+        try:
+            self.people = json.loads(msg.data).get('points', [])
+        except (ValueError, AttributeError):
+            self.get_logger().warn('points_of_interest is not valid JSON')
 
 
 def main():

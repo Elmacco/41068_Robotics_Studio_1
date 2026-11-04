@@ -2,7 +2,9 @@
 or not, and their map position from the depth camera.
 
   target_detector.py   camera/image -> target_detections, target_colour
-  target_projector.py  target_detections + depth -> target_pose, target_marker
+  target_projector.py  target_detections + depth + thermal_camera/image ->
+                       points_of_interest (the people list Active mode uses),
+                       target_pose, target_marker
 
 Also bridges the RGB-D camera_info topics, which the projector needs and the
 main bridge config doesn't include.
@@ -69,6 +71,8 @@ def generate_launch_description():
             'colour_enabled': colour_enabled,
             # Bundled copy, so it doesn't need to download on first run.
             'model': PathJoinSubstitution([assignment_path, 'weights', 'yolo26n.pt']),
+            # Annotated frames on target_detections/debug_image for the demo.
+            'debug': True,
         }],
     ))
 

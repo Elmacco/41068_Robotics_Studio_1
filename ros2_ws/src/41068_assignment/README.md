@@ -221,7 +221,12 @@ web dashboard's buttons publish to. From a terminal:
 ```bash
 ros2 topic pub --once /parrot1/mission_command std_msgs/msg/String "{data: 'mapping'}"
 ros2 topic echo /parrot1/mission_state        # e.g. "MAPPING: 42% observed, flying to F7 at [3.1, -2.0]"
+ros2 topic echo /parrot1/active_mode          # true while Active mode is running
 ```
+
+The latched `active_mode` topic publishes `std_msgs/Bool`: `true` whenever the
+mission enters Active mode and `false` whenever it leaves. The GUI can use it
+as a direct mode flag without parsing `mission_state`.
 
 | Command | What happens |
 |---|---|

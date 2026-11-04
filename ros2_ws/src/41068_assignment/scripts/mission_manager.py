@@ -46,7 +46,7 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile
 from rclpy.time import Time
-from std_msgs.msg import Float64, String
+from std_msgs.msg import Bool, Float64, String
 from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformException, TransformListener
 from visualization_msgs.msg import MarkerArray
@@ -138,9 +138,11 @@ class MissionManager(Node):
         self.create_subscription(String, 'points_of_interest', self.people_callback, latched)
 
         self.state_pub = self.create_publisher(String, 'mission_state', latched)
+        self.active_mode_pub = self.create_publisher(Bool, 'active_mode', latched)
         self.altitude_pub = self.create_publisher(Float64, 'target_altitude', 10)
         self.cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.marker_pub = self.create_publisher(MarkerArray, 'exploration_markers', 1)
+        self.publish_active_mode(False)
 
         self.nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         self.save_client = self.create_client(Trigger, 'terrain/save')
@@ -204,10 +206,14 @@ class MissionManager(Node):
         self.mode.stop()
         self.mode = mode
         self.mode.start()
+        self.publish_active_mode(isinstance(mode, ActiveMode))
         self.get_logger().info(f'Mode: {mode.name}')
         # Now rather than at the next 1 s tick, so the dashboard shows it at once.
         self.status = 'starting'
         self.publish_state()
+
+    def publish_active_mode(self, active: bool):
+        self.active_mode_pub.publish(Bool(data=active))
 
     # ------------------------------------------------------------ main loop
 

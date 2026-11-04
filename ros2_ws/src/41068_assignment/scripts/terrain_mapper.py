@@ -8,7 +8,11 @@ Subscribes
   odometry             nav_msgs/Odometry        Gazebo 3D odometry: altitude
 Publishes
   terrain/occupancy    nav_msgs/OccupancyGrid   -1 unobserved, 0 free, 100
-                                                obstacle; Mapping mode explores it
+                                                drone obstacle; Mapping mode
+                                                explores it
+  terrain/drone_obstacles nav_msgs/OccupancyGrid 0 free or unobserved, 100
+                                                drone obstacle; a layer of
+                                                Nav2's costmaps
   terrain/cloud        sensor_msgs/PointCloud2  one point per observed cell at
                                                 its ground height, coloured
                                                 grass / trail / under branches
@@ -157,6 +161,8 @@ class TerrainMapper(Node):
 
         latched = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.occupancy_pub = self.create_publisher(OccupancyGrid, 'terrain/occupancy', latched)
+        self.drone_obstacles_pub = self.create_publisher(OccupancyGrid, 'terrain/drone_obstacles',
+                                                         latched)
         self.cloud_pub = self.create_publisher(PointCloud2, 'terrain/cloud', 1)
         self.trails_pub = self.create_publisher(String, 'trails', latched)
         self.trail_marker_pub = self.create_publisher(MarkerArray, 'terrain/trail_markers', latched)
@@ -236,10 +242,8 @@ class TerrainMapper(Node):
 
     # ----------------------------------------------------------------- output
 
-    def publish_layers(self):
-        stamp = self.get_clock().now().to_msg()
+    def grid_msg(self, data: np.ndarray, stamp) -> OccupancyGrid:
         terrain = self.terrain
-
         grid = OccupancyGrid()
         grid.header.frame_id = self.frame_id
         grid.header.stamp = stamp
@@ -250,8 +254,19 @@ class TerrainMapper(Node):
         grid.info.origin.position.y = terrain.origin_y
         grid.info.origin.orientation.w = 1.0
         # From bytes: a 250k-item list takes ~35 ms to check and convert
-        grid.data = array.array('b', terrain.occupancy().tobytes())
-        self.occupancy_pub.publish(grid)
+        grid.data = array.array('b', data.astype(np.int8).tobytes())
+        return grid
+
+    def publish_layers(self):
+        stamp = self.get_clock().now().to_msg()
+        terrain = self.terrain
+
+        occupancy = terrain.occupancy()
+        self.occupancy_pub.publish(self.grid_msg(occupancy, stamp))
+        # Nav2 gets the obstacles only. Its camera-blind ground (under and
+        # behind the drone) is not unknown to it: as NO_INFORMATION the
+        # controller would refuse to fly over it.
+        self.drone_obstacles_pub.publish(self.grid_msg(np.maximum(occupancy, 0), stamp))
 
         # Only RViz shows it, so skip building it when RViz isn't running
         if self.cloud_pub.get_subscription_count() > 0:

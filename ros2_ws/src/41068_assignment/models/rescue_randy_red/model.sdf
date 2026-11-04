@@ -36,6 +36,11 @@
                 </material>
                 <plugin filename="ignition-gazebo-thermal-system" name="ignition::gazebo::systems::Thermal">
                     <heat_signature>materials/textures/RescueRandy_Thermal.png</heat_signature>
+                    <!-- Coolest part of the heat signature. Without it Gazebo uses
+                         the world's ambient temperature, so a cooler world made
+                         the person cooler too; 300 K keeps 96% of the body above
+                         Active mode's 30 C threshold. -->
+                    <min_temp>300</min_temp>
                     <max_temp>310</max_temp>
                 </plugin>
             </visual>

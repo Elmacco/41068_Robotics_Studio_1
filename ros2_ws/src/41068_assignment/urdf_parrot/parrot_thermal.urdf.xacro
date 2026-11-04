@@ -38,11 +38,15 @@
   <xacro:arg name="camera_pitch" default="0.785398"/>
   <xacro:property name="camera_pitch" value="$(arg camera_pitch)"/>
 
-  <!-- Thermal image resolution. 640x480 (up from 320x240) so a person
-       ~10 m away is ~13 px wide at 140 deg FOV instead of ~8 px at 120 deg -
-       otherwise the thermal feed is the weak link for hiker detection.
-       Real drone thermal cameras commonly come in 640x512. -->
-  <xacro:arg name="thermal_width" default="640"/>
+  <!-- Thermal image resolution. The same as the RGB-D camera's 720x480
+       (parrot_base.gazebo.xacro), with the same FOV, so a pixel in one is
+       the same direction in the other and Active mode can check the YOLO
+       box from the RGB image straight on the thermal image. At 640x480 the
+       thermal image was 0.89x the scale and centred 40 px to the left, so
+       the box sat 30-60 px off the person, more than a distant person's
+       width. The cameras are 7 cm apart sideways: ~3 px at 3 m. Was
+       320x240, then 640x480 so a person ~10 m away is wide enough to see. -->
+  <xacro:arg name="thermal_width" default="720"/>
   <xacro:arg name="thermal_height" default="480"/>
 
   <!-- Our copy of bringup's parrot.urdf.xacro, with the RGB-D camera's FOV

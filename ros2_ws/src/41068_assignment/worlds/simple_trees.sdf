@@ -18,10 +18,19 @@
     <gravity>0 0 -9.81</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
 
-    <!-- Explicit thermal baseline for objects without assigned heat. -->
+    <!-- Thermal baseline for everything without a heat source (trees, grass,
+         ground). Gazebo renders such objects at the ambient temperature
+         +/- range/2 by brightness, with range = gradient x the thermal
+         camera's view height at its far clip (40 m), here ~220 m. At 300 K
+         and 0.1 K/m that was 289-311 K, so pale pine foliage read hotter than
+         Active mode's 30 C body-heat threshold, as hot as a person. 20 C and
+         0.02 K/m give 291-295 K: 8 K under the threshold, with enough spread
+         to still see the trees in the thermal feed. The people pin their own
+         coolest temperature (min_temp in models/rescue_randy_*), which
+         otherwise follows this ambient. -->
     <atmosphere type="adiabatic">
-      <temperature>300.0</temperature>
-      <temperature_gradient>0.1</temperature_gradient>
+      <temperature>293.15</temperature>
+      <temperature_gradient>0.02</temperature_gradient>
     </atmosphere>
 
     <physics name="default_physics" type="ignored">

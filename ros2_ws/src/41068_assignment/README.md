@@ -385,9 +385,12 @@ Add these displays (all under `/parrot1/`):
   0.3–1.2 m above the surrounding ground are obstacles a person can't get
   past (trunks, rocks, bushes). Points 1.2–2.0 m up are low branches, passable
   but slow. A cell is trail by colour (its ground points are mostly brown,
-  `hiking_trail_1`) or by height (its ground is 0.2–0.3 m above the grass
-  within 1.5 m, `simple_trees`, whose trail is a raised path and whose grass
-  is tinted brown), set per world by `terrain.trail_source`. Terrain steeper
+  `hiking_trail_1`) or by height (most of its points are 0.2–0.3 m above
+  the grass within 1.5 m, `simple_trees`, whose trail is a raised path and
+  whose grass is tinted brown), set per world by `terrain.trail_source`.
+  Both are majority votes: views of the same spot disagree by up to ~0.3 m,
+  and judging the path by its lowest point, as before, lost 22% of it in
+  strips along its edges, which split trails into pieces. Terrain steeper
   than 35° is an obstacle (the A2 "large gradient" rule) if it also rises at
   least 0.3 m within 1 m, so the raised path's 0.23 m edge is a step, not a
   wall. Above 3 m the camera sees tree tops instead of the ground, so it then
@@ -458,9 +461,6 @@ Add these displays (all under `/parrot1/`):
   the map 11.3 m away from the world.
 - TF is 2D (the drone's z is 0 in TF), as SLAM Toolbox and Nav2 expect. The
   altitude comes from `/parrot1/odometry`, which is now 3D.
-
-### Tuning
-
 - `terrain_mapper` places each camera cloud at the odometry altitude from
   the moment the cloud was taken, not the latest one, and skips clouds taken
   while the drone was climbing, descending (`max_climb_rate`) or tilted
@@ -468,6 +468,9 @@ Add these displays (all under `/parrot1/`):
   cloud processing, put the ground 1-2 m too low wherever the drone climbed
   (the corner where Mapping ended, as Return Home climbed on the spot), and
   since a cell's ground is the lowest point seen there, it stayed wrong.
+
+### Tuning
+
 Each module's settings are in a dataclass at the top of its file
 (`TerrainConfig`, `TrailConfig`, `RouteConfig`, `GraphConfig`,
 `FollowConfig`, `PassiveConfig`), with a comment on each. They are also ROS

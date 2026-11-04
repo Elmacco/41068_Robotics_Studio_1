@@ -214,3 +214,46 @@ def test_launch_pad_is_not_a_raised_path():
         terrain.add_points(xyz, rgb)
     assert not terrain.trail_cells().any()
     assert not terrain.obstacles().any()
+
+
+def misregistered_path_map(path_votes=True, views=30, error=0.3, seed=1):
+    """The raised path seen in many views, each placed up to `error` m off
+    across the path, as views of simple_trees' path disagreed (see the
+    module docstring)."""
+    terrain = TerrainMap(TerrainConfig(x_min=0.0, x_max=5.0, y_min=0.0, y_max=5.0,
+                                       trail_source='height'))
+    terrain.path_votes = path_votes
+    view = [ground_points(0, 5, 0, 1.75, GRASS), ground_points(0, 5, 3.25, 5, GRASS),
+            ground_points(0, 5, 1.75, 3.25, TRAIL, z=0.23)]
+    xyz = np.vstack([v[0] for v in view])
+    rgb = np.vstack([v[1] for v in view])
+    rng = np.random.default_rng(seed)
+    for offset in rng.uniform(-error, error, views):
+        terrain.add_points(xyz + [0.0, offset, 0.0], rgb)
+    return terrain
+
+
+def path_width(terrain):
+    """Mean width of the found path across x (m)."""
+    return terrain.raised_path().sum(axis=0).mean() * terrain.resolution
+
+
+def test_misplaced_views_do_not_eat_the_path_edges():
+    # The lowest point keeps the worst view on each side: 1.5 m - 2 x ~0.3 m.
+    assert path_width(misregistered_path_map(path_votes=False)) < 1.0
+    # The vote keeps the edge where most views put it.
+    assert abs(path_width(misregistered_path_map()) - 1.5) <= 0.1
+
+
+def test_a_map_saved_before_the_path_votes_keeps_its_path(tmp_path):
+    terrain = raised_path_map()
+    path = str(tmp_path / 'terrain.npz')
+    terrain.save(path)
+    data = dict(np.load(path))
+    del data['raised_hits'], data['level_hits']
+    np.savez_compressed(path, **data)
+    loaded = TerrainMap(terrain.config)
+    loaded.load(path)
+    assert not loaded.path_votes
+    path = loaded.raised_path()
+    assert path[18:32, :].all() and not path[:17, :].any() and not path[33:, :].any()

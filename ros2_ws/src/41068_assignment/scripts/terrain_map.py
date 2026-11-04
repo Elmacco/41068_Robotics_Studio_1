@@ -21,6 +21,9 @@ Each grid cell keeps running totals over every camera point that landed in it:
                  drone_ceiling           drone, which maps at 0.8 m
   ground_hits    points on the ground
   trail_hits     ... that are trail-coloured (brown) -> trail fraction
+  raised_hits    points path_min_height to obstacle_min_height above the
+                 grass around them (base_window) -> votes for a raised path
+  level_hits     points lower than that -> votes against
 
 From those it derives the layers the rest of the system uses: observed,
 obstacles (including terrain too steep to walk, the A2 rule that a large
@@ -35,6 +38,16 @@ Trail cells come from one of two kinds of evidence, chosen per world
           whose trail is a 0.23 m high path of boxes. Its grass is tinted
           brown, so there colour cannot tell trail from grass, but height
           can: the drone does not tilt and the simulated depth has no noise.
+
+Both are majority votes over the points that landed in a cell. The height
+rule once used the cell's ground height, its lowest point, instead. But
+views disagree by up to ~0.3 m on where things are (the drone's pose at the
+moment of each image is only known so well), and a lowest point keeps the
+worst of them: grass seen 0.3 m inside the path's edge in one view lowered
+those cells for good. Measured against the world file, 22% of the path was
+lost that way, in strips along its edges. Those ragged edges grew spurs in
+the trail skeleton and split trails into pieces. A vote puts the edge where
+most views saw it.
 
 Why two height bands: with a single 0.3-2.0 m band, the canopies of the oak
 rows in hiking_trail_1 (which start 1.23 m up and are up to 12 m across)
@@ -158,6 +171,11 @@ class TerrainMap:
         self.drone_hits = np.zeros(shape, dtype=np.int32)
         self.ground_hits = np.zeros(shape, dtype=np.int32)
         self.trail_hits = np.zeros(shape, dtype=np.int32)
+        self.raised_hits = np.zeros(shape, dtype=np.int32)
+        self.level_hits = np.zeros(shape, dtype=np.int32)
+        # False for a map saved before the raised-path votes: it keeps the
+        # lowest-point rule (see raised_path).
+        self.path_votes = True
 
         # obstacles() until the totals next change. It is the costly layer
         # (slope and relief over the whole grid) and most others use it.
@@ -227,6 +245,17 @@ class TerrainMap:
             drone = ((height_above >= cfg.overhead_min_height)
                      & (height_above < cfg.drone_ceiling))
             np.add.at(self.drone_hits, (row[drone], col[drone]), 1)
+
+            # Raised-path votes, against the grass within base_window (this
+            # cloud's own grass is already in ground_z). Points from
+            # obstacle_min_height up are trunks, people and branches: no vote.
+            if cfg.trail_source != 'colour':
+                with np.errstate(invalid='ignore'):
+                    rise = z - self.local_ground(cfg.base_window)[row, col]
+                raised = (rise >= cfg.path_min_height) & (rise < cfg.obstacle_min_height)
+                level = rise < cfg.path_min_height
+                np.add.at(self.raised_hits, (row[raised], col[raised]), 1)
+                np.add.at(self.level_hits, (row[level], col[level]), 1)
 
         # A point is ground, and its colour counts, if it is close to its own
         # cell's lowest point, and that lowest point is no more than a step
@@ -332,12 +361,20 @@ class TerrainMap:
         return self.trail_hits / np.maximum(self.ground_hits, 1)
 
     def raised_path(self) -> np.ndarray:
-        """Cells whose ground is a step above the grass around it (height rule)."""
+        """Cells whose ground is a step above the grass around it (height rule).
+
+        Most of the cell's points voted raised, from at least
+        min_ground_points of them (see the module docstring).
+        """
         cfg = self.config
-        with np.errstate(invalid='ignore'):
-            rise = self.ground_z - self.local_ground(cfg.base_window)
-        return (self.observed() & (rise >= cfg.path_min_height)
-                & (rise < cfg.obstacle_min_height) & ~self.obstacles())
+        if self.path_votes:
+            raised = ((self.raised_hits >= cfg.min_ground_points)
+                      & (self.raised_hits > self.level_hits))
+        else:
+            with np.errstate(invalid='ignore'):
+                rise = self.ground_z - self.local_ground(cfg.base_window)
+            raised = (rise >= cfg.path_min_height) & (rise < cfg.obstacle_min_height)
+        return self.observed() & raised & ~self.obstacles()
 
     def trail_cells(self) -> np.ndarray:
         """Cells on a trail, by the world's trail_source."""
@@ -380,7 +417,8 @@ class TerrainMap:
             resolution=cfg.resolution,
             point_count=self.point_count, ground_z=self.ground_z,
             obstacle_hits=self.obstacle_hits, overhead_hits=self.overhead_hits,
-            drone_hits=self.drone_hits, ground_hits=self.ground_hits, trail_hits=self.trail_hits)
+            drone_hits=self.drone_hits, ground_hits=self.ground_hits, trail_hits=self.trail_hits,
+            raised_hits=self.raised_hits, level_hits=self.level_hits)
 
     def load(self, path: str):
         """Restore totals saved by save(). The grid must match this map's."""
@@ -401,4 +439,11 @@ class TerrainMap:
                            else np.zeros_like(self.obstacle_hits))
         self.ground_hits = data['ground_hits']
         self.trail_hits = data['trail_hits']
+        # Maps saved before the raised-path votes keep the lowest-point rule:
+        # with no votes yet, their mapped path would vanish.
+        self.path_votes = 'raised_hits' in data
+        self.raised_hits = (data['raised_hits'] if self.path_votes
+                            else np.zeros_like(self.ground_hits))
+        self.level_hits = (data['level_hits'] if self.path_votes
+                           else np.zeros_like(self.ground_hits))
         self._obstacles = None

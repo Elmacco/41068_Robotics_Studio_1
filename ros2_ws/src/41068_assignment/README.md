@@ -28,6 +28,7 @@ launch/
   navigation.launch.py     Localisation (map -> odom) + Nav2 (copy of bringup's)
 config/
   <world>.yaml in worlds/  Per-world mapping bounds and ranger station
+  mission.yaml             Key mission + detection settings (see Tuning)
   *.yaml, *.rviz, ...      Bridge, EKF, SLAM, Nav2, RViz and Gazebo server
                            configs (copies of bringup's, see below)
 worlds/
@@ -39,7 +40,6 @@ models/                    grass_plane, trail_plane, elevated_trail, launch_pad,
 weights/yolo26n.pt         YOLO weights for target_detector.py (offline use)
 maps/<world>/terrain.npz   Preloaded terrain map the demo starts from (see
                            maps/README.md for recording it)
-requirements.txt           pip-only dependencies (ultralytics)
 urdf_parrot/               Parrot + thermal camera (copies of bringup's xacros
                            and meshes, with tunable camera FOV/tilt and 3D
                            odometry)
@@ -88,7 +88,7 @@ ros2 launch 41068_assignment demo.launch.py detection:=True
 To run only the detection module and explicitly enable colour classification:
 
 ```bash
-ros2 launch 41068_assignment launch/modules/detection.launch.py colour_enabled:=true
+ros2 launch 41068_assignment detection.launch.py colour_enabled:=true
 ```
 
 The detector publishes `target_detections`, each person flagged `red` or
@@ -103,12 +103,15 @@ flags at its standoff.
 Everything this package launches (worlds, models, URDF, configs) is inside
 this package. Most of it started as copies from `41068_ignition_bringup`, see
 [Copied from the course package](#copied-from-the-course-package). That
-package is still needed for course worlds like `large_demo`. Also needs:
+package is still needed for course worlds like `large_demo`. On top of the
+course package's dependencies, it needs:
 
 ```bash
-sudo apt install ros-humble-slam-toolbox ros-humble-nav2-bringup ros-humble-vision-msgs
-# Person detection (target_detector.py); pulls in PyTorch
-pip install -r src/41068_assignment/requirements.txt
+sudo apt install python3-pip ros-humble-vision-msgs ros-humble-cv-bridge
+# Person detection (target_detector.py); ultralytics pulls in PyTorch.
+# numpy and opencv-python are pinned because ROS Humble's cv_bridge breaks
+# under numpy 2 / OpenCV 5 ("_ARRAY_API not found").
+pip install ultralytics==8.4.198 numpy==1.26.4 opencv-python==4.10.0.84 --break-system-packages
 ```
 
 Build:
@@ -150,7 +153,7 @@ ros2 launch 41068_assignment demo.launch.py terrain_map:=''
 1. Launch the sim with Nav2:
 
    ```bash
-  ros2 launch 41068_assignment spawn_parrot.launch.py rviz:=True nav2:=True web_dashboard:=True
+   ros2 launch 41068_assignment spawn_parrot.launch.py rviz:=True nav2:=True web_dashboard:=True
    ```
 
    The drone localises from odometry + GPS: the EKF fuses Gazebo's odometry
@@ -161,16 +164,18 @@ ros2 launch 41068_assignment demo.launch.py terrain_map:=''
    added error (in simple_trees it rotated the map 40 degrees while the drone
    sat still).
 
-  The `web_dashboard:=True` flag starts the local HTTP bridge that feeds the browser page live telemetry and camera streams.
+   `web_dashboard:=True` starts the HTTP bridge (port 8081) that feeds the
+   browser page live telemetry and camera streams. `demo.launch.py` starts
+   it through its dashboard module instead.
 
 2. Serve the webpage:
 
-  ```bash
-  cd /home/student/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/GUI
-  python3 -m http.server 8000
-  ```
+   ```bash
+   cd ~/subjects/41068_robotics_studio_1/ros2_ws/src/41068_assignment/GUI
+   python3 -m http.server 8000
+   ```
 
-  Then open `http://localhost:8000` in your browser.
+   Then open `http://localhost:8000` in your browser.
 
 3. (Optional) Preview the planned route in RViz before flying it — this only
    publishes markers, it never sends the drone anywhere:
@@ -331,8 +336,9 @@ the station to it; the route and its length, energy and share on trail appear
 under the map. Show Roadmap overlays the route graph.
 
 Points of interest come from `/parrot1/points_of_interest` (`std_msgs/String`,
-JSON), drawn red, green or white by `type`. Nothing publishes it yet: it is
-the slot for the people found by the detection part. To try it by hand:
+JSON), drawn red, green or white by `type`. `target_projector` publishes it
+from the detection part (each person `red` or `person`). To try the map
+without detection running, publish it by hand:
 
 ```bash
 ros2 topic pub --once /parrot1/points_of_interest std_msgs/msg/String \
@@ -502,6 +508,13 @@ them in `config/worlds/<world>.yaml` or with `--ros-args -p`, writing floats
 as floats (`1.0`, not `1`). The mission manager's altitudes and timeouts
 are ROS parameters declared at the top of `mission_manager.py`.
 
+The key settings of `mission_manager`, `target_detector` and
+`target_projector` (flight heights, Active mode, YOLO and red-shirt
+thresholds, the body-heat check) are collected in `config/mission.yaml`,
+loaded by `spawn_parrot.launch.py` and `launch/modules/detection.launch.py`.
+Its values are the code's defaults, so it only needs editing to change
+one. Rebuild after editing it.
+
 ### Tests
 
 ```bash
@@ -558,7 +571,7 @@ change listed here.
 | `urdf_parrot/common_properties.urdf.xacro`, `meshes/` | Not changed |
 | `worlds/simple_trees.sdf`, `worlds/hiking_trail_1.sdf` | Team-made worlds, not changed |
 | `models/grass_plane`, `elevated_trail`, `launch_pad` | Not changed |
-| `models/rescue_randy_*`, `scripts/target_*.py`, `colour_classifier.py`, `test_colour_classifier.py`, `config/gazebo_bridge_parrot1_camera_info.yaml`, `requirements.txt`, `weights/` | Copied from `Ethan_Colour_Detector_Module_Needs_Integration/`, not the course package. `target_projector.py` has two fixes: the point is rotated from optical axes into `camera_link` axes (the frame Gazebo stamps the depth image with), and the TF lookup no longer fails when TF lags the image |
+| `models/rescue_randy_*`, `scripts/target_*.py`, `colour_classifier.py`, `test_colour_classifier.py`, `config/gazebo_bridge_parrot1_camera_info.yaml`, `weights/` | Copied from `Ethan_Colour_Detector_Module_Needs_Integration/`, not the course package. `target_projector.py` has two fixes: the point is rotated from optical axes into `camera_link` axes (the frame Gazebo stamps the depth image with), and the TF lookup no longer fails when TF lags the image |
 | `models/trail_plane` | Collision is a flat plane matching the visual; the hills heightmap is commented out until its visual loads (it was invisible but solid). Only the two textures it uses were copied |
 
 ## Notes on the Nav2/SLAM setup

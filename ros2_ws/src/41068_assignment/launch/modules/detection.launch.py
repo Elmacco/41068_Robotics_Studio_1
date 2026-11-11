@@ -45,6 +45,7 @@ def generate_launch_description():
         return ld
 
     assignment_path = FindPackageShare('41068_assignment')
+    mission_params = PathJoinSubstitution([assignment_path, 'config', 'mission.yaml'])
 
     ld.add_action(Node(
         package='ros_ign_bridge',
@@ -66,7 +67,8 @@ def generate_launch_description():
         namespace=namespace,
         name='target_detector',
         output='screen',
-        parameters=[{
+        # Thresholds are in config/mission.yaml; the dict below wins over it.
+        parameters=[mission_params, {
             'use_sim_time': use_sim_time,
             'colour_enabled': colour_enabled,
             # Bundled copy, so it doesn't need to download on first run.
@@ -82,7 +84,7 @@ def generate_launch_description():
         namespace=namespace,
         name='target_projector',
         output='screen',
-        parameters=[{
+        parameters=[mission_params, {
             'use_sim_time': use_sim_time,
             'robot_name': namespace,
         }],

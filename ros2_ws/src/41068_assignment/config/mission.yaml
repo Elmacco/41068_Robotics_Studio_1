@@ -1,0 +1,67 @@
+# Key settings for the mission and person detection, in one place to tune.
+#
+# Loaded by launch/spawn_parrot.launch.py (mission_manager) and
+# launch/modules/detection.launch.py (target_detector, target_projector).
+# Every value here is the code's own default, so deleting a line changes
+# nothing: the node falls back to the same value. Any other parameter of
+# these nodes can be added the same way; `ros2 param dump /parrot1/<node>`
+# lists them all with their current values.
+#
+# After editing, rebuild so the installed copy is updated:
+#   colcon build --packages-select 41068_assignment
+# Floats must be written as floats (1.0, not 1) or the node refuses them.
+
+/**/mission_manager:
+  ros__parameters:
+    # Flight heights (m). Mapping and Passive fly at mapping_altitude, which
+    # must stay under Nav2's 2 m max_obstacle_height and the oak canopy
+    # (1.04 m and up in simple_trees). Active drops to active_altitude if
+    # higher but never climbs. Return Home flies over the trees at cruise.
+    mapping_altitude: 0.8
+    active_altitude: 3.0
+    cruise_altitude: 8.0
+    # A person seen within this long (s) interrupts the Passive patrol.
+    person_recent: 2.0
+    # Passive: waypoints along the trail every this far (m).
+    passive.spacing: 2.0
+    # Active: rings round the person (m) to look for a viewing spot on.
+    active.standoff_distances: [3.0, 3.5, 4.0, 4.5, 5.0]
+    # Active: share of close-up frames that must be red for a red shirt.
+    active.shirt_red_fraction: 0.5
+    # Active: give up reaching the viewing spot after this long (s), and
+    # retry this many times from another spot before abandoning the person.
+    active.approach_timeout: 40.0
+    active.retry_limit: 1
+
+/**/target_detector:
+  ros__parameters:
+    # YOLO person confidence threshold, and the image size given to YOLO
+    # (smaller is faster but misses distant people).
+    confidence: 0.4
+    imgsz: 640
+    # Red shirt check: share of torso pixels that must be red, HSV
+    # saturation/value floors, and the two hue ends (OpenCV H, 0-180).
+    colour_min_fraction: 0.25
+    colour_min_sat: 120
+    colour_min_val: 50
+    colour_red_hue_max: 10
+    colour_red_hue_min: 170
+    # Torso crop, as fractions of the person's box.
+    torso_top: 0.18
+    torso_bottom: 0.55
+    torso_half_width: 0.25
+
+/**/target_projector:
+  ros__parameters:
+    # Frames needed before a person is added to the people list, and how
+    # close (m) two sightings must be to count as the same person.
+    min_observations: 3
+    merge_radius: 1.5
+    # Furthest person position accepted (m).
+    max_valid_depth: 15.0
+    # Body-heat check: only add a person once the thermal camera confirms
+    # them, with at least min_hot_pixels at or above 30 C inside their box,
+    # in a thermal frame at most thermal_max_age (s) from the detection.
+    require_thermal: true
+    min_hot_pixels: 20
+    thermal_max_age: 1.0

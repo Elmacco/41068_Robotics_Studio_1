@@ -325,14 +325,15 @@ def generate_launch_description():
     ))
 
     # Mission modes, driven by mission_command (from the dashboard or the
-    # command line, see the README). Home is the spawn pose.
+    # command line, see the README). Home is the spawn pose. Its key settings
+    # (altitudes, Active mode) are in config/mission.yaml.
     ld.add_action(Node(
         package='41068_assignment',
         executable='mission_manager.py',
         namespace=namespace,
         name='mission_manager',
         output='screen',
-        parameters=[{
+        parameters=[PathJoinSubstitution([config_path, 'mission.yaml']), {
             'use_sim_time': use_sim_time,
             'home_x': ParameterValue(spawn_x, value_type=float),
             'home_y': ParameterValue(spawn_y, value_type=float),
